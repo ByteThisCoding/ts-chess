@@ -1,11 +1,10 @@
 import { ChessBoardSingleMove } from "./moves/chess-board-move";
-import { ChessBoardStateHistory } from "./chess-board-state-history";
-import { ChessGameStatus } from "./chess-game-status";
+import { ChessBoardStateHistory } from "./board-state/chess-board-state-history";
 import { ChessMoveValidator } from "./moves/chess-move-validator";
 import { ChessPlayer } from "./enums";
 
 export class ChessGame {
-    private status = new ChessGameStatus();
+    
     private boardStateHistory = new ChessBoardStateHistory();
     private currentPlayer: ChessPlayer = ChessPlayer.white;
 

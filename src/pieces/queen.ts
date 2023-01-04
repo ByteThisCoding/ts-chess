@@ -1,4 +1,4 @@
-import { ChessBoardState } from "../chess-board-state";
+import { ChessBoardState } from "../board-state/chess-board-state";
 import { ChessPiece } from "./chess-piece";
 import { ChessPosition } from "../chess-position";
 import { ChessPlayer } from "../enums";
@@ -29,7 +29,7 @@ export class QueenPiece extends ChessPiece {
         // add for higher columns
         for (let col = this.getPosition().col - 1; col > 0; col--) {
             const rowOffset = this.getPosition().col - col;
-            const newPos = ChessPosition.get(
+            const toPosition = ChessPosition.get(
                 col,
                 this.getPosition().row + rowOffset
             );
@@ -39,17 +39,21 @@ export class QueenPiece extends ChessPiece {
                 break;
             }
 
-            moves.add(newPos);
-
-            const existingPiece = boardState.getPieceAtPosition(newPos);
+            const existingPiece = boardState.getPieceAtPosition(toPosition);
             if (existingPiece) {
+                if (existingPiece.player !== this.player) {
+                    moves.add(this.newMove(boardState, toPosition));
+                }
+
                 break;
+            } else {
+                moves.add(this.newMove(boardState, toPosition));
             }
         }
 
         for (let col = this.getPosition().col - 1; col > 0; col--) {
             const rowOffset = this.getPosition().col - col;
-            const newPos = ChessPosition.get(
+            const toPosition = ChessPosition.get(
                 col,
                 this.getPosition().row - rowOffset
             );
@@ -59,18 +63,22 @@ export class QueenPiece extends ChessPiece {
                 break;
             }
 
-            moves.add(newPos);
-
-            const existingPiece = boardState.getPieceAtPosition(newPos);
+            const existingPiece = boardState.getPieceAtPosition(toPosition);
             if (existingPiece) {
+                if (existingPiece.player !== this.player) {
+                    moves.add(this.newMove(boardState, toPosition));
+                }
+
                 break;
+            } else {
+                moves.add(this.newMove(boardState, toPosition));
             }
         }
 
         // add for lower columns
         for (let col = this.getPosition().col + 1; col < 9; col++) {
             const rowOffset = col - this.getPosition().col;
-            const newPos = ChessPosition.get(
+            const toPosition = ChessPosition.get(
                 col,
                 this.getPosition().row + rowOffset
             );
@@ -79,17 +87,21 @@ export class QueenPiece extends ChessPiece {
                 break;
             }
 
-            moves.add(newPos);
-
-            const existingPiece = boardState.getPieceAtPosition(newPos);
+            const existingPiece = boardState.getPieceAtPosition(toPosition);
             if (existingPiece) {
+                if (existingPiece.player !== this.player) {
+                    moves.add(this.newMove(boardState, toPosition));
+                }
+
                 break;
+            } else {
+                moves.add(this.newMove(boardState, toPosition));
             }
         }
 
         for (let col = this.getPosition().col + 1; col < 9; col++) {
             const rowOffset = col - this.getPosition().col;
-            const newPos = ChessPosition.get(
+            const toPosition = ChessPosition.get(
                 col,
                 this.getPosition().row - rowOffset
             );
@@ -98,40 +110,120 @@ export class QueenPiece extends ChessPiece {
                 break;
             }
 
-            moves.add(newPos);
-
-            const existingPiece = boardState.getPieceAtPosition(newPos);
+            const existingPiece = boardState.getPieceAtPosition(toPosition);
             if (existingPiece) {
+                if (existingPiece.player !== this.player) {
+                    moves.add(this.newMove(boardState, toPosition));
+                }
+
                 break;
+            } else {
+                moves.add(this.newMove(boardState, toPosition));
             }
         }
 
         // add for rook like movements
-        // add all in current col
-        for (let i = 1; i < 9; i++) {
+        // add all to the right in col
+        for (let i = this.getPosition().col + 1; i < 9; i++) {
             const newPos = ChessPosition.get(i, this.getPosition().row);
 
-            if (this.getPosition().col !== i) {
-                moves.add(newPos);
-
-                const existingPiece = boardState.getPieceAtPosition(newPos);
-                if (existingPiece) {
-                    break;
+            const existingPiece = boardState.getPieceAtPosition(newPos);
+            if (existingPiece) {
+                if (existingPiece.player !== this.player) {
+                    moves.add(
+                        this.newMove(
+                            boardState,
+                            newPos
+                        )
+                    );
                 }
+
+                break;
+            } else {
+                moves.add(
+                    this.newMove(
+                        boardState,
+                        newPos
+                    )
+                );
             }
         }
 
-        // add all in current row
-        for (let i = 1; i < 9; i++) {
-            const newPos = ChessPosition.get(this.getPosition().row, i);
-
-            if (this.getPosition().row !== i) {
-                moves.add(newPos);
-
-                const existingPiece = boardState.getPieceAtPosition(newPos);
-                if (existingPiece) {
-                    break;
+        // add all to the left in col
+        for (let i = this.getPosition().col - 1; i > 0; i--) {
+            const newPos = ChessPosition.get(i, this.getPosition().row);
+            
+            const existingPiece = boardState.getPieceAtPosition(newPos);
+            if (existingPiece) {
+                if (existingPiece.player !== this.player) {
+                    moves.add(
+                        this.newMove(
+                            boardState,
+                            newPos
+                        )
+                    );
                 }
+
+                break;
+            } else {
+                moves.add(
+                    this.newMove(
+                        boardState,
+                        newPos
+                    )
+                );
+            }
+        }
+
+        // add all above in row
+        for (let i = this.getPosition().row + 1; i < 9; i++) {
+            const newPos = ChessPosition.get(this.getPosition().col, i);
+            
+            const existingPiece = boardState.getPieceAtPosition(newPos);
+            if (existingPiece) {
+                if (existingPiece.player !== this.player) {
+                    moves.add(
+                        this.newMove(
+                            boardState,
+                            newPos
+                        )
+                    );
+                }
+
+                break;
+            } else {
+                moves.add(
+                    this.newMove(
+                        boardState,
+                        newPos
+                    )
+                );
+            }
+        }
+
+        // add all below in row
+        for (let i = this.getPosition().row - 1; i > 0; i--) {
+            const newPos = ChessPosition.get(this.getPosition().col, i);
+            
+            const existingPiece = boardState.getPieceAtPosition(newPos);
+            if (existingPiece) {
+                if (existingPiece.player !== this.player) {
+                    moves.add(
+                        this.newMove(
+                            boardState,
+                            newPos
+                        )
+                    );
+                }
+
+                break;
+            } else {
+                moves.add(
+                    this.newMove(
+                        boardState,
+                        newPos
+                    )
+                );
             }
         }
 

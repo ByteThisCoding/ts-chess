@@ -1,9 +1,8 @@
-import { ChessBoardState } from "../chess-board-state";
+import { ChessBoardState } from "../board-state/chess-board-state";
 import { ChessPiece } from "./chess-piece";
 import { ChessPosition } from "../chess-position";
 import { ChessPlayer } from "../enums";
 import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set";
-import { ChessPieceAvailableMove } from "../moves/chess-piece-available-move";
 
 /**
  * Encapsulation of a bishop
@@ -39,11 +38,15 @@ export class BishopPiece extends ChessPiece {
                 break;
             }
 
-            moves.add(new ChessPieceAvailableMove({ toPosition }));
-
             const existingPiece = boardState.getPieceAtPosition(toPosition);
             if (existingPiece) {
+                if (existingPiece.player !== this.player) {
+                    moves.add(this.newMove(boardState, toPosition));
+                }
+
                 break;
+            } else {
+                moves.add(this.newMove(boardState, toPosition));
             }
         }
 
@@ -59,11 +62,15 @@ export class BishopPiece extends ChessPiece {
                 break;
             }
 
-            moves.add(new ChessPieceAvailableMove({ toPosition }));
-
             const existingPiece = boardState.getPieceAtPosition(toPosition);
             if (existingPiece) {
+                if (existingPiece.player !== this.player) {
+                    moves.add(this.newMove(boardState, toPosition));
+                }
+
                 break;
+            } else {
+                moves.add(this.newMove(boardState, toPosition));
             }
         }
 
@@ -79,11 +86,15 @@ export class BishopPiece extends ChessPiece {
                 break;
             }
 
-            moves.add(new ChessPieceAvailableMove({ toPosition }));
-
             const existingPiece = boardState.getPieceAtPosition(toPosition);
             if (existingPiece) {
+                if (existingPiece.player !== this.player) {
+                    moves.add(this.newMove(boardState, toPosition));
+                }
+
                 break;
+            } else {
+                moves.add(this.newMove(boardState, toPosition));
             }
         }
 
@@ -98,11 +109,15 @@ export class BishopPiece extends ChessPiece {
                 break;
             }
 
-            moves.add(new ChessPieceAvailableMove({ toPosition }));
-
             const existingPiece = boardState.getPieceAtPosition(toPosition);
             if (existingPiece) {
+                if (existingPiece.player !== this.player) {
+                    moves.add(this.newMove(boardState, toPosition));
+                }
+
                 break;
+            } else {
+                moves.add(this.newMove(boardState, toPosition));
             }
         }
 

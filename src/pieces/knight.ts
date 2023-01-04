@@ -1,4 +1,4 @@
-import { ChessBoardState } from "../chess-board-state";
+import { ChessBoardState } from "../board-state/chess-board-state";
 import { ChessPiece } from "./chess-piece";
 import { ChessPosition } from "../chess-position";
 import { ChessPlayer } from "../enums";
@@ -29,58 +29,104 @@ export class KnightPiece extends ChessPiece {
         //  ^
         //  ^
         //  B
-        moves.add(
-            ChessPosition.get(
-                this.getPosition().col + 1,
-                this.getPosition().row + 2
-            )
-        );
-        moves.add(
-            ChessPosition.get(
-                this.getPosition().col - 1,
-                this.getPosition().row + 2
-            )
-        );
-        moves.add(
-            ChessPosition.get(
-                this.getPosition().col + 1,
-                this.getPosition().row - 2
-            )
-        );
-        moves.add(
-            ChessPosition.get(
-                this.getPosition().col - 1,
-                this.getPosition().row - 2
-            )
-        );
+        if (this.getPosition().col < 8 && this.getPosition().row < 7) {
+            moves.add(
+                this.newMove(
+                    boardState,
+                    ChessPosition.get(
+                        this.getPosition().col + 1,
+                        this.getPosition().row + 2
+                    )
+                )
+            );
+        }
+
+        if (this.getPosition().col > 1 && this.getPosition().row < 7) {
+            moves.add(
+                this.newMove(
+                    boardState,
+                    ChessPosition.get(
+                        this.getPosition().col - 1,
+                        this.getPosition().row + 2
+                    )
+                )
+            );
+        }
+
+        if (this.getPosition().col < 8 && this.getPosition().row > 2) {
+            moves.add(
+                this.newMove(
+                    boardState,
+                    ChessPosition.get(
+                        this.getPosition().col + 1,
+                        this.getPosition().row - 2
+                    )
+                )
+            );
+        }
+
+        if (this.getPosition().col > 1 && this.getPosition().row > 2) {
+            moves.add(
+                this.newMove(
+                    boardState,
+                    ChessPosition.get(
+                        this.getPosition().col - 1,
+                        this.getPosition().row - 2
+                    )
+                )
+            );
+        }
 
         // <-<->->
         //    ^
         //    B
-        moves.add(
-            ChessPosition.get(
-                this.getPosition().col + 1,
-                this.getPosition().row + 2
-            )
-        );
-        moves.add(
-            ChessPosition.get(
-                this.getPosition().col - 1,
-                this.getPosition().row + 2
-            )
-        );
-        moves.add(
-            ChessPosition.get(
-                this.getPosition().col + 1,
-                this.getPosition().row - 2
-            )
-        );
-        moves.add(
-            ChessPosition.get(
-                this.getPosition().col - 1,
-                this.getPosition().row - 2
-            )
-        );
+        if (this.getPosition().col < 7 && this.getPosition().row < 7) {
+            moves.add(
+                this.newMove(
+                    boardState,
+                    ChessPosition.get(
+                        this.getPosition().col + 2,
+                        this.getPosition().row + 1
+                    )
+                )
+            );
+        }
+
+        if (this.getPosition().col < 7 && this.getPosition().row > 1) {
+            moves.add(
+                this.newMove(
+                    boardState,
+                    ChessPosition.get(
+                        this.getPosition().col + 2,
+                        this.getPosition().row - 1
+                    )
+                )
+            );
+        }
+
+        if (this.getPosition().col > 2 && this.getPosition().row < 7) {
+            moves.add(
+                this.newMove(
+                    boardState,
+                    ChessPosition.get(
+                        this.getPosition().col - 2,
+                        this.getPosition().row + 1
+                    )
+                )
+            );
+        }
+
+        if (this.getPosition().col > 2 && this.getPosition().row > 1) {
+            moves.add(
+                this.newMove(
+                    boardState,
+                    ChessPosition.get(
+                        this.getPosition().col - 2,
+                        this.getPosition().row - 1
+                    )
+                )
+            );
+        }
 
         return moves;
     }

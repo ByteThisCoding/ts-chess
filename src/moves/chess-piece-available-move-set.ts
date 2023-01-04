@@ -1,13 +1,13 @@
-import { ChessBoardState } from "../chess-board-state";
+import { ChessBoardState } from "../board-state/chess-board-state";
 import { ChessPosition } from "../chess-position";
 import { ChessPlayer } from "../enums";
-import { ChessPieceAvailableMove } from "./chess-piece-available-move";
+import { ChessBoardSingleMove } from "./chess-board-move";
 
 /**
  * Encapsulation of a set of possible moves
  */
 export class ChessPieceAvailableMoveSet {
-    private availableMoves = new Map<ChessPosition, ChessPieceAvailableMove>();
+    private availableMoves = new Map<ChessPosition, ChessBoardSingleMove[]>();
 
     constructor(
         private player: ChessPlayer,
@@ -17,42 +17,77 @@ export class ChessPieceAvailableMoveSet {
     /**
      * Add a potential move, wrapping move if it's a chess position
      */
-    add(move: ChessPieceAvailableMove | ChessPosition | null): void {
+    add(move: ChessBoardSingleMove | null): void {
         // if trying to add an empty move (probably item out of bounds), return
         if (!move) {
             return;
         }
 
-        if (move instanceof ChessPosition) {
-            move = new ChessPieceAvailableMove(move);
-        }
-
         // if not castle, don't add if piece of same color is there
-        if (!move.getIsCastle()) {
-            const existing = this.boardState.getPieceAtPosition(move.getToPosition());
+        if (!move.isCastle) {
+            const existing = this.boardState.getPieceAtPosition(move.toPosition);
             if (existing?.player === this.player) {
                 return;
             }
         }
 
-        this.availableMoves.set(move.getToPosition(), move);
+        if (!this.availableMoves.has(move.toPosition)) {
+            this.availableMoves.set(move.toPosition, []);
+        }
+
+        this.availableMoves.get(move.toPosition)!.push(move);
     }
 
-    getMoves(): Iterable<ChessPieceAvailableMove> {
-        return this.availableMoves.values();
+    /**
+     * Remove a move from this set
+     */
+    remove(move: ChessBoardSingleMove): void {
+        const moves = this.availableMoves.get(move!.toPosition);
+        if (!moves || moves.length === 0) {
+            return;
+        }
+
+        const moveIndex = moves.findIndex(mv => mv.equals(move));
+        if (moveIndex === -1) {
+            return;
+        }
+
+        moves.splice(moveIndex, 1);
+    }
+
+    /**
+     * Combine the moves of another instance of this class into this
+     */
+    merge(movesSet: ChessPieceAvailableMoveSet): void {
+        for (const [pos, move] of movesSet.availableMoves) {
+            this.availableMoves.set(pos, move);
+        }
+    }
+
+    *getMoves(): Iterable<ChessBoardSingleMove> {
+        for (const [pos, moves] of this.availableMoves) {
+            for (const move of moves) {
+                yield move;
+            }
+        }
+    }
+
+    getNumMoves(): number {
+        return this.availableMoves.size;
     }
 
     /**
      * Check if we have an available move to a certain position
      */
     hasMoveToPosition(pos: ChessPosition): boolean {
-        return this.getMoveToPosition(pos) !== null;
+        return this.getMovesToPosition(pos).length > 0;
     }
 
     /**
      * Get a move to a position if it exists, or null if none exists
      */
-    getMoveToPosition(pos: ChessPosition): ChessPieceAvailableMove | null {
-        return this.availableMoves.get(pos) || null;
+    getMovesToPosition(pos: ChessPosition): ChessBoardSingleMove[] {
+        const moves = this.availableMoves.get(pos);
+        return moves || [];
     }
 }

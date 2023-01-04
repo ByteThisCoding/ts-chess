@@ -1,9 +1,8 @@
-import { ChessBoardState } from "../chess-board-state";
+import { ChessBoardState } from "../board-state/chess-board-state";
 import { ChessPiece } from "./chess-piece";
 import { ChessPosition } from "../chess-position";
 import { ChessPlayer } from "../enums";
 import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set";
-import { ChessPieceAvailableMove } from "../moves/chess-piece-available-move";
 
 /**
  * Encapsulation of a pawn
@@ -44,9 +43,12 @@ export class PawnPiece extends ChessPiece {
 
         if (inc === - 1 && this.getPosition().row > 1 || inc === 1 && this.getPosition().row < 8) {
             moves.add(
-                ChessPosition.get(
-                    this.getPosition().col,
-                    this.getPosition().row + inc
+                this.newMove(
+                    boardState,
+                    ChessPosition.get(
+                        this.getPosition().col,
+                        this.getPosition().row + inc
+                    )
                 )
             );
 
@@ -57,7 +59,12 @@ export class PawnPiece extends ChessPiece {
                     this.getPosition().row + inc
                 );
                 if (boardState.getPieceAtPosition(takeLeftPos)) {
-                    moves.add(takeLeftPos);
+                    moves.add(
+                        this.newMove(
+                            boardState,
+                            takeLeftPos
+                        )
+                    );
                 }
             }
 
@@ -67,7 +74,12 @@ export class PawnPiece extends ChessPiece {
                     this.getPosition().row + inc
                 );
                 if (boardState.getPieceAtPosition(takeRightPos)) {
-                    moves.add(takeRightPos);
+                    moves.add(
+                        this.newMove(
+                            boardState,
+                            takeRightPos
+                        )
+                    );
                 }
             }
         }
@@ -75,36 +87,47 @@ export class PawnPiece extends ChessPiece {
         // can move two if on home row
         if (inc === -1 && this.getPosition().row === 7 || inc === 1 && this.getPosition().row === 2) {
             moves.add(
-                ChessPosition.get(
-                    this.getPosition().col,
-                    this.getPosition().row + inc*2
+                this.newMove(
+                    boardState,
+                    ChessPosition.get(
+                        this.getPosition().col,
+                        this.getPosition().row + inc * 2
+                    )
                 )
             );
         }
 
         // en passant
         if (inc === -1 && this.getPosition().row === 4 || inc === 1 && this.getPosition().row === 5) {
-            const leftPawnPos = ChessPosition.get(this.getPosition().col - 1, this.getPosition().row);
-            const leftPawn = boardState.getPieceAtPosition(leftPawnPos);
+            if (this.getPosition().col > 1) {
+                const leftPawnPos = ChessPosition.get(this.getPosition().col - 1, this.getPosition().row);
+                const leftPawn = boardState.getPieceAtPosition(leftPawnPos);
 
-            if (leftPawn && leftPawn.getLastPositionChangeTurn() === boardState.getTurnNumber()) {
-                moves.add(
-                    new ChessPieceAvailableMove({
-                        toPosition: ChessPosition.get(this.getPosition().col - 1, this.getPosition().row + inc),
-                        isEnPassant: true 
-                    })
-                );
+                if (leftPawn && leftPawn.getLastPositionChangeTurn() === boardState.getMoveNumber()) {
+                    moves.add(
+                        this.newMove(
+                            boardState,
+                            ChessPosition.get(this.getPosition().col - 1, this.getPosition().row + inc),
+                            false,
+                            true
+                        )
+                    );
+                }
             }
 
-            const rightPawnPos = ChessPosition.get(this.getPosition().col + 1, this.getPosition().row);
-            const rightPawn = boardState.getPieceAtPosition(rightPawnPos);
-            if (rightPawn && rightPawn.getLastPositionChangeTurn() === boardState.getTurnNumber()) {
-                moves.add(
-                    new ChessPieceAvailableMove({
-                        toPosition: ChessPosition.get(this.getPosition().col + 1, this.getPosition().row + inc),
-                        isEnPassant: true 
-                    })
-                );
+            if (this.getPosition().col < 8) {
+                const rightPawnPos = ChessPosition.get(this.getPosition().col + 1, this.getPosition().row);
+                const rightPawn = boardState.getPieceAtPosition(rightPawnPos);
+                if (rightPawn && rightPawn.getLastPositionChangeTurn() === boardState.getMoveNumber()) {
+                    moves.add(
+                        this.newMove(
+                            boardState,
+                            ChessPosition.get(this.getPosition().col + 1, this.getPosition().row + inc),
+                            false,
+                            true
+                        )
+                    );
+                }
             }
         }
 

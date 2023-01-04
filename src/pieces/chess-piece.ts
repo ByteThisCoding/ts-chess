@@ -1,6 +1,7 @@
-import { ChessBoardState } from "../chess-board-state";
+import { ChessBoardState } from "../board-state/chess-board-state";
 import { ChessPosition } from "../chess-position";
 import { ChessPlayer } from "../enums";
+import { ChessBoardSingleMove } from "../moves/chess-board-move";
 import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set";
 
 export abstract class ChessPiece {
@@ -45,9 +46,11 @@ export abstract class ChessPiece {
     getPossibleMovements(
         boardState: ChessBoardState
     ): ChessPieceAvailableMoveSet {
-        return this.player === ChessPlayer.white
+        const moves = this.player === ChessPlayer.white
             ? this.getPossibleMovementsWhite(boardState)
             : this.getPossibleMovementsBlack(boardState);
+
+        return moves;
     }
 
     clone(): ChessPiece {
@@ -57,6 +60,32 @@ export abstract class ChessPiece {
         cloned.prevPosition = this.prevPosition;
         cloned.lastPositionChangeTurn = this.lastPositionChangeTurn;
         return cloned;
+    }
+
+    equals(piece: ChessPiece): boolean {
+        return this.name === piece.name
+            && this.position === piece.position
+            && this.player === piece.player;
+    }
+
+    /**
+     * Helper method to simplify creating new move objects for subclasses
+     */
+    protected newMove(
+        boardState: ChessBoardState,
+        toPosition: ChessPosition,
+        isCastle: boolean = false,
+        isEnPassant: boolean = false
+    ): ChessBoardSingleMove | null {
+
+        return new ChessBoardSingleMove(
+            boardState.getLastMove()?.player === ChessPlayer.white ? ChessPlayer.black : ChessPlayer.white,
+            this,
+            this.position,
+            toPosition,
+            isCastle,
+            isEnPassant
+        )
     }
 
     protected abstract doClone(): ChessPiece;
