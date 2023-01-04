@@ -16,8 +16,10 @@ export class ChessBoardSingleMove {
         public pieceMoved: ChessPiece,
         public fromPosition: ChessPosition,
         public toPosition: ChessPosition,
-        public isCastle: boolean,
-        public isEnPassant: boolean
+        public isCastle: boolean = false,
+        public isEnPassant: boolean = false,
+        public isPromotion: boolean = false,
+        public promoteToPieceLetter: string = ""
     ) {}
 
     /**
@@ -30,7 +32,9 @@ export class ChessBoardSingleMove {
             this.fromPosition,
             this.toPosition,
             this.isCastle,
-            this.isEnPassant
+            this.isEnPassant,
+            this.isPromotion,
+            this.promoteToPieceLetter
         );
     }
 
@@ -40,7 +44,9 @@ export class ChessBoardSingleMove {
             && this.fromPosition === move.fromPosition
             && this.toPosition === move.toPosition
             && this.isCastle === move.isCastle
-            && this.isEnPassant === move.isEnPassant;
+            && this.isEnPassant === move.isEnPassant
+            && this.isPromotion === move.isPromotion
+            && this.promoteToPieceLetter === move.promoteToPieceLetter
     }
 
     public static notationToMove(cmd: string): ChessBoardSingleMove {

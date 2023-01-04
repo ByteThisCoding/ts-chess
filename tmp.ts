@@ -245,9 +245,7 @@ makeMove(
             .getCurrentBoardState()
             .getPieceAtPosition(ChessPosition.get(4, 8))!,
         ChessPosition.get(4, 8),
-        ChessPosition.get(6, 6),
-        false,
-        true
+        ChessPosition.get(6, 6)
     )
 );
 
@@ -260,9 +258,7 @@ makeMove(
             .getCurrentBoardState()
             .getPieceAtPosition(ChessPosition.get(2, 1))!,
         ChessPosition.get(2, 1),
-        ChessPosition.get(1, 3),
-        false,
-        true
+        ChessPosition.get(1, 3)
     )
 );
 
@@ -275,9 +271,7 @@ makeMove(
             .getCurrentBoardState()
             .getPieceAtPosition(ChessPosition.get(6, 6))!,
         ChessPosition.get(6, 6),
-        ChessPosition.get(5, 7),
-        false,
-        true
+        ChessPosition.get(5, 7)
     )
 );
 
@@ -290,9 +284,7 @@ makeMove(
             .getCurrentBoardState()
             .getPieceAtPosition(ChessPosition.get(2, 2))!,
         ChessPosition.get(2, 2),
-        ChessPosition.get(2, 3),
-        false,
-        true
+        ChessPosition.get(2, 3)
     )
 );
 
@@ -306,9 +298,7 @@ makeMove(
             .getCurrentBoardState()
             .getPieceAtPosition(ChessPosition.get(5, 7))!,
         ChessPosition.get(5, 7),
-        ChessPosition.get(7, 5),
-        false,
-        true
+        ChessPosition.get(7, 5)
     )
 );
 
@@ -327,6 +317,178 @@ makeMove(
         true
     )
 );*/
+
+// move king to safety
+makeMove(
+    game,
+    new ChessBoardSingleMove(
+        ChessPlayer.white,
+        game
+            .getBoardStateHistory()
+            .getCurrentBoardState()
+            .getPieceAtPosition(ChessPosition.get(7, 1))!,
+        ChessPosition.get(7, 1),
+        ChessPosition.get(8, 1),
+        false,
+        false
+    )
+);
+
+makeMove(
+    game,
+    new ChessBoardSingleMove(
+        ChessPlayer.black,
+        game
+            .getBoardStateHistory()
+            .getCurrentBoardState()
+            .getPieceAtPosition(ChessPosition.get(8, 7))!,
+        ChessPosition.get(8, 7),
+        ChessPosition.get(8, 5),
+        false,
+        false
+    )
+);
+
+makeMove(
+    game,
+    new ChessBoardSingleMove(
+        ChessPlayer.white,
+        game
+            .getBoardStateHistory()
+            .getCurrentBoardState()
+            .getPieceAtPosition(ChessPosition.get(1, 1))!,
+        ChessPosition.get(1, 1),
+        ChessPosition.get(2, 1),
+        false,
+        false
+    )
+);
+
+makeMove(
+    game,
+    new ChessBoardSingleMove(
+        ChessPlayer.black,
+        game
+            .getBoardStateHistory()
+            .getCurrentBoardState()
+            .getPieceAtPosition(ChessPosition.get(1, 5))!,
+        ChessPosition.get(1, 5),
+        ChessPosition.get(1, 4),
+        false,
+        false
+    )
+);
+
+makeMove(
+    game,
+    new ChessBoardSingleMove(
+        ChessPlayer.white,
+        game
+            .getBoardStateHistory()
+            .getCurrentBoardState()
+            .getPieceAtPosition(ChessPosition.get(4, 2))!,
+        ChessPosition.get(4, 2),
+        ChessPosition.get(4, 3),
+        false,
+        false
+    )
+);
+
+makeMove(
+    game,
+    new ChessBoardSingleMove(
+        ChessPlayer.black,
+        game
+            .getBoardStateHistory()
+            .getCurrentBoardState()
+            .getPieceAtPosition(ChessPosition.get(1, 4))!,
+        ChessPosition.get(1, 4),
+        ChessPosition.get(2, 3),
+        false,
+        false
+    )
+);
+
+makeMove(
+    game,
+    new ChessBoardSingleMove(
+        ChessPlayer.white,
+        game
+            .getBoardStateHistory()
+            .getCurrentBoardState()
+            .getPieceAtPosition(ChessPosition.get(3, 4))!,
+        ChessPosition.get(3, 4),
+        ChessPosition.get(4, 5),
+        false,
+        false
+    )
+);
+
+makeMove(
+    game,
+    new ChessBoardSingleMove(
+        ChessPlayer.black,
+        game
+            .getBoardStateHistory()
+            .getCurrentBoardState()
+            .getPieceAtPosition(ChessPosition.get(2, 3))!,
+        ChessPosition.get(2, 3),
+        ChessPosition.get(3, 2),
+        false,
+        false
+    )
+);
+
+makeMove(
+    game,
+    new ChessBoardSingleMove(
+        ChessPlayer.white,
+        game
+            .getBoardStateHistory()
+            .getCurrentBoardState()
+            .getPieceAtPosition(ChessPosition.get(3, 1))!,
+        ChessPosition.get(3, 1),
+        ChessPosition.get(2, 2),
+        false,
+        false
+    )
+);
+
+// promote black pawn forward
+/*makeMove(
+    game,
+    new ChessBoardSingleMove(
+        ChessPlayer.black,
+        game
+            .getBoardStateHistory()
+            .getCurrentBoardState()
+            .getPieceAtPosition(ChessPosition.get(3, 2))!,
+        ChessPosition.get(3, 2),
+        ChessPosition.get(3, 1),
+        false,
+        false,
+        true,
+        "q"
+    )
+);*/
+
+//promote black pawn capture
+makeMove(
+    game,
+    new ChessBoardSingleMove(
+        ChessPlayer.black,
+        game
+            .getBoardStateHistory()
+            .getCurrentBoardState()
+            .getPieceAtPosition(ChessPosition.get(3, 2))!,
+        ChessPosition.get(3, 2),
+        ChessPosition.get(4, 1),
+        false,
+        false,
+        true,
+        "q"
+    )
+);
 
 function makeMove(game: ChessGame, move: ChessBoardSingleMove): void {
     game.makeMove(move);

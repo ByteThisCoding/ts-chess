@@ -5,6 +5,7 @@ import {
 } from "./chess-board-move-validation-status";
 import { ChessBoardState } from "../board-state/chess-board-state";
 import { ChessPlayer } from "../enums";
+import { KingPiece } from "../pieces/king";
 
 /**
  * Utility responsible for checking if a move is valid
@@ -16,6 +17,14 @@ export class ChessMoveValidator {
         move: ChessBoardSingleMove
     ): ChessBoardMoveValidationStatus {
         const piece = move.pieceMoved;
+
+        // validate player owns piece
+        if (move.player !== move.pieceMoved.player) {
+            return new ChessBoardMoveValidationStatus(
+                false,
+                ChessBoardMoveValidationFailure.playerDoesNotOwn
+            );
+        }
 
         // validate from position is correct
         const fromPos = move.fromPosition;
@@ -32,7 +41,10 @@ export class ChessMoveValidator {
         if (!validMoves.hasMoveToPosition(toPos)) {
             return new ChessBoardMoveValidationStatus(
                 false,
-                ChessBoardMoveValidationFailure.pieceCannotAccessPosition
+                ChessBoardMoveValidationFailure.pieceCannotAccessPosition,
+                {
+                    availableMoves: [...validMoves.getMoves()].map(mv => mv.toPosition.toString())
+                }
             );
         }
 
@@ -41,11 +53,18 @@ export class ChessMoveValidator {
         const enemyPossibleMoves = boardState.getPossibleMovesForPlayer(enemy);
 
         // check if enemy's king's position is included
-        const playerKing = boardState.getPlayerKingPiece(move.player);
+        // if the king was moved, use that, otherwise, use last recorded king position
+        let playerKing = boardState.getPlayerKingPiece(move.player);
+        if (move.pieceMoved instanceof KingPiece) {
+            playerKing = move.pieceMoved.clone() as KingPiece;
+            playerKing.setPosition(move.toPosition, -1);
+        }
+
         const playerKingPos = playerKing.getPosition();
 
         for (const move of enemyPossibleMoves.getMoves()) {
             if (move.toPosition === playerKingPos) {
+                console.log(move, playerKingPos);
                 return new ChessBoardMoveValidationStatus(
                     false,
                     ChessBoardMoveValidationFailure.invalidCheck

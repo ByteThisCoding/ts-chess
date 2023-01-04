@@ -4,6 +4,9 @@ import { ChessPlayer } from "../enums";
 import { ChessBoardSingleMove } from "../moves/chess-board-move";
 import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set";
 
+/**
+ * Abstraction for common chess piece logic + external reference
+ */
 export abstract class ChessPiece {
     abstract name: string;
     abstract letter: string;
@@ -75,7 +78,9 @@ export abstract class ChessPiece {
         boardState: ChessBoardState,
         toPosition: ChessPosition,
         isCastle: boolean = false,
-        isEnPassant: boolean = false
+        isEnPassant: boolean = false,
+        isPromotion: boolean = false,
+        promotionLetter: string = ""
     ): ChessBoardSingleMove | null {
 
         return new ChessBoardSingleMove(
@@ -84,7 +89,9 @@ export abstract class ChessPiece {
             this.position,
             toPosition,
             isCastle,
-            isEnPassant
+            isEnPassant,
+            isPromotion,
+            promotionLetter
         )
     }
 

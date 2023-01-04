@@ -41,16 +41,36 @@ export class PawnPiece extends ChessPiece {
     ): ChessPieceAvailableMoveSet {
         const moves = new ChessPieceAvailableMoveSet(this.player, boardState);
 
-        if (inc === - 1 && this.getPosition().row > 1 || inc === 1 && this.getPosition().row < 8) {
-            moves.add(
-                this.newMove(
-                    boardState,
-                    ChessPosition.get(
-                        this.getPosition().col,
-                        this.getPosition().row + inc
-                    )
-                )
+        if (inc === -1 && this.getPosition().row > 1 || inc === 1 && this.getPosition().row < 8) {
+            const nextPos = ChessPosition.get(
+                this.getPosition().col,
+                this.getPosition().row + inc
             );
+
+            if (!boardState.hasPieceAtPosition(nextPos)) {
+                // if this can be promoted, do it
+                if (inc === -1 && this.getPosition().row === 2 || inc === 1 && this.getPosition().row === 7) {
+                    ["r", "n", "b", "q"].forEach(letter => {
+                        moves.add(
+                            this.newMove(
+                                boardState,
+                                nextPos,
+                                false,
+                                false,
+                                true,
+                                letter
+                            )
+                        );
+                    });
+                } else {
+                    moves.add(
+                        this.newMove(
+                            boardState,
+                            nextPos
+                        )
+                    );
+                }
+            }
 
             // add capture pieces if possible
             if (this.getPosition().col > 1) {
@@ -58,13 +78,29 @@ export class PawnPiece extends ChessPiece {
                     this.getPosition().col - 1,
                     this.getPosition().row + inc
                 );
-                if (boardState.getPieceAtPosition(takeLeftPos)) {
-                    moves.add(
-                        this.newMove(
-                            boardState,
-                            takeLeftPos
-                        )
-                    );
+                if (boardState.hasPieceAtPosition(takeLeftPos)) {
+                    // if this can be promoted, do it
+                    if (inc === -1 && this.getPosition().row === 2 || inc === 1 && this.getPosition().row === 7) {
+                        ["r", "n", "b", "q"].forEach(letter => {
+                            moves.add(
+                                this.newMove(
+                                    boardState,
+                                    takeLeftPos,
+                                    false,
+                                    false,
+                                    true,
+                                    letter
+                                )
+                            );
+                        });
+                    } else {
+                        moves.add(
+                            this.newMove(
+                                boardState,
+                                takeLeftPos
+                            )
+                        );
+                    }
                 }
             }
 
@@ -73,28 +109,48 @@ export class PawnPiece extends ChessPiece {
                     this.getPosition().col + 1,
                     this.getPosition().row + inc
                 );
-                if (boardState.getPieceAtPosition(takeRightPos)) {
-                    moves.add(
-                        this.newMove(
-                            boardState,
-                            takeRightPos
-                        )
-                    );
+                if (boardState.hasPieceAtPosition(takeRightPos)) {
+                    // if this can be promoted, do it
+                    if (inc === -1 && this.getPosition().row === 2 || inc === 1 && this.getPosition().row === 7) {
+                        ["r", "n", "b", "q"].forEach(letter => {
+                            moves.add(
+                                this.newMove(
+                                    boardState,
+                                    takeRightPos,
+                                    false,
+                                    false,
+                                    true,
+                                    letter
+                                )
+                            );
+                        });
+                    } else {
+                        moves.add(
+                            this.newMove(
+                                boardState,
+                                takeRightPos
+                            )
+                        );
+                    }
                 }
             }
         }
 
         // can move two if on home row
         if (inc === -1 && this.getPosition().row === 7 || inc === 1 && this.getPosition().row === 2) {
-            moves.add(
-                this.newMove(
-                    boardState,
-                    ChessPosition.get(
-                        this.getPosition().col,
-                        this.getPosition().row + inc * 2
-                    )
-                )
+            const nextPos = ChessPosition.get(
+                this.getPosition().col,
+                this.getPosition().row + inc * 2
             );
+
+            if (!boardState.hasPieceAtPosition(nextPos)) {
+                moves.add(
+                    this.newMove(
+                        boardState,
+                        nextPos
+                    )
+                );
+            }
         }
 
         // en passant

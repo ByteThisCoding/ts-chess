@@ -9,6 +9,7 @@ import { QueenPiece } from "../pieces/queen";
 import { RookPiece } from "../pieces/rook";
 import { ChessBoardSingleMove } from "../moves/chess-board-move";
 import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set";
+import { ChessPieceFactory } from "../pieces/chess-piece-factory";
 
 /**
  * Mutable Representation of a chess board with pieces
@@ -86,7 +87,10 @@ export class ChessBoardState {
         this.updateSinglePiece(move.fromPosition, null, moveNumber);
     
         // handle special cases
-        if (move.isEnPassant) {
+        if (move.isPromotion) {
+            const newPiece = ChessPieceFactory.createPiece(move.promoteToPieceLetter, move.player, move.toPosition);
+            this.updateSinglePiece(move.toPosition, newPiece, moveNumber);
+        } else if (move.isEnPassant) {
             // the to-position indicates above or below the pawn to delete
             const existingPawnRow = move.player === ChessPlayer.white ? move.toPosition.row - 1 : move.toPosition.row + 1;
             const existingPawnPos = ChessPosition.get(move.toPosition.col, existingPawnRow);
@@ -266,6 +270,7 @@ export class ChessBoardState {
         board += `Black check: ${this.isBlackInCheck} | Black checkmate: ${this.isBlackInCheckmate} | Black King: ${this.blackKingPiece.getPosition().toString()}\n`;
         board += `Stalemate: ${this.isStalemate}\n`;
         board += `Move Number: ${this.getMoveNumber()}\n`;
+        board += `Last Move By: ${this.lastMove?.player} -> ${this.lastMove?.toPosition.toString()}\n`;
 
         return board;
     }

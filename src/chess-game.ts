@@ -31,6 +31,10 @@ export class ChessGame {
             move
         );
         if (!moveStatus.success) {
+            console.error(`Error making move: `, {
+                failure: moveStatus.failureReason,
+                data: moveStatus.additionalData
+            });
             throw new Error(
                 "The selected move is invalid: " + moveStatus.failureReason
             );
