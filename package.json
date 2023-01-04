@@ -1,0 +1,10 @@
+{
+    "name": "@byte-this/ts-chess",
+    "version": "1.0.0",
+    "scripts": {
+        "format": "npx prettier --write ."
+    },
+    "devDependencies": {
+        "prettier": "^2.8.1"
+    }
+}
