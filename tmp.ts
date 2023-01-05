@@ -2,10 +2,10 @@
  * Temporary file for testing
  */
 
-import { ChessBoardSingleMove } from "./src/moves/chess-board-move";
-import { ChessGame } from "./src/chess-game";
-import { ChessPosition } from "./src/chess-position";
-import { ChessPlayer } from "./src/enums";
+import { ChessBoardSingleMove } from "./src/game-logic/moves/chess-board-move";
+import { ChessGame } from "./src/game-logic/chess-game";
+import { ChessPosition } from "./src/game-logic/chess-position";
+import { ChessPlayer } from "./src//game-logic/enums";
 
 const game = new ChessGame();
 

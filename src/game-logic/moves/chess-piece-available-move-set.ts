@@ -56,6 +56,9 @@ export class ChessPieceAvailableMoveSet {
         }
 
         moves.splice(moveIndex, 1);
+        if (moves.length === 0) {
+            this.availableMoves.delete(move!.toPosition);
+        }
     }
 
     /**
@@ -89,8 +92,8 @@ export class ChessPieceAvailableMoveSet {
         }
     }
 
-    getNumMoves(): number {
-        return this.availableMoves.size;
+    hasMoves(): boolean {
+        return this.availableMoves.size > 0;
     }
 
     /**

@@ -10,7 +10,6 @@ import { RookPiece } from "../pieces/rook";
 import { ChessBoardSingleMove } from "../moves/chess-board-move";
 import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set";
 import { ChessPieceFactory } from "../pieces/chess-piece-factory";
-import { ChessNotation } from "../notation/chess-notation-parser";
 
 /**
  * Mutable Representation of a chess board with pieces
@@ -30,8 +29,12 @@ export class ChessBoardState {
     private isWhiteInCheckmate = false;
     private isStalemate = false;
 
+    private blackPiecesValue = 0;
+    private whitePiecesValue = 0;
+
     // internal, used to prevent infinite recursion when evaluating checkmate
     private _performCheckmateEvaluation = true;
+    private _possiblePieceCache = new Map<ChessPiece, ChessPieceAvailableMoveSet>();
 
     // store here so we don't have to search on each move
     private whiteKingPiece!: KingPiece;
@@ -47,6 +50,25 @@ export class ChessBoardState {
                 }
             }
         }
+    }
+
+    getBlackPiecesValue(): number {
+        return this.blackPiecesValue;
+    }
+
+    getWhitePiecesValue(): number {
+        return this.whitePiecesValue;
+    }
+
+    getScore(): number {
+        return this.whitePiecesValue - this.blackPiecesValue;
+    }
+
+    getPossibleMovementsForPiece(piece: ChessPiece): ChessPieceAvailableMoveSet {
+        if (!this._possiblePieceCache.has(piece)) {
+            this._possiblePieceCache.set(piece, piece.getPossibleMovements(this));
+        }
+        return this._possiblePieceCache.get(piece)!;
     }
 
     isPlayerInCheck(player: ChessPlayer): boolean {
@@ -179,8 +201,11 @@ export class ChessBoardState {
         // update move + number
         this.lastMove = move;
 
+        this._possiblePieceCache.clear();
+
         // check if anybody is in check, checkmate, or stalemate
         this.updateCheckStalemateStatus();
+        this.updatePieceValues();
     }
 
     /**
@@ -191,7 +216,7 @@ export class ChessBoardState {
 
         for (const [pos, piece] of this.positions) {
             if (piece.player === player) {
-                const possibleMoves = piece.getPossibleMovements(this);
+                const possibleMoves = this.getPossibleMovementsForPiece(piece);
                 allPlayerMoves.merge(possibleMoves);
             }
         }
@@ -199,10 +224,23 @@ export class ChessBoardState {
         return allPlayerMoves;
     }
 
+    private updatePieceValues(): void {
+        this.whitePiecesValue = 0;
+        this.blackPiecesValue = 0;
+
+        for (const [pos, piece] of this.positions) {
+            if (piece.player === ChessPlayer.white) {
+                this.whitePiecesValue += piece.pointsValue;
+            } else {
+                this.blackPiecesValue += piece.pointsValue;
+            }
+        }
+    }
+
     /**
      * After a move is made, this is called to check if the reverse player is in check
      * This checks by seeing if the player that just went has a line of sight of the king for possible moves
-     * 
+     *
      * TODO: fix stack overflow when in checkmate (??)
      */
     private updateCheckStalemateStatus(): void {
@@ -274,8 +312,8 @@ export class ChessBoardState {
                 this.isBlackInCheckmate = false;
             }
 
-            // if not in check, check if stalemate by seeing if enemy has any possible moves 
-            this.isStalemate = enemyPossibleMoves.getNumMoves() === 0;
+            // if not in check, check if stalemate by seeing if enemy has any possible moves
+            this.isStalemate = !enemyPossibleMoves.hasMoves();
         }
     }
 
@@ -309,6 +347,8 @@ export class ChessBoardState {
         state.isStalemate = this.isStalemate;
         state.whiteKingPiece = this.whiteKingPiece.clone() as KingPiece;
         state.blackKingPiece = this.blackKingPiece.clone() as KingPiece;
+        state.blackPiecesValue = this.blackPiecesValue;
+        state.whitePiecesValue = this.whitePiecesValue;
         return state;
     }
 
@@ -333,16 +373,22 @@ export class ChessBoardState {
 
         board += "\n\n";
         board += `Last move: ${this.lastMoveNotation}\n`;
-        board += `White in check: ${this.isWhiteInCheck
-            } | White in checkmate: ${this.isWhiteInCheckmate
-            } | White King: ${this.whiteKingPiece.getPosition().toString()}\n`;
-        board += `Black in check: ${this.isBlackInCheck
-            } | Black in checkmate: ${this.isBlackInCheckmate
-            } | Black King: ${this.blackKingPiece.getPosition().toString()}\n`;
+        board += `White in check: ${
+            this.isWhiteInCheck
+        } | White in checkmate: ${
+            this.isWhiteInCheckmate
+        } | White King: ${this.whiteKingPiece.getPosition().toString()}\n`;
+        board += `Black in check: ${
+            this.isBlackInCheck
+        } | Black in checkmate: ${
+            this.isBlackInCheckmate
+        } | Black King: ${this.blackKingPiece.getPosition().toString()}\n`;
         board += `Stalemate: ${this.isStalemate}\n`;
         board += `Move Number: ${this.getMoveNumber()}\n`;
-        board += `Last Move By: ${this.lastMove?.player
-            } -> ${this.lastMove?.toPosition.toString()}\n`;
+        board += `Last Move By: ${
+            this.lastMove?.player
+        } -> ${this.lastMove?.toPosition.toString()}\n`;
+        board += `Board Value: ${this.getScore()}\n`;
 
         return board;
     }

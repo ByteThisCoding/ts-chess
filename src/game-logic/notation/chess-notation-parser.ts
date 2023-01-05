@@ -27,7 +27,6 @@ export class ChessNotation {
         boardState: ChessBoardState,
         notation: string
     ): ChessNotationParseStatus {
-        console.log("-----------------------", notation);
         notation = notation.trim();
 
         const movePlayer =

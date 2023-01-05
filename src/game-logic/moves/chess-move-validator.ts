@@ -11,7 +11,7 @@ import { KingPiece } from "../pieces/king";
  * Utility responsible for checking if a move is valid
  */
 export class ChessMoveValidator {
-    // TODO: add check for if king is in check
+    
     public static isMoveValid(
         boardState: ChessBoardState,
         move: ChessBoardSingleMove
@@ -22,22 +22,31 @@ export class ChessMoveValidator {
         if (move.player !== move.pieceMoved.player) {
             return new ChessBoardMoveValidationStatus(
                 false,
-                ChessBoardMoveValidationFailure.playerDoesNotOwn
+                ChessBoardMoveValidationFailure.playerDoesNotOwn,
+                {
+                    piece: piece.toString(),
+                }
             );
         }
 
         // validate from position is correct
         const fromPos = move.fromPosition;
-        if (boardState.getPieceAtPosition(fromPos) !== piece) {
+        const fromPiece = boardState.getPieceAtPosition(fromPos);
+        if (!fromPiece?.equals(piece)) {
             return new ChessBoardMoveValidationStatus(
                 false,
-                ChessBoardMoveValidationFailure.fromPositionMismatch
+                ChessBoardMoveValidationFailure.fromPositionMismatch,
+                {
+                    piece: piece.toString(),
+                    fromPiece: fromPiece?.toString(),
+                }
             );
         }
 
         // validate piece can move to this position
         const toPos = move.toPosition;
-        const validMoves = piece.getPossibleMovements(boardState);
+
+        const validMoves = boardState.getPossibleMovementsForPiece(piece);
         if (!validMoves.hasMoveToPosition(toPos)) {
             return new ChessBoardMoveValidationStatus(
                 false,
@@ -69,7 +78,6 @@ export class ChessMoveValidator {
 
         for (const move of enemyPossibleMoves.getMoves()) {
             if (move.toPosition === playerKingPos) {
-                console.log(move, playerKingPos);
                 return new ChessBoardMoveValidationStatus(
                     false,
                     ChessBoardMoveValidationFailure.invalidCheck

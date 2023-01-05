@@ -1,10 +1,11 @@
 import readline from "readline";
-import { ChessBoardState } from "./src/board-state/chess-board-state";
-import { ChessGame } from "./src/chess-game";
-import { ChessPlayer } from "./src/enums";
-import { ChessBoardSingleMove } from "./src/moves/chess-board-move";
-import { ChessNotationParseStatus } from "./src/notation/chess-notation-parse-status";
-import { ChessNotation } from "./src/notation/chess-notation-parser";
+import { ChessAiHeuristic } from "./src/ai/heuristic/heuristic";
+import { ChessMinimaxAiPlayer } from "./src/ai/minimax-ai/ai";
+import { ChessBoardState } from "./src/game-logic/board-state/chess-board-state";
+import { ChessGame } from "./src/game-logic/chess-game";
+import { ChessPlayer } from "./src/game-logic/enums";
+import { ChessBoardSingleMove } from "./src/game-logic/moves/chess-board-move";
+import { ChessNotation } from "./src/game-logic/notation/chess-notation-parser";
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -18,7 +19,9 @@ RunGame();
 
 async function RunGame() {
     const game = new ChessGame();
-    await loopNoAi(game);
+    //await loopNoAi(game);
+    //await loopOneAi(game);
+    await loopTwoAis(game);
     process.exit(0);
 }
 
@@ -42,6 +45,99 @@ async function loopNoAi(game: ChessGame) {
             console.log(`There was a problem with that move.`, err);
         }
     }
+    console.log("Game over!");
+}
+
+/**
+ * Human vs AI
+ */
+async function loopOneAi(game: ChessGame) {
+    const playerColor = await requestPlayerColor();
+    const aiPlayer = new ChessMinimaxAiPlayer(new ChessAiHeuristic());
+
+    // if player is not first, have AI move first
+    if (playerColor === ChessPlayer.black) {
+        const aiMove = aiPlayer.determineNextMove(
+            game.getBoardStateHistory().getCurrentBoardState()
+        );
+        game.makeMove(aiMove);
+        console.log(
+            game.getBoardStateHistory().getCurrentBoardState().toString()
+        );
+        console.log("________________________");
+    }
+
+    while (!game.isGameOver()) {
+        try {
+            // get the player's move
+            const move = await requestChessMove(
+                game.getBoardStateHistory().getCurrentBoardState()
+            );
+            game.makeMove(move);
+            console.log(
+                game.getBoardStateHistory().getCurrentBoardState().toString()
+            );
+            console.log("________________________");
+
+            // get the AI's move
+            if (!game.isGameOver()) {
+                const aiMove = aiPlayer.determineNextMove(
+                    game.getBoardStateHistory().getCurrentBoardState()
+                );
+                game.makeMove(aiMove);
+                console.log(
+                    game
+                        .getBoardStateHistory()
+                        .getCurrentBoardState()
+                        .toString()
+                );
+                console.log("________________________");
+            }
+        } catch (err) {
+            console.log(`There was a problem with that move.`, err);
+        }
+    }
+
+    console.log("Game over!");
+}
+
+async function loopTwoAis(game: ChessGame) {
+    const aiPlayerWhite = new ChessMinimaxAiPlayer(new ChessAiHeuristic());
+    const aiPlayerBlack = new ChessMinimaxAiPlayer(new ChessAiHeuristic());
+
+    while (!game.isGameOver()) {
+        try {
+            const aiMove = aiPlayerWhite.determineNextMove(
+                game.getBoardStateHistory().getCurrentBoardState()
+            );
+            game.makeMove(aiMove);
+            console.log(
+                game
+                    .getBoardStateHistory()
+                    .getCurrentBoardState()
+                    .toString()
+            );
+            console.log("________________________");
+
+            // get the AI's move
+            if (!game.isGameOver()) {
+                const aiMove = aiPlayerBlack.determineNextMove(
+                    game.getBoardStateHistory().getCurrentBoardState()
+                );
+                game.makeMove(aiMove);
+                console.log(
+                    game
+                        .getBoardStateHistory()
+                        .getCurrentBoardState()
+                        .toString()
+                );
+                console.log("________________________");
+            }
+        } catch (err) {
+            console.log(`There was a problem with that move.`, err);
+        }
+    }
+
     console.log("Game over!");
 }
 

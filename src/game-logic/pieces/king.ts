@@ -10,7 +10,7 @@ import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-
 export class KingPiece extends ChessPiece {
     name: string = "King";
     letter: string = "K";
-    pointsValue: number = -1;
+    pointsValue: number = 0;
 
     constructor(public player: ChessPlayer, position: ChessPosition) {
         super(position);

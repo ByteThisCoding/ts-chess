@@ -63,6 +63,7 @@ export abstract class ChessPiece {
         cloned.startPosition = this.startPosition;
         cloned.prevPosition = this.prevPosition;
         cloned.lastPositionChangeTurn = this.lastPositionChangeTurn;
+        cloned.player = this.player;
         return cloned;
     }
 
@@ -72,6 +73,10 @@ export abstract class ChessPiece {
             this.position === piece.position &&
             this.player === piece.player
         );
+    }
+
+    toString(): string {
+        return `(${this.player} ${this.name} : ${this.position.toString()})`;
     }
 
     /**
