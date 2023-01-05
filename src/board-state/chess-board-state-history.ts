@@ -2,6 +2,7 @@ import { ChessBoardSingleMove } from "../moves/chess-board-move";
 import { ChessBoardState } from "./chess-board-state";
 import { ChessPosition } from "../chess-position";
 import { ChessPlayer } from "../enums";
+import { ChessNotation } from "../notation/chess-notation-parser";
 
 /**
  * This will encapsulate a chess board's current state
@@ -26,8 +27,11 @@ export class ChessBoardStateHistory {
     registerMove(move: ChessBoardSingleMove): void {
         this.boardHistory.push(this.latestBoardState.clone());
         this.movesHistory.push(move);
-        const moveNumber = this.movesHistory.length;
-        this.getCurrentBoardState().setPiecesFromMove(move, moveNumber);
+        const notation = ChessNotation.convertMoveToNotation(
+            this.getCurrentBoardState(),
+            move
+        );
+        this.getCurrentBoardState().setPiecesFromMove(move, notation);
     }
 
     /**

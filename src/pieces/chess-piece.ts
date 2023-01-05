@@ -49,9 +49,10 @@ export abstract class ChessPiece {
     getPossibleMovements(
         boardState: ChessBoardState
     ): ChessPieceAvailableMoveSet {
-        const moves = this.player === ChessPlayer.white
-            ? this.getPossibleMovementsWhite(boardState)
-            : this.getPossibleMovementsBlack(boardState);
+        const moves =
+            this.player === ChessPlayer.white
+                ? this.getPossibleMovementsWhite(boardState)
+                : this.getPossibleMovementsBlack(boardState);
 
         return moves;
     }
@@ -66,9 +67,11 @@ export abstract class ChessPiece {
     }
 
     equals(piece: ChessPiece): boolean {
-        return this.name === piece.name
-            && this.position === piece.position
-            && this.player === piece.player;
+        return (
+            this.name === piece.name &&
+            this.position === piece.position &&
+            this.player === piece.player
+        );
     }
 
     /**
@@ -82,9 +85,10 @@ export abstract class ChessPiece {
         isPromotion: boolean = false,
         promotionLetter: string = ""
     ): ChessBoardSingleMove | null {
-
         return new ChessBoardSingleMove(
-            boardState.getLastMove()?.player === ChessPlayer.white ? ChessPlayer.black : ChessPlayer.white,
+            boardState.getLastMove()?.player === ChessPlayer.white
+                ? ChessPlayer.black
+                : ChessPlayer.white,
             this,
             this.position,
             toPosition,
@@ -92,7 +96,7 @@ export abstract class ChessPiece {
             isEnPassant,
             isPromotion,
             promotionLetter
-        )
+        );
     }
 
     protected abstract doClone(): ChessPiece;

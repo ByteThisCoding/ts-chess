@@ -43,13 +43,18 @@ export class ChessMoveValidator {
                 false,
                 ChessBoardMoveValidationFailure.pieceCannotAccessPosition,
                 {
-                    availableMoves: [...validMoves.getMoves()].map(mv => mv.toPosition.toString())
+                    availableMoves: [...validMoves.getMoves()].map((mv) =>
+                        mv.toPosition.toString()
+                    ),
                 }
             );
         }
 
-        // validate player won't put themselves in illegal check 
-        const enemy = move.player === ChessPlayer.white ? ChessPlayer.black : ChessPlayer.white;
+        // validate player won't put themselves in illegal check
+        const enemy =
+            move.player === ChessPlayer.white
+                ? ChessPlayer.black
+                : ChessPlayer.white;
         const enemyPossibleMoves = boardState.getPossibleMovesForPlayer(enemy);
 
         // check if enemy's king's position is included

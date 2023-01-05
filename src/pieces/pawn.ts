@@ -41,7 +41,10 @@ export class PawnPiece extends ChessPiece {
     ): ChessPieceAvailableMoveSet {
         const moves = new ChessPieceAvailableMoveSet(this.player, boardState);
 
-        if (inc === -1 && this.getPosition().row > 1 || inc === 1 && this.getPosition().row < 8) {
+        if (
+            (inc === -1 && this.getPosition().row > 1) ||
+            (inc === 1 && this.getPosition().row < 8)
+        ) {
             const nextPos = ChessPosition.get(
                 this.getPosition().col,
                 this.getPosition().row + inc
@@ -49,8 +52,11 @@ export class PawnPiece extends ChessPiece {
 
             if (!boardState.hasPieceAtPosition(nextPos)) {
                 // if this can be promoted, do it
-                if (inc === -1 && this.getPosition().row === 2 || inc === 1 && this.getPosition().row === 7) {
-                    ["r", "n", "b", "q"].forEach(letter => {
+                if (
+                    (inc === -1 && this.getPosition().row === 2) ||
+                    (inc === 1 && this.getPosition().row === 7)
+                ) {
+                    ["r", "n", "b", "q"].forEach((letter) => {
                         moves.add(
                             this.newMove(
                                 boardState,
@@ -63,12 +69,7 @@ export class PawnPiece extends ChessPiece {
                         );
                     });
                 } else {
-                    moves.add(
-                        this.newMove(
-                            boardState,
-                            nextPos
-                        )
-                    );
+                    moves.add(this.newMove(boardState, nextPos));
                 }
             }
 
@@ -80,8 +81,11 @@ export class PawnPiece extends ChessPiece {
                 );
                 if (boardState.hasPieceAtPosition(takeLeftPos)) {
                     // if this can be promoted, do it
-                    if (inc === -1 && this.getPosition().row === 2 || inc === 1 && this.getPosition().row === 7) {
-                        ["r", "n", "b", "q"].forEach(letter => {
+                    if (
+                        (inc === -1 && this.getPosition().row === 2) ||
+                        (inc === 1 && this.getPosition().row === 7)
+                    ) {
+                        ["r", "n", "b", "q"].forEach((letter) => {
                             moves.add(
                                 this.newMove(
                                     boardState,
@@ -94,12 +98,7 @@ export class PawnPiece extends ChessPiece {
                             );
                         });
                     } else {
-                        moves.add(
-                            this.newMove(
-                                boardState,
-                                takeLeftPos
-                            )
-                        );
+                        moves.add(this.newMove(boardState, takeLeftPos));
                     }
                 }
             }
@@ -111,8 +110,11 @@ export class PawnPiece extends ChessPiece {
                 );
                 if (boardState.hasPieceAtPosition(takeRightPos)) {
                     // if this can be promoted, do it
-                    if (inc === -1 && this.getPosition().row === 2 || inc === 1 && this.getPosition().row === 7) {
-                        ["r", "n", "b", "q"].forEach(letter => {
+                    if (
+                        (inc === -1 && this.getPosition().row === 2) ||
+                        (inc === 1 && this.getPosition().row === 7)
+                    ) {
+                        ["r", "n", "b", "q"].forEach((letter) => {
                             moves.add(
                                 this.newMove(
                                     boardState,
@@ -125,45 +127,51 @@ export class PawnPiece extends ChessPiece {
                             );
                         });
                     } else {
-                        moves.add(
-                            this.newMove(
-                                boardState,
-                                takeRightPos
-                            )
-                        );
+                        moves.add(this.newMove(boardState, takeRightPos));
                     }
                 }
             }
         }
 
         // can move two if on home row
-        if (inc === -1 && this.getPosition().row === 7 || inc === 1 && this.getPosition().row === 2) {
+        if (
+            (inc === -1 && this.getPosition().row === 7) ||
+            (inc === 1 && this.getPosition().row === 2)
+        ) {
             const nextPos = ChessPosition.get(
                 this.getPosition().col,
                 this.getPosition().row + inc * 2
             );
 
             if (!boardState.hasPieceAtPosition(nextPos)) {
-                moves.add(
-                    this.newMove(
-                        boardState,
-                        nextPos
-                    )
-                );
+                moves.add(this.newMove(boardState, nextPos));
             }
         }
 
         // en passant
-        if (inc === -1 && this.getPosition().row === 4 || inc === 1 && this.getPosition().row === 5) {
+        if (
+            (inc === -1 && this.getPosition().row === 4) ||
+            (inc === 1 && this.getPosition().row === 5)
+        ) {
             if (this.getPosition().col > 1) {
-                const leftPawnPos = ChessPosition.get(this.getPosition().col - 1, this.getPosition().row);
+                const leftPawnPos = ChessPosition.get(
+                    this.getPosition().col - 1,
+                    this.getPosition().row
+                );
                 const leftPawn = boardState.getPieceAtPosition(leftPawnPos);
 
-                if (leftPawn && leftPawn.getLastPositionChangeTurn() === boardState.getMoveNumber()) {
+                if (
+                    leftPawn &&
+                    leftPawn.getLastPositionChangeTurn() ===
+                        boardState.getMoveNumber()
+                ) {
                     moves.add(
                         this.newMove(
                             boardState,
-                            ChessPosition.get(this.getPosition().col - 1, this.getPosition().row + inc),
+                            ChessPosition.get(
+                                this.getPosition().col - 1,
+                                this.getPosition().row + inc
+                            ),
                             false,
                             true
                         )
@@ -172,13 +180,23 @@ export class PawnPiece extends ChessPiece {
             }
 
             if (this.getPosition().col < 8) {
-                const rightPawnPos = ChessPosition.get(this.getPosition().col + 1, this.getPosition().row);
+                const rightPawnPos = ChessPosition.get(
+                    this.getPosition().col + 1,
+                    this.getPosition().row
+                );
                 const rightPawn = boardState.getPieceAtPosition(rightPawnPos);
-                if (rightPawn && rightPawn.getLastPositionChangeTurn() === boardState.getMoveNumber()) {
+                if (
+                    rightPawn &&
+                    rightPawn.getLastPositionChangeTurn() ===
+                        boardState.getMoveNumber()
+                ) {
                     moves.add(
                         this.newMove(
                             boardState,
-                            ChessPosition.get(this.getPosition().col + 1, this.getPosition().row + inc),
+                            ChessPosition.get(
+                                this.getPosition().col + 1,
+                                this.getPosition().row + inc
+                            ),
                             false,
                             true
                         )

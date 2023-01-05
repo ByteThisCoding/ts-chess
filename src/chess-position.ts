@@ -25,6 +25,25 @@ export class ChessPosition {
         return this.positions[col - 1][row - 1];
     }
 
+    /**
+     * Convert a string such as "a8" to a position
+     */
+    public static fromString(str: string): ChessPosition {
+        const colLetter = str.substring(0, 1).toLowerCase();
+        const col = colLetter.charCodeAt(0) - "a".charCodeAt(0) + 1;
+        if (col < 1 || col > 8) {
+            throw new Error(`Invalid column!`);
+        }
+
+        const rowStr = str.substring(1);
+        const row = parseInt(rowStr);
+        if (isNaN(row) || row < 1 || row > 8) {
+            throw new Error(`Invalid row!`);
+        }
+
+        return this.get(col, row);
+    }
+
     // we'll use static instances
     private constructor(
         public readonly col: number,

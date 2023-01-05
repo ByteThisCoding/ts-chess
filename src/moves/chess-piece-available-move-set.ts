@@ -1,6 +1,7 @@
 import { ChessBoardState } from "../board-state/chess-board-state";
 import { ChessPosition } from "../chess-position";
 import { ChessPlayer } from "../enums";
+import { ChessPiece } from "../pieces/chess-piece";
 import { ChessBoardSingleMove } from "./chess-board-move";
 
 /**
@@ -25,7 +26,9 @@ export class ChessPieceAvailableMoveSet {
 
         // if not castle, don't add if piece of same color is there
         if (!move.isCastle) {
-            const existing = this.boardState.getPieceAtPosition(move.toPosition);
+            const existing = this.boardState.getPieceAtPosition(
+                move.toPosition
+            );
             if (existing?.player === this.player) {
                 return;
             }
@@ -47,7 +50,7 @@ export class ChessPieceAvailableMoveSet {
             return;
         }
 
-        const moveIndex = moves.findIndex(mv => mv.equals(move));
+        const moveIndex = moves.findIndex((mv) => mv.equals(move));
         if (moveIndex === -1) {
             return;
         }
@@ -59,8 +62,10 @@ export class ChessPieceAvailableMoveSet {
      * Combine the moves of another instance of this class into this
      */
     merge(movesSet: ChessPieceAvailableMoveSet): void {
-        for (const [pos, move] of movesSet.availableMoves) {
-            this.availableMoves.set(pos, move);
+        for (const [pos, moves] of movesSet.availableMoves) {
+            for (const move of moves) {
+                this.add(move);
+            }
         }
     }
 
@@ -68,6 +73,18 @@ export class ChessPieceAvailableMoveSet {
         for (const [pos, moves] of this.availableMoves) {
             for (const move of moves) {
                 yield move;
+            }
+        }
+    }
+
+    *getMovesForPieceType(
+        pieceType: ChessPiece
+    ): Iterable<ChessBoardSingleMove> {
+        for (const [pos, moves] of this.availableMoves) {
+            for (const move of moves) {
+                if (move.pieceMoved.letter === pieceType.letter) {
+                    yield move;
+                }
             }
         }
     }

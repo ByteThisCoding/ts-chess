@@ -3,7 +3,7 @@ export enum ChessBoardMoveValidationFailure {
     pieceCannotAccessPosition = "The piece does not have access to the target position.",
     fromPositionMismatch = "The from position and selected piece do not match up.",
     invalidCheck = "The move would put the player in an invalid check.",
-    playerDoesNotOwn = "The player attempted to move a piece they don't own."
+    playerDoesNotOwn = "The player attempted to move a piece they don't own.",
 }
 
 export class ChessBoardMoveValidationStatus {

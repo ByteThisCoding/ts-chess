@@ -4,7 +4,6 @@ import { ChessMoveValidator } from "./moves/chess-move-validator";
 import { ChessPlayer } from "./enums";
 
 export class ChessGame {
-    
     private boardStateHistory = new ChessBoardStateHistory();
     private currentPlayer: ChessPlayer = ChessPlayer.white;
 
@@ -14,6 +13,13 @@ export class ChessGame {
 
     getBoardStateHistory(): ChessBoardStateHistory {
         return this.boardStateHistory;
+    }
+
+    isGameOver(): boolean {
+        return (
+            this.boardStateHistory.getCurrentBoardState().isGameInCheckmate() ||
+            this.boardStateHistory.getCurrentBoardState().isGameInStalemate()
+        );
     }
 
     /**
@@ -33,7 +39,7 @@ export class ChessGame {
         if (!moveStatus.success) {
             console.error(`Error making move: `, {
                 failure: moveStatus.failureReason,
-                data: moveStatus.additionalData
+                data: moveStatus.additionalData,
             });
             throw new Error(
                 "The selected move is invalid: " + moveStatus.failureReason

@@ -5,6 +5,7 @@
         "format": "npx prettier --write ."
     },
     "devDependencies": {
+        "@types/node": "^18.11.18",
         "prettier": "^2.8.1"
     }
 }

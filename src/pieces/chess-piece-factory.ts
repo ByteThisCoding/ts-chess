@@ -9,8 +9,11 @@ import { QueenPiece } from "./queen";
 import { RookPiece } from "./rook";
 
 export class ChessPieceFactory {
-
-    public static createPiece(pieceLetter: string, player: ChessPlayer, pos: ChessPosition): ChessPiece {
+    public static createPiece(
+        pieceLetter: string,
+        player: ChessPlayer,
+        pos: ChessPosition
+    ): ChessPiece {
         switch (pieceLetter.toLowerCase()) {
             case "p":
                 return new PawnPiece(player, pos);
@@ -28,5 +31,4 @@ export class ChessPieceFactory {
 
         throw new Error(`Invalid piece code: ${pieceLetter}`);
     }
-
 }

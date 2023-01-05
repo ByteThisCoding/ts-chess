@@ -130,100 +130,60 @@ export class QueenPiece extends ChessPiece {
             const existingPiece = boardState.getPieceAtPosition(newPos);
             if (existingPiece) {
                 if (existingPiece.player !== this.player) {
-                    moves.add(
-                        this.newMove(
-                            boardState,
-                            newPos
-                        )
-                    );
+                    moves.add(this.newMove(boardState, newPos));
                 }
 
                 break;
             } else {
-                moves.add(
-                    this.newMove(
-                        boardState,
-                        newPos
-                    )
-                );
+                moves.add(this.newMove(boardState, newPos));
             }
         }
 
         // add all to the left in col
         for (let i = this.getPosition().col - 1; i > 0; i--) {
             const newPos = ChessPosition.get(i, this.getPosition().row);
-            
+
             const existingPiece = boardState.getPieceAtPosition(newPos);
             if (existingPiece) {
                 if (existingPiece.player !== this.player) {
-                    moves.add(
-                        this.newMove(
-                            boardState,
-                            newPos
-                        )
-                    );
+                    moves.add(this.newMove(boardState, newPos));
                 }
 
                 break;
             } else {
-                moves.add(
-                    this.newMove(
-                        boardState,
-                        newPos
-                    )
-                );
+                moves.add(this.newMove(boardState, newPos));
             }
         }
 
         // add all above in row
         for (let i = this.getPosition().row + 1; i < 9; i++) {
             const newPos = ChessPosition.get(this.getPosition().col, i);
-            
+
             const existingPiece = boardState.getPieceAtPosition(newPos);
             if (existingPiece) {
                 if (existingPiece.player !== this.player) {
-                    moves.add(
-                        this.newMove(
-                            boardState,
-                            newPos
-                        )
-                    );
+                    moves.add(this.newMove(boardState, newPos));
                 }
 
                 break;
             } else {
-                moves.add(
-                    this.newMove(
-                        boardState,
-                        newPos
-                    )
-                );
+                moves.add(this.newMove(boardState, newPos));
             }
         }
 
         // add all below in row
         for (let i = this.getPosition().row - 1; i > 0; i--) {
             const newPos = ChessPosition.get(this.getPosition().col, i);
-            
+
             const existingPiece = boardState.getPieceAtPosition(newPos);
             if (existingPiece) {
                 if (existingPiece.player !== this.player) {
-                    moves.add(
-                        this.newMove(
-                            boardState,
-                            newPos
-                        )
-                    );
+                    moves.add(this.newMove(boardState, newPos));
                 }
 
                 break;
             } else {
-                moves.add(
-                    this.newMove(
-                        boardState,
-                        newPos
-                    )
-                );
+                moves.add(this.newMove(boardState, newPos));
             }
         }
 

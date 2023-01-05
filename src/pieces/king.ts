@@ -25,7 +25,7 @@ export class KingPiece extends ChessPiece {
     ): ChessPieceAvailableMoveSet {
         const moves = this.getNonCastleMovements(boardState);
         this.addCastleMovements(boardState, moves, 1);
-        
+
         return moves;
     }
 
@@ -52,6 +52,11 @@ export class KingPiece extends ChessPiece {
             return;
         }
 
+        // can't if player is in check
+        if (boardState.isGameInCheck()) {
+            return;
+        }
+
         // check rook on a1
         const firstRookPos = ChessPosition.get(1, row);
         const firstRook = boardState.getPieceAtPosition(firstRookPos);
@@ -63,9 +68,7 @@ export class KingPiece extends ChessPiece {
                 !boardState.hasPieceAtPosition(knightPos) &&
                 !boardState.hasPieceAtPosition(bishopPos)
             ) {
-                moves.add(
-                    this.newMove(boardState, firstRookPos, true)
-                );
+                moves.add(this.newMove(boardState, firstRookPos, true));
             }
         }
 
@@ -79,9 +82,7 @@ export class KingPiece extends ChessPiece {
                 !boardState.hasPieceAtPosition(knightPos) &&
                 !boardState.hasPieceAtPosition(bishopPos)
             ) {
-                moves.add(
-                    this.newMove(boardState, secondRookPos, true)
-                );
+                moves.add(this.newMove(boardState, secondRookPos, true));
             }
         }
     }
