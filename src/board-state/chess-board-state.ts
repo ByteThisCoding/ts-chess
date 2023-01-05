@@ -30,6 +30,9 @@ export class ChessBoardState {
     private isWhiteInCheckmate = false;
     private isStalemate = false;
 
+    // internal, used to prevent infinite recursion when evaluating checkmate
+    private _performCheckmateEvaluation = true;
+
     // store here so we don't have to search on each move
     private whiteKingPiece!: KingPiece;
     private blackKingPiece!: KingPiece;
@@ -204,11 +207,6 @@ export class ChessBoardState {
      */
     private updateCheckStalemateStatus(): void {
         // reset, update later if needed
-        if (this.lastMove!.player === ChessPlayer.white) {
-            this.isBlackInCheck = false;
-        } else {
-            this.isWhiteInCheck = false;
-        }
 
         // search through possible moves
         const lastPlayerPossibleMoves = this.getPossibleMovesForPlayer(
@@ -218,47 +216,65 @@ export class ChessBoardState {
             this.lastMove?.player === ChessPlayer.white
                 ? ChessPlayer.black
                 : ChessPlayer.white;
+
         const enemyPossibleMoves = this.getPossibleMovesForPlayer(enemy);
 
         // check if enemy's king's position is included
         const enemyKing = this.getPlayerKingPiece(enemy);
         const enemyKingPos = enemyKing.getPosition();
 
-        for (const move of lastPlayerPossibleMoves.getMoves()) {
-            if (move.toPosition === enemyKingPos) {
-                if (enemy === ChessPlayer.white) {
-                    this.isWhiteInCheck = true;
-                } else {
-                    this.isBlackInCheck = true;
+        let enemyInCheck = this.isPlayerInCheck(this.lastMove!.player);
+
+        if (!enemyInCheck) {
+            for (const move of lastPlayerPossibleMoves.getMoves()) {
+                if (move.toPosition === enemyKingPos) {
+                    enemyInCheck = true;
+                    break;
                 }
-                break;
             }
         }
 
         // if in check, see if it's a checkmate
-        if (this.isGameInCheck()) {
-            // assume true until we find counter example
-            let isCheckmate = true;
-            // check by iterating through possible enemy moves, then re-checking check status
-            for (const move of enemyPossibleMoves.getMoves()) {
-                const freshBoard = this.clone();
-                const freshMove = move.clone();
-                freshBoard.setPiecesFromMove(freshMove, "");
+        if (enemyInCheck) {
+            if (enemy === ChessPlayer.white) {
+                this.isWhiteInCheck = true;
+            } else {
+                this.isBlackInCheck = true;
+            }
 
-                // if no longer in mate, we've found a viable move
-                if (!freshBoard.isPlayerInCheck(this.lastMove!.player)) {
-                    isCheckmate = false;
-                    break;
+            // assume true until we find counter example
+            if (this._performCheckmateEvaluation) {
+                let isCheckmate = true;
+                // check by iterating through possible enemy moves, then re-checking check status
+                for (const move of enemyPossibleMoves.getMoves()) {
+                    const freshBoard = this.clone();
+                    freshBoard._performCheckmateEvaluation = false;
+                    const freshMove = move.clone();
+                    freshBoard.setPiecesFromMove(freshMove, "");
+
+                    // if no longer in mate, we've found a viable move
+                    if (!freshBoard.isPlayerInCheck(this.lastMove!.player)) {
+                        isCheckmate = false;
+                        break;
+                    }
+                }
+
+                if (enemy === ChessPlayer.white) {
+                    this.isWhiteInCheckmate = isCheckmate;
+                } else {
+                    this.isBlackInCheckmate = isCheckmate;
                 }
             }
-
-            if (this.isBlackInCheck) {
-                this.isBlackInCheckmate = isCheckmate;
-            } else {
-                this.isWhiteInCheckmate = isCheckmate;
-            }
         } else {
-            // if not in check, check if stalemate by seeing if enemy has any possible moves
+            if (enemy === ChessPlayer.white) {
+                this.isWhiteInCheck = false;
+                this.isWhiteInCheckmate = false;
+            } else {
+                this.isBlackInCheck = false;
+                this.isBlackInCheckmate = false;
+            }
+
+            // if not in check, check if stalemate by seeing if enemy has any possible moves 
             this.isStalemate = enemyPossibleMoves.getNumMoves() === 0;
         }
     }
@@ -317,21 +333,16 @@ export class ChessBoardState {
 
         board += "\n\n";
         board += `Last move: ${this.lastMoveNotation}\n`;
-        board += `White in check: ${
-            this.isWhiteInCheck
-        } | White in checkmate: ${
-            this.isWhiteInCheckmate
-        } | White King: ${this.whiteKingPiece.getPosition().toString()}\n`;
-        board += `Black in check: ${
-            this.isBlackInCheck
-        } | Black in checkmate: ${
-            this.isBlackInCheckmate
-        } | Black King: ${this.blackKingPiece.getPosition().toString()}\n`;
+        board += `White in check: ${this.isWhiteInCheck
+            } | White in checkmate: ${this.isWhiteInCheckmate
+            } | White King: ${this.whiteKingPiece.getPosition().toString()}\n`;
+        board += `Black in check: ${this.isBlackInCheck
+            } | Black in checkmate: ${this.isBlackInCheckmate
+            } | Black King: ${this.blackKingPiece.getPosition().toString()}\n`;
         board += `Stalemate: ${this.isStalemate}\n`;
         board += `Move Number: ${this.getMoveNumber()}\n`;
-        board += `Last Move By: ${
-            this.lastMove?.player
-        } -> ${this.lastMove?.toPosition.toString()}\n`;
+        board += `Last Move By: ${this.lastMove?.player
+            } -> ${this.lastMove?.toPosition.toString()}\n`;
 
         return board;
     }

@@ -18,7 +18,8 @@ RunGame();
 
 async function RunGame() {
     const game = new ChessGame();
-    loopNoAi(game);
+    await loopNoAi(game);
+    process.exit(0);
 }
 
 /**
