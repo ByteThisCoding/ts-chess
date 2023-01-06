@@ -1,6 +1,6 @@
 import { ChessBoardState } from "../board-state/chess-board-state";
 import { ChessPiece } from "./chess-piece";
-import { ChessPosition } from "../chess-position";
+import { ChessCell, ChessPosition } from "../position/chess-position";
 import { ChessPlayer } from "../enums";
 import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set";
 
@@ -12,8 +12,8 @@ export class RookPiece extends ChessPiece {
     letter: string = "R";
     pointsValue: number = 5;
 
-    constructor(public player: ChessPlayer, position: ChessPosition) {
-        super(position);
+    constructor(public player: ChessPlayer, position: ChessCell) {
+        super(position, 14);
     }
 
     protected doClone(): RookPiece {
@@ -24,10 +24,11 @@ export class RookPiece extends ChessPiece {
         boardState: ChessBoardState
     ): ChessPieceAvailableMoveSet {
         const moves = new ChessPieceAvailableMoveSet(this.player, boardState);
+        const [posCol, posRow] = ChessPosition.cellToColRow(this.getPosition());
 
         // add all to the right in col
-        for (let i = this.getPosition().col + 1; i < 9; i++) {
-            const newPos = ChessPosition.get(i, this.getPosition().row);
+        for (let i = posCol + 1; i < 9; i++) {
+            const newPos = ChessPosition.get(i, posRow);
 
             const existingPiece = boardState.getPieceAtPosition(newPos);
             if (existingPiece) {
@@ -42,8 +43,8 @@ export class RookPiece extends ChessPiece {
         }
 
         // add all to the left in col
-        for (let i = this.getPosition().col - 1; i > 0; i--) {
-            const newPos = ChessPosition.get(i, this.getPosition().row);
+        for (let i = posCol - 1; i > 0; i--) {
+            const newPos = ChessPosition.get(i, posRow);
 
             const existingPiece = boardState.getPieceAtPosition(newPos);
             if (existingPiece) {
@@ -58,8 +59,8 @@ export class RookPiece extends ChessPiece {
         }
 
         // add all above in row
-        for (let i = this.getPosition().row + 1; i < 9; i++) {
-            const newPos = ChessPosition.get(this.getPosition().col, i);
+        for (let i = posRow + 1; i < 9; i++) {
+            const newPos = ChessPosition.get(posCol, i);
 
             const existingPiece = boardState.getPieceAtPosition(newPos);
             if (existingPiece) {
@@ -74,8 +75,8 @@ export class RookPiece extends ChessPiece {
         }
 
         // add all below in row
-        for (let i = this.getPosition().row - 1; i > 0; i--) {
-            const newPos = ChessPosition.get(this.getPosition().col, i);
+        for (let i = posRow - 1; i > 0; i--) {
+            const newPos = ChessPosition.get(posCol, i);
 
             const existingPiece = boardState.getPieceAtPosition(newPos);
             if (existingPiece) {

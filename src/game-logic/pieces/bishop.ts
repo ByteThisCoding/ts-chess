@@ -1,6 +1,6 @@
 import { ChessBoardState } from "../board-state/chess-board-state";
 import { ChessPiece } from "./chess-piece";
-import { ChessPosition } from "../chess-position";
+import { ChessCell, ChessPosition } from "../position/chess-position";
 import { ChessPlayer } from "../enums";
 import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set";
 
@@ -12,8 +12,8 @@ export class BishopPiece extends ChessPiece {
     letter: string = "B";
     pointsValue: number = 3;
 
-    constructor(public player: ChessPlayer, position: ChessPosition) {
-        super(position);
+    constructor(public player: ChessPlayer, position: ChessCell) {
+        super(position, 14);
     }
 
     protected doClone(): BishopPiece {
@@ -26,15 +26,16 @@ export class BishopPiece extends ChessPiece {
         const moves = new ChessPieceAvailableMoveSet(this.player, boardState);
 
         // add for higher columns
-        for (let col = this.getPosition().col - 1; col > 0; col--) {
-            const rowOffset = this.getPosition().col - col;
+        const [posCol, posRow] = ChessPosition.cellToColRow(this.getPosition());
+        for (let col = posCol - 1; col > 0; col--) {
+            const rowOffset = posCol - col;
             const toPosition = ChessPosition.get(
                 col,
-                this.getPosition().row + rowOffset
+                posRow + rowOffset
             );
 
             // stop if out of bounds
-            if (this.getPosition().row + rowOffset > 8) {
+            if (posRow + rowOffset > 8) {
                 break;
             }
 
@@ -50,15 +51,15 @@ export class BishopPiece extends ChessPiece {
             }
         }
 
-        for (let col = this.getPosition().col - 1; col > 0; col--) {
-            const rowOffset = this.getPosition().col - col;
+        for (let col = posCol - 1; col > 0; col--) {
+            const rowOffset = posCol - col;
             const toPosition = ChessPosition.get(
                 col,
-                this.getPosition().row - rowOffset
+                posRow - rowOffset
             );
 
             // stop if out of bounds
-            if (this.getPosition().row - rowOffset < 1) {
+            if (posRow - rowOffset < 1) {
                 break;
             }
 
@@ -75,14 +76,14 @@ export class BishopPiece extends ChessPiece {
         }
 
         // add for lower columns
-        for (let col = this.getPosition().col + 1; col < 9; col++) {
-            const rowOffset = col - this.getPosition().col;
+        for (let col = posCol + 1; col < 9; col++) {
+            const rowOffset = col - posCol;
             const toPosition = ChessPosition.get(
                 col,
-                this.getPosition().row + rowOffset
+                posRow + rowOffset
             );
 
-            if (this.getPosition().row + rowOffset > 8) {
+            if (posRow + rowOffset > 8) {
                 break;
             }
 
@@ -98,14 +99,14 @@ export class BishopPiece extends ChessPiece {
             }
         }
 
-        for (let col = this.getPosition().col + 1; col < 9; col++) {
-            const rowOffset = col - this.getPosition().col;
+        for (let col = posCol + 1; col < 9; col++) {
+            const rowOffset = col - posCol;
             const toPosition = ChessPosition.get(
                 col,
-                this.getPosition().row - rowOffset
+                posRow - rowOffset
             );
 
-            if (this.getPosition().row - rowOffset < 1) {
+            if (posRow - rowOffset < 1) {
                 break;
             }
 

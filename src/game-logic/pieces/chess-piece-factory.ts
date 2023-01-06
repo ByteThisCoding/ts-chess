@@ -1,4 +1,4 @@
-import { ChessPosition } from "../chess-position";
+import { ChessCell, ChessPosition } from "../position/chess-position";
 import { ChessPlayer } from "../enums";
 import { BishopPiece } from "./bishop";
 import { ChessPiece } from "./chess-piece";
@@ -12,7 +12,7 @@ export class ChessPieceFactory {
     public static createPiece(
         pieceLetter: string,
         player: ChessPlayer,
-        pos: ChessPosition
+        pos: ChessCell
     ): ChessPiece {
         switch (pieceLetter.toLowerCase()) {
             case "p":

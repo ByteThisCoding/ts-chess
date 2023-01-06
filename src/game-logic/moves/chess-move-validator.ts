@@ -6,12 +6,14 @@ import {
 import { ChessBoardState } from "../board-state/chess-board-state";
 import { ChessPlayer } from "../enums";
 import { KingPiece } from "../pieces/king";
+import { ChessCell, ChessPosition } from "../position/chess-position";
+import { QueenPiece } from "../pieces/queen";
 
 /**
  * Utility responsible for checking if a move is valid
  */
 export class ChessMoveValidator {
-    
+
     public static isMoveValid(
         boardState: ChessBoardState,
         move: ChessBoardSingleMove
@@ -37,8 +39,11 @@ export class ChessMoveValidator {
                 false,
                 ChessBoardMoveValidationFailure.fromPositionMismatch,
                 {
+                    fromPos: ChessPosition.toString(fromPos),
                     piece: piece.toString(),
                     fromPiece: fromPiece?.toString(),
+                    board: boardState.toString(),
+                    move: move.toString()
                 }
             );
         }
@@ -68,15 +73,17 @@ export class ChessMoveValidator {
 
         // check if enemy's king's position is included
         // if the king was moved, use that, otherwise, use last recorded king position
-        let playerKing = boardState.getPlayerKingPiece(move.player);
+        let playerKingPos: ChessCell = -1;
+        
         if (move.pieceMoved instanceof KingPiece) {
-            playerKing = move.pieceMoved.clone() as KingPiece;
-            playerKing.setPosition(move.toPosition, -1);
+            playerKingPos = move.toPosition;
+        } else {
+            const playerKing = boardState.getPlayerKingPiece(move.player);
+            playerKingPos = playerKing.getPosition();
         }
 
-        const playerKingPos = playerKing.getPosition();
-
         for (const move of enemyPossibleMoves.getMoves()) {
+
             if (move.toPosition === playerKingPos) {
                 return new ChessBoardMoveValidationStatus(
                     false,

@@ -1,10 +1,10 @@
 import { ChessPiece } from "../pieces/chess-piece";
-import { ChessPosition } from "../chess-position";
+import { ChessCell, ChessPosition } from "../position/chess-position";
 import { ChessPlayer } from "../enums";
-import { ChessNotation } from "../notation/chess-notation-parser";
 
 /**
  * This represents a single player's move (not a grouping of white and black)
+ * This object is mutable but should not be mutated outside of the chess piece class
  */
 export class ChessBoardSingleMove {
     get notation(): string {
@@ -14,8 +14,8 @@ export class ChessBoardSingleMove {
     constructor(
         public player: ChessPlayer,
         public pieceMoved: ChessPiece,
-        public fromPosition: ChessPosition,
-        public toPosition: ChessPosition,
+        public fromPosition: ChessCell,
+        public toPosition: ChessCell,
         public isCastle: boolean = false,
         public isEnPassant: boolean = false,
         public isPromotion: boolean = false,
@@ -54,7 +54,7 @@ export class ChessBoardSingleMove {
     toString(): string {
         return `[${this.player}:${
             this.pieceMoved.letter
-        }:${this.fromPosition.toString()}:${this.toPosition.toString()}]`;
+        }:${ChessPosition.toString(this.fromPosition)}:${ChessPosition.toString(this.toPosition)}]`;
     }
 
     public static notationToMove(cmd: string): ChessBoardSingleMove {

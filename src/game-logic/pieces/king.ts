@@ -1,6 +1,6 @@
 import { ChessBoardState } from "../board-state/chess-board-state";
 import { ChessPiece } from "./chess-piece";
-import { ChessPosition } from "../chess-position";
+import { ChessCell, ChessPosition } from "../position/chess-position";
 import { ChessPlayer } from "../enums";
 import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set";
 
@@ -12,8 +12,8 @@ export class KingPiece extends ChessPiece {
     letter: string = "K";
     pointsValue: number = 0;
 
-    constructor(public player: ChessPlayer, position: ChessPosition) {
-        super(position);
+    constructor(public player: ChessPlayer, position: ChessCell) {
+        super(position, 10);
     }
 
     protected doClone(): KingPiece {
@@ -48,7 +48,7 @@ export class KingPiece extends ChessPiece {
         row: 1 | 8
     ): void {
         // invalid if the king has moved
-        if (this.hasPieceMoved()) {
+        if (this.getIsActivated()) {
             return;
         }
 
@@ -60,7 +60,7 @@ export class KingPiece extends ChessPiece {
         // check rook on a1
         const firstRookPos = ChessPosition.get(1, row);
         const firstRook = boardState.getPieceAtPosition(firstRookPos);
-        if (firstRook && !firstRook.hasPieceMoved()) {
+        if (firstRook && !firstRook.getIsActivated()) {
             // check if any pieces in the way
             const knightPos = ChessPosition.get(2, row);
             const bishopPos = ChessPosition.get(3, row);
@@ -74,7 +74,7 @@ export class KingPiece extends ChessPiece {
 
         const secondRookPos = ChessPosition.get(8, row);
         const secondRook = boardState.getPieceAtPosition(secondRookPos);
-        if (secondRook && !secondRook.hasPieceMoved()) {
+        if (secondRook && !secondRook.getIsActivated()) {
             // check if any pieces in the way
             const knightPos = ChessPosition.get(7, row);
             const bishopPos = ChessPosition.get(6, row);
@@ -97,25 +97,27 @@ export class KingPiece extends ChessPiece {
 
         // add for bishop like movements
         // add for higher columns
-        if (this.getPosition().col > 1) {
-            if (this.getPosition().row + 1 < 9) {
+        const [posCol, posRow] = ChessPosition.cellToColRow(this.getPosition());
+
+        if (posCol > 1) {
+            if (posRow + 1 < 9) {
                 moves.add(
                     this.newMove(
                         boardState,
                         ChessPosition.get(
-                            this.getPosition().col - 1,
-                            this.getPosition().row + 1
+                            posCol - 1,
+                            posRow + 1
                         )
                     )
                 );
             }
-            if (this.getPosition().row - 1 > 0) {
+            if (posRow - 1 > 0) {
                 moves.add(
                     this.newMove(
                         boardState,
                         ChessPosition.get(
-                            this.getPosition().col - 1,
-                            this.getPosition().row - 1
+                            posCol - 1,
+                            posRow - 1
                         )
                     )
                 );
@@ -123,25 +125,25 @@ export class KingPiece extends ChessPiece {
         }
 
         // add for lower columns
-        if (this.getPosition().col < 8) {
-            if (this.getPosition().row + 1 < 9) {
+        if (posCol < 8) {
+            if (posRow + 1 < 9) {
                 moves.add(
                     this.newMove(
                         boardState,
                         ChessPosition.get(
-                            this.getPosition().col + 1,
-                            this.getPosition().row + 1
+                            posCol + 1,
+                            posRow + 1
                         )
                     )
                 );
             }
-            if (this.getPosition().row - 1 > 0) {
+            if (posRow - 1 > 0) {
                 moves.add(
                     this.newMove(
                         boardState,
                         ChessPosition.get(
-                            this.getPosition().col + 1,
-                            this.getPosition().row - 1
+                            posCol + 1,
+                            posRow - 1
                         )
                     )
                 );
@@ -150,46 +152,46 @@ export class KingPiece extends ChessPiece {
 
         // add for rook like movements
         // add all in current col
-        if (this.getPosition().row > 1) {
+        if (posRow > 1) {
             moves.add(
                 this.newMove(
                     boardState,
                     ChessPosition.get(
-                        this.getPosition().col,
-                        this.getPosition().row - 1
+                        posCol,
+                        posRow - 1
                     )
                 )
             );
         }
-        if (this.getPosition().row < 8) {
+        if (posRow < 8) {
             moves.add(
                 this.newMove(
                     boardState,
                     ChessPosition.get(
-                        this.getPosition().col,
-                        this.getPosition().row + 1
+                        posCol,
+                        posRow + 1
                     )
                 )
             );
         }
-        if (this.getPosition().col > 1) {
+        if (posCol > 1) {
             moves.add(
                 this.newMove(
                     boardState,
                     ChessPosition.get(
-                        this.getPosition().col - 1,
-                        this.getPosition().row
+                        posCol - 1,
+                        posRow
                     )
                 )
             );
         }
-        if (this.getPosition().col < 8) {
+        if (posCol < 8) {
             moves.add(
                 this.newMove(
                     boardState,
                     ChessPosition.get(
-                        this.getPosition().col + 1,
-                        this.getPosition().row
+                        posCol + 1,
+                        posRow
                     )
                 )
             );

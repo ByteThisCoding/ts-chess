@@ -4,7 +4,7 @@
 
 import { ChessBoardSingleMove } from "./src/game-logic/moves/chess-board-move";
 import { ChessGame } from "./src/game-logic/chess-game";
-import { ChessPosition } from "./src/game-logic/chess-position";
+import { ChessPosition } from "./src/game-logic/position/chess-position";
 import { ChessPlayer } from "./src//game-logic/enums";
 
 const game = new ChessGame();
@@ -23,6 +23,8 @@ makeMove(
         false
     )
 );
+
+process.exit(0);
 
 makeMove(
     game,
@@ -494,4 +496,7 @@ function makeMove(game: ChessGame, move: ChessBoardSingleMove): void {
     game.makeMove(move);
     console.log(game.getBoardStateHistory().getCurrentBoardState().toString());
     console.log("___________________________");
+    console.log("Reverse:");
+    //@ts-ignore
+    console.log(game.getBoardStateHistory().getCurrentBoardState().boardStats.lastMoveReverseUpdates)
 }

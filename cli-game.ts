@@ -22,6 +22,9 @@ async function RunGame() {
     //await loopNoAi(game);
     //await loopOneAi(game);
     await loopTwoAis(game);
+
+    console.log("Moves:", game.getBoardStateHistory().getListOfMovesNotation());
+
     process.exit(0);
 }
 
@@ -102,6 +105,8 @@ async function loopOneAi(game: ChessGame) {
 }
 
 async function loopTwoAis(game: ChessGame) {
+    console.log("Two AI players game has started");
+
     const aiPlayerWhite = new ChessMinimaxAiPlayer(new ChessAiHeuristic());
     const aiPlayerBlack = new ChessMinimaxAiPlayer(new ChessAiHeuristic());
 
@@ -133,6 +138,8 @@ async function loopTwoAis(game: ChessGame) {
                 );
                 console.log("________________________");
             }
+
+            await Promise.resolve();
         } catch (err) {
             console.log(`There was a problem with that move.`, err);
         }

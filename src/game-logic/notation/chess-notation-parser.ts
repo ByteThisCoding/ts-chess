@@ -1,5 +1,5 @@
 import { ChessBoardState } from "../board-state/chess-board-state";
-import { ChessPosition } from "../chess-position";
+import { ChessCell, ChessPosition } from "../position/chess-position";
 import { ChessPlayer } from "../enums";
 import { ChessBoardSingleMove } from "../moves/chess-board-move";
 import { ChessPiece } from "../pieces/chess-piece";
@@ -53,8 +53,8 @@ export class ChessNotation {
         }
 
         let pieceLetter = "";
-        let fromPos: ChessPosition;
-        let toPos: ChessPosition;
+        let fromPos: ChessCell;
+        let toPos: ChessCell;
 
         let piece: ChessPiece;
 
@@ -143,6 +143,8 @@ export class ChessNotation {
         }
 
         const toPiece = boardState.getPieceAtPosition(toPos);
+        const [fromPosCol, fromPosRow] = ChessPosition.cellToColRow(fromPos);
+        const [toPosCol, toPosRow] = ChessPosition.cellToColRow(toPos);
 
         // special case: en passant
         let enPassant = false;
@@ -150,7 +152,7 @@ export class ChessNotation {
         if (
             piece instanceof PawnPiece &&
             !toPiece &&
-            toPos.col !== fromPos.col
+            toPosCol !== fromPosCol
         ) {
             enPassant = true;
         }
@@ -278,7 +280,8 @@ export class ChessNotation {
         }
 
         // check which pawn is making this move
-        const prevPos = ChessPosition.get(pos.col, pos.row - inc);
+        const [posCol, posRow] = ChessPosition.cellToColRow(pos);
+        const prevPos = ChessPosition.get(posCol, posRow - inc);
         const prevPosPiece = boardState.getPieceAtPosition(prevPos);
 
         if (prevPosPiece) {
@@ -306,13 +309,13 @@ export class ChessNotation {
                 );
             }
         } else if (
-            (movePlayer === ChessPlayer.white && pos.row === 4) ||
-            (movePlayer === ChessPlayer.black && pos.row === 5)
+            (movePlayer === ChessPlayer.white && posRow === 4) ||
+            (movePlayer === ChessPlayer.black && posRow === 5)
         ) {
             // see if this is a double move from start
             // check middle row
             const midRow = movePlayer === ChessPlayer.white ? 2 : 7;
-            const midPos = ChessPosition.get(pos.col, midRow);
+            const midPos = ChessPosition.get(posCol, midRow);
             const midPosPiece = boardState.getPieceAtPosition(midPos);
             if (midPosPiece) {
                 if (!(midPosPiece instanceof PawnPiece)) {
@@ -371,10 +374,11 @@ export class ChessNotation {
         move: ChessBoardSingleMove
     ): string {
         const movePiece = move.pieceMoved;
+        const [col, row] = ChessPosition.cellToColRow(move.toPosition);
 
         // special case, castle
         if (move.isCastle) {
-            return move.toPosition.col === 1 ? "O-O-O" : "O-O";
+            return col === 1 ? "O-O-O" : "O-O";
         }
 
         const isCapture =
@@ -393,7 +397,7 @@ export class ChessNotation {
             piece: movePiece.letter,
             fromPosition: "", // if piece's position is needed to disambiguate
             captures: isCapture ? "x" : "",
-            toPosition: move.toPosition.toString(),
+            toPosition: ChessPosition.toString(move.toPosition),
             promotion: "", //if a pawn is promoted, letter goes here
             gameState, //+, #
         };
@@ -408,7 +412,7 @@ export class ChessNotation {
             }
 
             if (isCapture) {
-                notationParts.fromPosition = move.fromPosition.toString();
+                notationParts.fromPosition = ChessPosition.toString(move.fromPosition);
             }
         }
 
@@ -427,7 +431,7 @@ export class ChessNotation {
             }
         }
         if (secondFound) {
-            notationParts.fromPosition = move.fromPosition.toString();
+            notationParts.fromPosition = ChessPosition.toString(move.fromPosition);
         }
 
         return `${notationParts.piece}${notationParts.fromPosition}${notationParts.captures}${notationParts.toPosition}${notationParts.promotion}${notationParts.gameState}`;

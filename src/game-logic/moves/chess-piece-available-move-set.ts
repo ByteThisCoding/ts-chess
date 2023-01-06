@@ -1,5 +1,5 @@
 import { ChessBoardState } from "../board-state/chess-board-state";
-import { ChessPosition } from "../chess-position";
+import { ChessPosition } from "../position/chess-position";
 import { ChessPlayer } from "../enums";
 import { ChessPiece } from "../pieces/chess-piece";
 import { ChessBoardSingleMove } from "./chess-board-move";
@@ -9,11 +9,16 @@ import { ChessBoardSingleMove } from "./chess-board-move";
  */
 export class ChessPieceAvailableMoveSet {
     private availableMoves = new Map<ChessPosition, ChessBoardSingleMove[]>();
+    private numMoves = 0;
 
     constructor(
         private player: ChessPlayer,
         private boardState: ChessBoardState
     ) {}
+
+    getNumMoves(): number {
+        return this.numMoves;
+    }
 
     /**
      * Add a potential move, wrapping move if it's a chess position
@@ -39,6 +44,7 @@ export class ChessPieceAvailableMoveSet {
         }
 
         this.availableMoves.get(move.toPosition)!.push(move);
+        this.numMoves ++;
     }
 
     /**
@@ -55,6 +61,7 @@ export class ChessPieceAvailableMoveSet {
             return;
         }
 
+        this.numMoves --;
         moves.splice(moveIndex, 1);
         if (moves.length === 0) {
             this.availableMoves.delete(move!.toPosition);
@@ -93,7 +100,7 @@ export class ChessPieceAvailableMoveSet {
     }
 
     hasMoves(): boolean {
-        return this.availableMoves.size > 0;
+        return this.numMoves > 0;
     }
 
     /**

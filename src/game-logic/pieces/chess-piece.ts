@@ -1,5 +1,5 @@
 import { ChessBoardState } from "../board-state/chess-board-state";
-import { ChessPosition } from "../chess-position";
+import { ChessCell, ChessPosition } from "../position/chess-position";
 import { ChessPlayer } from "../enums";
 import { ChessBoardSingleMove } from "../moves/chess-board-move";
 import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set";
@@ -13,19 +13,28 @@ export abstract class ChessPiece {
     abstract player: ChessPlayer;
     abstract pointsValue: number;
 
-    private startPosition: ChessPosition;
-    private prevPosition: ChessPosition | null = null;
+    // TODO: is bug with isActivated when looking ahead, doesn't unset
+    private isActivated = false;
     private lastPositionChangeTurn: number = 0;
+    private startPosition: ChessCell;
+    private prevPosition: ChessCell | null = null;
 
-    constructor(private position: ChessPosition) {
+    constructor(
+        private position: ChessCell,
+        private maxNumPossibleMoves: number
+    ) {
         this.startPosition = position;
     }
 
-    getPosition(): ChessPosition {
+    getPosition(): ChessCell {
         return this.position;
     }
 
-    getPrevPosition(): ChessPosition | null {
+    getIsActivated(): boolean {
+        return this.isActivated;
+    }
+
+    getPrevPosition(): ChessCell | null {
         return this.prevPosition;
     }
 
@@ -33,14 +42,11 @@ export abstract class ChessPiece {
         return this.lastPositionChangeTurn;
     }
 
-    setPosition(pos: ChessPosition, turnNumber: number): void {
+    setPosition(pos: ChessCell, turnNumber: number): void {
         this.prevPosition = this.position;
         this.position = pos;
         this.lastPositionChangeTurn = turnNumber;
-    }
-
-    hasPieceMoved(): boolean {
-        return this.startPosition !== this.position;
+        this.isActivated = true;
     }
 
     /**
@@ -59,11 +65,14 @@ export abstract class ChessPiece {
 
     clone(): ChessPiece {
         const cloned = this.doClone();
+
+        cloned.player = this.player;
         cloned.position = this.position;
         cloned.startPosition = this.startPosition;
         cloned.prevPosition = this.prevPosition;
         cloned.lastPositionChangeTurn = this.lastPositionChangeTurn;
-        cloned.player = this.player;
+        cloned.isActivated = this.isActivated;
+
         return cloned;
     }
 
@@ -76,7 +85,7 @@ export abstract class ChessPiece {
     }
 
     toString(): string {
-        return `(${this.player} ${this.name} : ${this.position.toString()})`;
+        return `(${this.player} ${this.name} : ${ChessPosition.toString(this.position)})`;
     }
 
     /**
@@ -84,16 +93,14 @@ export abstract class ChessPiece {
      */
     protected newMove(
         boardState: ChessBoardState,
-        toPosition: ChessPosition,
+        toPosition: ChessCell,
         isCastle: boolean = false,
         isEnPassant: boolean = false,
         isPromotion: boolean = false,
         promotionLetter: string = ""
     ): ChessBoardSingleMove | null {
         return new ChessBoardSingleMove(
-            boardState.getLastMove()?.player === ChessPlayer.white
-                ? ChessPlayer.black
-                : ChessPlayer.white,
+            this.player,
             this,
             this.position,
             toPosition,
