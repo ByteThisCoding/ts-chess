@@ -29,13 +29,14 @@ export class ChessBoardStateHistory {
      * Register that a move has taken place
      */
     registerMove(move: ChessBoardSingleMove): void {
-        this.boardHistory.push(this.latestBoardState.clone());
+        this.boardHistory.push(this.getBoardState().clone());
         this.movesHistory.push(move);
         const notation = ChessNotation.convertMoveToNotation(
-            this.getCurrentBoardState(),
+            this.getBoardState(),
             move
         );
-        this.getCurrentBoardState().setPiecesFromMove(move, notation);
+
+        this.getBoardState().setPiecesFromMove(move, notation);
     }
 
     /**
@@ -51,7 +52,7 @@ export class ChessBoardStateHistory {
         return lastMove;
     }
 
-    getCurrentBoardState(): ChessBoardState {
+    getBoardState(): ChessBoardState {
         return this.latestBoardState;
     }
 }

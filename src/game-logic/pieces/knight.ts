@@ -81,7 +81,7 @@ export class KnightPiece extends ChessPiece {
         // <-<->->
         //    ^
         //    B
-        if (posCol < 7 && posRow < 7) {
+        if (posCol < 7 && posRow < 8) {
             moves.add(
                 this.newMove(
                     boardState,
@@ -105,7 +105,7 @@ export class KnightPiece extends ChessPiece {
             );
         }
 
-        if (posCol > 2 && posRow < 7) {
+        if (posCol > 2 && posRow < 8) {
             moves.add(
                 this.newMove(
                     boardState,

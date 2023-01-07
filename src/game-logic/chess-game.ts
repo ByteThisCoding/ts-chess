@@ -2,6 +2,7 @@ import { ChessBoardSingleMove } from "./moves/chess-board-move";
 import { ChessBoardStateHistory } from "./board-state/chess-board-state-history";
 import { ChessMoveValidator } from "./moves/chess-move-validator";
 import { ChessPlayer } from "./enums";
+import { ChessBoardState } from "./board-state/chess-board-state";
 
 export class ChessGame {
     private boardStateHistory = new ChessBoardStateHistory();
@@ -11,14 +12,18 @@ export class ChessGame {
         return this.currentPlayer;
     }
 
+    getCurrentBoardState(): ChessBoardState {
+        return this.getBoardStateHistory().getBoardState();
+    }
+
     getBoardStateHistory(): ChessBoardStateHistory {
         return this.boardStateHistory;
     }
 
     isGameOver(): boolean {
         return (
-            this.boardStateHistory.getCurrentBoardState().isGameInCheckmate() ||
-            this.boardStateHistory.getCurrentBoardState().isGameInStalemate()
+            this.boardStateHistory.getBoardState().isGameInCheckmate() ||
+            this.boardStateHistory.getBoardState().isGameInStalemate()
         );
     }
 
@@ -33,7 +38,7 @@ export class ChessGame {
 
         // validate
         const moveStatus = ChessMoveValidator.isMoveValid(
-            this.boardStateHistory.getCurrentBoardState(),
+            this.boardStateHistory.getBoardState(),
             move
         );
         if (!moveStatus.success) {

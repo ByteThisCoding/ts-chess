@@ -4,10 +4,7 @@ import {
     ChessBoardMoveValidationStatus,
 } from "./chess-board-move-validation-status";
 import { ChessBoardState } from "../board-state/chess-board-state";
-import { ChessPlayer } from "../enums";
-import { KingPiece } from "../pieces/king";
-import { ChessCell, ChessPosition } from "../position/chess-position";
-import { QueenPiece } from "../pieces/queen";
+import { ChessPosition } from "../position/chess-position";
 
 /**
  * Utility responsible for checking if a move is valid
@@ -57,39 +54,20 @@ export class ChessMoveValidator {
                 false,
                 ChessBoardMoveValidationFailure.pieceCannotAccessPosition,
                 {
+                    move: move.toString(),
                     availableMoves: [...validMoves.getMoves()].map((mv) =>
-                        mv.toPosition.toString()
+                        ChessPosition.toString(mv.toPosition)
                     ),
                 }
             );
         }
 
-        // validate player won't put themselves in illegal check
-        const enemy =
-            move.player === ChessPlayer.white
-                ? ChessPlayer.black
-                : ChessPlayer.white;
-        const enemyPossibleMoves = boardState.getPossibleMovesForPlayer(enemy);
-
-        // check if enemy's king's position is included
-        // if the king was moved, use that, otherwise, use last recorded king position
-        let playerKingPos: ChessCell = -1;
-        
-        if (move.pieceMoved instanceof KingPiece) {
-            playerKingPos = move.toPosition;
-        } else {
-            const playerKing = boardState.getPlayerKingPiece(move.player);
-            playerKingPos = playerKing.getPosition();
-        }
-
-        for (const move of enemyPossibleMoves.getMoves()) {
-
-            if (move.toPosition === playerKingPos) {
-                return new ChessBoardMoveValidationStatus(
-                    false,
-                    ChessBoardMoveValidationFailure.invalidCheck
-                );
-            }
+        // tentatively make move to detect if player would be in invalid check
+        if (boardState.doesMovePutPlayerInIllegalCheck(move)) {
+            return new ChessBoardMoveValidationStatus(
+                false,
+                ChessBoardMoveValidationFailure.invalidCheck
+            );
         }
 
         return new ChessBoardMoveValidationStatus(true, null);

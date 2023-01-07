@@ -42,6 +42,7 @@ export class PawnPiece extends ChessPiece {
         const moves = new ChessPieceAvailableMoveSet(this.player, boardState);
         const [posCol, posRow] = ChessPosition.cellToColRow(this.getPosition());
 
+        // see if the pawn can move forward
         if (
             (inc === -1 && posRow > 1) ||
             (inc === 1 && posRow < 8)
@@ -51,6 +52,7 @@ export class PawnPiece extends ChessPiece {
                 posRow + inc
             );
 
+            // if no position infront, it can move forward
             if (!boardState.hasPieceAtPosition(nextPos)) {
                 // if this can be promoted, do it
                 if (
@@ -70,6 +72,7 @@ export class PawnPiece extends ChessPiece {
                         );
                     });
                 } else {
+                    // otherwise, add normal move
                     moves.add(this.newMove(boardState, nextPos));
                 }
             }

@@ -15,7 +15,7 @@ makeMove(
         ChessPlayer.white,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(5, 2))!,
         ChessPosition.get(5, 2),
         ChessPosition.get(5, 4),
@@ -32,7 +32,7 @@ makeMove(
         ChessPlayer.black,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(5, 7))!,
         ChessPosition.get(5, 7),
         ChessPosition.get(5, 5),
@@ -47,7 +47,7 @@ makeMove(
         ChessPlayer.white,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(7, 1))!,
         ChessPosition.get(7, 1),
         ChessPosition.get(6, 3),
@@ -62,7 +62,7 @@ makeMove(
         ChessPlayer.black,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(4, 7))!,
         ChessPosition.get(4, 7),
         ChessPosition.get(4, 6),
@@ -77,7 +77,7 @@ makeMove(
         ChessPlayer.white,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(6, 1))!,
         ChessPosition.get(6, 1),
         ChessPosition.get(3, 4),
@@ -92,7 +92,7 @@ makeMove(
         ChessPlayer.black,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(2, 8))!,
         ChessPosition.get(2, 8),
         ChessPosition.get(3, 6),
@@ -107,7 +107,7 @@ makeMove(
         ChessPlayer.white,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(6, 3))!,
         ChessPosition.get(6, 3),
         ChessPosition.get(5, 5),
@@ -122,7 +122,7 @@ makeMove(
         ChessPlayer.black,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(4, 6))!,
         ChessPosition.get(4, 6),
         ChessPosition.get(5, 5),
@@ -138,7 +138,7 @@ makeMove(
         ChessPlayer.white,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(5, 1))!,
         ChessPosition.get(5, 1),
         ChessPosition.get(8, 1),
@@ -153,7 +153,7 @@ makeMove(
         ChessPlayer.black,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(1, 8))!,
         ChessPosition.get(1, 8),
         ChessPosition.get(2, 8),
@@ -168,7 +168,7 @@ makeMove(
         ChessPlayer.white,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(7, 2))!,
         ChessPosition.get(7, 2),
         ChessPosition.get(7, 4),
@@ -183,7 +183,7 @@ makeMove(
         ChessPlayer.black,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(1, 7))!,
         ChessPosition.get(1, 7),
         ChessPosition.get(1, 5),
@@ -198,7 +198,7 @@ makeMove(
         ChessPlayer.white,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(7, 4))!,
         ChessPosition.get(7, 4),
         ChessPosition.get(7, 5),
@@ -213,7 +213,7 @@ makeMove(
         ChessPlayer.black,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(6, 7))!,
         ChessPosition.get(6, 7),
         ChessPosition.get(6, 5),
@@ -229,7 +229,7 @@ makeMove(
         ChessPlayer.white,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(7, 5))!,
         ChessPosition.get(7, 5),
         ChessPosition.get(6, 6),
@@ -244,7 +244,7 @@ makeMove(
         ChessPlayer.black,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(4, 8))!,
         ChessPosition.get(4, 8),
         ChessPosition.get(6, 6)
@@ -257,7 +257,7 @@ makeMove(
         ChessPlayer.white,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(2, 1))!,
         ChessPosition.get(2, 1),
         ChessPosition.get(1, 3)
@@ -270,7 +270,7 @@ makeMove(
         ChessPlayer.black,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(6, 6))!,
         ChessPosition.get(6, 6),
         ChessPosition.get(5, 7)
@@ -283,7 +283,7 @@ makeMove(
         ChessPlayer.white,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(2, 2))!,
         ChessPosition.get(2, 2),
         ChessPosition.get(2, 3)
@@ -297,7 +297,7 @@ makeMove(
         ChessPlayer.black,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(5, 7))!,
         ChessPosition.get(5, 7),
         ChessPosition.get(7, 5)
@@ -327,7 +327,7 @@ makeMove(
         ChessPlayer.white,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(7, 1))!,
         ChessPosition.get(7, 1),
         ChessPosition.get(8, 1),
@@ -342,7 +342,7 @@ makeMove(
         ChessPlayer.black,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(8, 7))!,
         ChessPosition.get(8, 7),
         ChessPosition.get(8, 5),
@@ -357,7 +357,7 @@ makeMove(
         ChessPlayer.white,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(1, 1))!,
         ChessPosition.get(1, 1),
         ChessPosition.get(2, 1),
@@ -372,7 +372,7 @@ makeMove(
         ChessPlayer.black,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(1, 5))!,
         ChessPosition.get(1, 5),
         ChessPosition.get(1, 4),
@@ -387,7 +387,7 @@ makeMove(
         ChessPlayer.white,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(4, 2))!,
         ChessPosition.get(4, 2),
         ChessPosition.get(4, 3),
@@ -402,7 +402,7 @@ makeMove(
         ChessPlayer.black,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(1, 4))!,
         ChessPosition.get(1, 4),
         ChessPosition.get(2, 3),
@@ -417,7 +417,7 @@ makeMove(
         ChessPlayer.white,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(3, 4))!,
         ChessPosition.get(3, 4),
         ChessPosition.get(4, 5),
@@ -432,7 +432,7 @@ makeMove(
         ChessPlayer.black,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(2, 3))!,
         ChessPosition.get(2, 3),
         ChessPosition.get(3, 2),
@@ -447,7 +447,7 @@ makeMove(
         ChessPlayer.white,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(3, 1))!,
         ChessPosition.get(3, 1),
         ChessPosition.get(2, 2),
@@ -481,7 +481,7 @@ makeMove(
         ChessPlayer.black,
         game
             .getBoardStateHistory()
-            .getCurrentBoardState()
+            .getBoardState()
             .getPieceAtPosition(ChessPosition.get(3, 2))!,
         ChessPosition.get(3, 2),
         ChessPosition.get(4, 1),
@@ -494,9 +494,9 @@ makeMove(
 
 function makeMove(game: ChessGame, move: ChessBoardSingleMove): void {
     game.makeMove(move);
-    console.log(game.getBoardStateHistory().getCurrentBoardState().toString());
+    console.log(game.getBoardStateHistory().getBoardState().toStringDetailed());
     console.log("___________________________");
     console.log("Reverse:");
     //@ts-ignore
-    console.log(game.getBoardStateHistory().getCurrentBoardState().boardStats.lastMoveReverseUpdates)
+    console.log(game.getBoardStateHistory().getBoardState().boardStats.lastMoveReverseUpdates)
 }
