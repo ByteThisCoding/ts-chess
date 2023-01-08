@@ -5,6 +5,7 @@
 
 /dist
 /coverage
+/build
 
 # User-specific files
 *.rsuser

@@ -8,9 +8,13 @@ import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-
  * Encapsulation of a knight
  */
 export class KnightPiece extends ChessPiece {
+    static letter = "N";
+    letter: string = KnightPiece.letter;
+
     name: string = "Knight";
-    letter: string = "N";
-    pointsValue: number = 3;
+
+    static pointsValue = 3;
+    pointsValue: number = KnightPiece.pointsValue;
 
     constructor(public player: ChessPlayer, position: ChessCell) {
         super(position, 8);
@@ -34,10 +38,7 @@ export class KnightPiece extends ChessPiece {
             moves.add(
                 this.newMove(
                     boardState,
-                    ChessPosition.get(
-                        posCol + 1,
-                        posRow + 2
-                    )
+                    ChessPosition.get(posCol + 1, posRow + 2)
                 )
             );
         }
@@ -46,10 +47,7 @@ export class KnightPiece extends ChessPiece {
             moves.add(
                 this.newMove(
                     boardState,
-                    ChessPosition.get(
-                        posCol - 1,
-                        posRow + 2
-                    )
+                    ChessPosition.get(posCol - 1, posRow + 2)
                 )
             );
         }
@@ -58,10 +56,7 @@ export class KnightPiece extends ChessPiece {
             moves.add(
                 this.newMove(
                     boardState,
-                    ChessPosition.get(
-                        posCol + 1,
-                        posRow - 2
-                    )
+                    ChessPosition.get(posCol + 1, posRow - 2)
                 )
             );
         }
@@ -70,10 +65,7 @@ export class KnightPiece extends ChessPiece {
             moves.add(
                 this.newMove(
                     boardState,
-                    ChessPosition.get(
-                        posCol - 1,
-                        posRow - 2
-                    )
+                    ChessPosition.get(posCol - 1, posRow - 2)
                 )
             );
         }
@@ -85,10 +77,7 @@ export class KnightPiece extends ChessPiece {
             moves.add(
                 this.newMove(
                     boardState,
-                    ChessPosition.get(
-                        posCol + 2,
-                        posRow + 1
-                    )
+                    ChessPosition.get(posCol + 2, posRow + 1)
                 )
             );
         }
@@ -97,10 +86,7 @@ export class KnightPiece extends ChessPiece {
             moves.add(
                 this.newMove(
                     boardState,
-                    ChessPosition.get(
-                        posCol + 2,
-                        posRow - 1
-                    )
+                    ChessPosition.get(posCol + 2, posRow - 1)
                 )
             );
         }
@@ -109,10 +95,7 @@ export class KnightPiece extends ChessPiece {
             moves.add(
                 this.newMove(
                     boardState,
-                    ChessPosition.get(
-                        posCol - 2,
-                        posRow + 1
-                    )
+                    ChessPosition.get(posCol - 2, posRow + 1)
                 )
             );
         }
@@ -121,10 +104,7 @@ export class KnightPiece extends ChessPiece {
             moves.add(
                 this.newMove(
                     boardState,
-                    ChessPosition.get(
-                        posCol - 2,
-                        posRow - 1
-                    )
+                    ChessPosition.get(posCol - 2, posRow - 1)
                 )
             );
         }

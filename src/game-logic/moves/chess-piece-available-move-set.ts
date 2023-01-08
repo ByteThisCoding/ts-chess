@@ -1,5 +1,5 @@
 import { ChessBoardState } from "../board-state/chess-board-state";
-import { ChessPosition } from "../position/chess-position";
+import { ChessCell, ChessPosition } from "../position/chess-position";
 import { ChessPlayer } from "../enums";
 import { ChessPiece } from "../pieces/chess-piece";
 import { ChessBoardSingleMove } from "./chess-board-move";
@@ -8,7 +8,7 @@ import { ChessBoardSingleMove } from "./chess-board-move";
  * Encapsulation of a set of possible moves
  */
 export class ChessPieceAvailableMoveSet {
-    private availableMoves = new Map<ChessPosition, ChessBoardSingleMove[]>();
+    private availableMoves = new Map<ChessCell, ChessBoardSingleMove[]>();
     private numMoves = 0;
 
     constructor(
@@ -44,7 +44,7 @@ export class ChessPieceAvailableMoveSet {
         }
 
         this.availableMoves.get(move.toPosition)!.push(move);
-        this.numMoves ++;
+        this.numMoves++;
     }
 
     /**
@@ -61,7 +61,7 @@ export class ChessPieceAvailableMoveSet {
             return;
         }
 
-        this.numMoves --;
+        this.numMoves--;
         moves.splice(moveIndex, 1);
         if (moves.length === 0) {
             this.availableMoves.delete(move!.toPosition);
@@ -106,14 +106,14 @@ export class ChessPieceAvailableMoveSet {
     /**
      * Check if we have an available move to a certain position
      */
-    hasMoveToPosition(pos: ChessPosition): boolean {
+    hasMoveToPosition(pos: ChessCell): boolean {
         return this.getMovesToPosition(pos).length > 0;
     }
 
     /**
      * Get a move to a position if it exists, or null if none exists
      */
-    getMovesToPosition(pos: ChessPosition): ChessBoardSingleMove[] {
+    getMovesToPosition(pos: ChessCell): ChessBoardSingleMove[] {
         const moves = this.availableMoves.get(pos);
         return moves || [];
     }

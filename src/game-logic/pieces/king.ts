@@ -9,8 +9,12 @@ import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-
  */
 export class KingPiece extends ChessPiece {
     name: string = "King";
-    letter: string = "K";
-    pointsValue: number = 0;
+
+    static letter = "K";
+    letter: string = KingPiece.letter;
+
+    static pointsValue = 50;
+    pointsValue: number = KingPiece.pointsValue;
 
     constructor(public player: ChessPlayer, position: ChessCell) {
         super(position, 10);
@@ -104,10 +108,7 @@ export class KingPiece extends ChessPiece {
                 moves.add(
                     this.newMove(
                         boardState,
-                        ChessPosition.get(
-                            posCol - 1,
-                            posRow + 1
-                        )
+                        ChessPosition.get(posCol - 1, posRow + 1)
                     )
                 );
             }
@@ -115,10 +116,7 @@ export class KingPiece extends ChessPiece {
                 moves.add(
                     this.newMove(
                         boardState,
-                        ChessPosition.get(
-                            posCol - 1,
-                            posRow - 1
-                        )
+                        ChessPosition.get(posCol - 1, posRow - 1)
                     )
                 );
             }
@@ -130,10 +128,7 @@ export class KingPiece extends ChessPiece {
                 moves.add(
                     this.newMove(
                         boardState,
-                        ChessPosition.get(
-                            posCol + 1,
-                            posRow + 1
-                        )
+                        ChessPosition.get(posCol + 1, posRow + 1)
                     )
                 );
             }
@@ -141,10 +136,7 @@ export class KingPiece extends ChessPiece {
                 moves.add(
                     this.newMove(
                         boardState,
-                        ChessPosition.get(
-                            posCol + 1,
-                            posRow - 1
-                        )
+                        ChessPosition.get(posCol + 1, posRow - 1)
                     )
                 );
             }
@@ -154,46 +146,22 @@ export class KingPiece extends ChessPiece {
         // add all in current col
         if (posRow > 1) {
             moves.add(
-                this.newMove(
-                    boardState,
-                    ChessPosition.get(
-                        posCol,
-                        posRow - 1
-                    )
-                )
+                this.newMove(boardState, ChessPosition.get(posCol, posRow - 1))
             );
         }
         if (posRow < 8) {
             moves.add(
-                this.newMove(
-                    boardState,
-                    ChessPosition.get(
-                        posCol,
-                        posRow + 1
-                    )
-                )
+                this.newMove(boardState, ChessPosition.get(posCol, posRow + 1))
             );
         }
         if (posCol > 1) {
             moves.add(
-                this.newMove(
-                    boardState,
-                    ChessPosition.get(
-                        posCol - 1,
-                        posRow
-                    )
-                )
+                this.newMove(boardState, ChessPosition.get(posCol - 1, posRow))
             );
         }
         if (posCol < 8) {
             moves.add(
-                this.newMove(
-                    boardState,
-                    ChessPosition.get(
-                        posCol + 1,
-                        posRow
-                    )
-                )
+                this.newMove(boardState, ChessPosition.get(posCol + 1, posRow))
             );
         }
 

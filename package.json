@@ -1,11 +1,15 @@
 {
     "name": "@byte-this/ts-chess",
     "version": "1.0.0",
+    "type:": "module",
     "scripts": {
-        "format": "npx prettier --write ."
+        "format": "npx prettier --write .",
+        "run": "ts-node cli-game.ts"
     },
     "devDependencies": {
         "@types/node": "^18.11.18",
-        "prettier": "^2.8.1"
+        "prettier": "^2.8.1",
+        "ts-node-dev": "^2.0.0",
+        "tsconfig-paths": "^4.1.2"
     }
 }

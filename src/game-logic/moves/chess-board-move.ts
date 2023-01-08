@@ -54,7 +54,9 @@ export class ChessBoardSingleMove {
     toString(): string {
         return `[${this.player}:${
             this.pieceMoved.letter
-        }:${ChessPosition.toString(this.fromPosition)}:${ChessPosition.toString(this.toPosition)}]`;
+        }:${ChessPosition.toString(this.fromPosition)}:${ChessPosition.toString(
+            this.toPosition
+        )}]`;
     }
 
     public static notationToMove(cmd: string): ChessBoardSingleMove {

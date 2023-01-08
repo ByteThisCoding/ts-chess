@@ -6,6 +6,7 @@ import { ChessGame } from "./src/game-logic/chess-game";
 import { ChessPlayer } from "./src/game-logic/enums";
 import { ChessBoardSingleMove } from "./src/game-logic/moves/chess-board-move";
 import { ChessNotation } from "./src/game-logic/notation/chess-notation-parser";
+import { ChessPosition } from "./src/game-logic/position/chess-position";
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -25,7 +26,14 @@ async function RunGame() {
 
     console.log(printGameCheckmatePieces(game.getCurrentBoardState()));
 
-    console.log("Moves:", game.getBoardStateHistory().getListOfMovesNotation().map((mv, ind) => `${ind}: ${mv}`).join("\n"));
+    console.log(
+        "Moves:",
+        game
+            .getBoardStateHistory()
+            .getListOfMovesNotation()
+            .map((mv, ind) => `${ind}: ${mv}`)
+            .join("\n")
+    );
 
     process.exit(0);
 }
@@ -62,7 +70,9 @@ async function loopOneAi(game: ChessGame) {
 
     // if player is not first, have AI move first
     if (playerColor === ChessPlayer.black) {
-        const aiMove = aiPlayer.determineNextMove(game.getBoardStateHistory().getBoardState());
+        const aiMove = aiPlayer.determineNextMove(
+            game.getBoardStateHistory().getBoardState()
+        );
 
         if (!aiMove) {
             console.log("AI Resigns!");
@@ -90,7 +100,9 @@ async function loopOneAi(game: ChessGame) {
 
             // get the AI's move
             if (!game.isGameOver()) {
-                const aiMove = aiPlayer.determineNextMove(game.getBoardStateHistory().getBoardState());
+                const aiMove = aiPlayer.determineNextMove(
+                    game.getBoardStateHistory().getBoardState()
+                );
                 if (!aiMove) {
                     console.log("AI Resigns!");
                     return;
@@ -123,7 +135,9 @@ async function loopTwoAis(game: ChessGame) {
 
     while (!game.isGameOver()) {
         try {
-            const aiMove = aiPlayerWhite.determineNextMove(game.getBoardStateHistory().getBoardState());
+            const aiMove = aiPlayerWhite.determineNextMove(
+                game.getBoardStateHistory().getBoardState()
+            );
             if (!aiMove) {
                 console.log("AI Resigns!");
                 return;
@@ -131,26 +145,25 @@ async function loopTwoAis(game: ChessGame) {
 
             game.makeMove(aiMove);
             console.log(
-                game
-                    .getBoardStateHistory()
-                    .getBoardState()
-                    .toStringDetailed()
+                game.getBoardStateHistory().getBoardState().toStringDetailed()
             );
             console.log("________________________");
 
-            const boardStr = game.getBoardStateHistory().getBoardState().toString();
-            repetitionMap.set(
-                boardStr,
-                (repetitionMap.get(boardStr) || 0) + 1
-            );
+            const boardStr = game
+                .getBoardStateHistory()
+                .getBoardState()
+                .toString();
+            repetitionMap.set(boardStr, (repetitionMap.get(boardStr) || 0) + 1);
             if (repetitionMap.get(boardStr)! > 3) {
                 console.log("Game over due to repetition!");
                 return;
-            } 
+            }
 
             // get the AI's move
             if (!game.isGameOver()) {
-                const aiMove = aiPlayerBlack.determineNextMove(game.getBoardStateHistory().getBoardState());
+                const aiMove = aiPlayerBlack.determineNextMove(
+                    game.getBoardStateHistory().getBoardState()
+                );
                 if (!aiMove) {
                     console.log("AI Resigns!");
                     return;
@@ -165,7 +178,10 @@ async function loopTwoAis(game: ChessGame) {
                 );
                 console.log("________________________");
 
-                const boardStr = game.getBoardStateHistory().getBoardState().toString();
+                const boardStr = game
+                    .getBoardStateHistory()
+                    .getBoardState()
+                    .toString();
                 repetitionMap.set(
                     boardStr,
                     (repetitionMap.get(boardStr) || 0) + 1
@@ -173,7 +189,7 @@ async function loopTwoAis(game: ChessGame) {
                 if (repetitionMap.get(boardStr)! > 3) {
                     console.log("Game over due to repetition!");
                     return;
-                } 
+                }
             }
 
             await Promise.resolve();
@@ -259,7 +275,10 @@ function printGameCheckmatePieces(boardState: ChessBoardState): void {
 
     const moves = boardState.getPossibleMovesForPlayer(playerCheckmated);
     const kingPiece = boardState.getPlayerKingPiece(playerCheckmated);
-    console.log("Position of checkmated king: "+kingPiece.getPosition());
+    console.log(
+        "Position of checkmated king: " +
+            ChessPosition.toString(kingPiece.getPosition())
+    );
     console.log("List of moves which attack the king:");
     for (const move of moves.getMoves()) {
         if (move.toPosition === kingPiece.getPosition()) {

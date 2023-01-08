@@ -8,9 +8,13 @@ import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-
  * Encapsulation of a queen
  */
 export class QueenPiece extends ChessPiece {
+    static letter = "Q";
+    letter: string = QueenPiece.letter;
+
     name: string = "Queen";
-    letter: string = "Q";
-    pointsValue: number = 9;
+
+    static pointsValue = 9;
+    pointsValue: number = QueenPiece.pointsValue;
 
     constructor(public player: ChessPlayer, position: ChessCell) {
         super(position, 28);
@@ -30,10 +34,7 @@ export class QueenPiece extends ChessPiece {
         // add for higher columns
         for (let col = posCol - 1; col > 0; col--) {
             const rowOffset = posCol - col;
-            const toPosition = ChessPosition.get(
-                col,
-                posRow + rowOffset
-            );
+            const toPosition = ChessPosition.get(col, posRow + rowOffset);
 
             // stop if out of bounds
             if (posRow + rowOffset > 8) {
@@ -54,10 +55,7 @@ export class QueenPiece extends ChessPiece {
 
         for (let col = posCol - 1; col > 0; col--) {
             const rowOffset = posCol - col;
-            const toPosition = ChessPosition.get(
-                col,
-                posRow - rowOffset
-            );
+            const toPosition = ChessPosition.get(col, posRow - rowOffset);
 
             // stop if out of bounds
             if (posRow - rowOffset < 1) {
@@ -79,10 +77,7 @@ export class QueenPiece extends ChessPiece {
         // add for lower columns
         for (let col = posCol + 1; col < 9; col++) {
             const rowOffset = col - posCol;
-            const toPosition = ChessPosition.get(
-                col,
-                posRow + rowOffset
-            );
+            const toPosition = ChessPosition.get(col, posRow + rowOffset);
 
             if (posRow + rowOffset > 8) {
                 break;
@@ -102,10 +97,7 @@ export class QueenPiece extends ChessPiece {
 
         for (let col = posCol + 1; col < 9; col++) {
             const rowOffset = col - posCol;
-            const toPosition = ChessPosition.get(
-                col,
-                posRow - rowOffset
-            );
+            const toPosition = ChessPosition.get(col, posRow - rowOffset);
 
             if (posRow - rowOffset < 1) {
                 break;

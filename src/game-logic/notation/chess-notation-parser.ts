@@ -150,7 +150,7 @@ export class ChessNotation {
         let enPassant = false;
         // the only way it can move columns without stepping into an existing piece is if it is en passant
         if (
-            piece instanceof PawnPiece &&
+            piece.letter === PawnPiece.letter &&
             !toPiece &&
             toPosCol !== fromPosCol
         ) {
@@ -187,7 +187,7 @@ export class ChessNotation {
             const row = movePlayer === ChessPlayer.white ? 1 : 8;
             const rookPos = ChessPosition.get(1, row);
             const rook = boardState.getPieceAtPosition(rookPos);
-            if (!rook || !(rook instanceof RookPiece)) {
+            if (!rook || !(rook.letter === RookPiece.letter)) {
                 return new ChessNotationParseStatus(
                     false,
                     null,
@@ -197,7 +197,7 @@ export class ChessNotation {
 
             const kingPos = ChessPosition.get(5, row);
             const king = boardState.getPieceAtPosition(kingPos);
-            if (!king || !(king instanceof KingPiece)) {
+            if (!king || !(king.letter === KingPiece.letter)) {
                 return new ChessNotationParseStatus(
                     false,
                     null,
@@ -221,7 +221,7 @@ export class ChessNotation {
             const row = movePlayer === ChessPlayer.white ? 1 : 8;
             const rookPos = ChessPosition.get(8, row);
             const rook = boardState.getPieceAtPosition(rookPos);
-            if (!rook || !(rook instanceof RookPiece)) {
+            if (!rook || !(rook.letter === RookPiece.letter)) {
                 return new ChessNotationParseStatus(
                     false,
                     null,
@@ -231,7 +231,7 @@ export class ChessNotation {
 
             const kingPos = ChessPosition.get(5, row);
             const king = boardState.getPieceAtPosition(kingPos);
-            if (!king || !(king instanceof KingPiece)) {
+            if (!king || !(king.letter === KingPiece.letter)) {
                 return new ChessNotationParseStatus(
                     false,
                     null,
@@ -285,7 +285,7 @@ export class ChessNotation {
         const prevPosPiece = boardState.getPieceAtPosition(prevPos);
 
         if (prevPosPiece) {
-            if (!(prevPosPiece instanceof PawnPiece)) {
+            if (!(prevPosPiece.letter === PawnPiece.letter)) {
                 return new ChessNotationParseStatus(
                     false,
                     null,
@@ -318,7 +318,7 @@ export class ChessNotation {
             const midPos = ChessPosition.get(posCol, midRow);
             const midPosPiece = boardState.getPieceAtPosition(midPos);
             if (midPosPiece) {
-                if (!(midPosPiece instanceof PawnPiece)) {
+                if (!(midPosPiece.letter === PawnPiece.letter)) {
                     return new ChessNotationParseStatus(
                         false,
                         null,
@@ -403,7 +403,7 @@ export class ChessNotation {
         };
 
         // if movePiece is pawn, remove "p" from notation
-        if (movePiece instanceof PawnPiece) {
+        if (movePiece.letter === PawnPiece.letter) {
             notationParts.piece = "";
 
             if (move.isPromotion) {
@@ -412,7 +412,9 @@ export class ChessNotation {
             }
 
             if (isCapture) {
-                notationParts.fromPosition = ChessPosition.toString(move.fromPosition);
+                notationParts.fromPosition = ChessPosition.toString(
+                    move.fromPosition
+                );
             }
         }
 
@@ -431,7 +433,9 @@ export class ChessNotation {
             }
         }
         if (secondFound) {
-            notationParts.fromPosition = ChessPosition.toString(move.fromPosition);
+            notationParts.fromPosition = ChessPosition.toString(
+                move.fromPosition
+            );
         }
 
         return `${notationParts.piece}${notationParts.fromPosition}${notationParts.captures}${notationParts.toPosition}${notationParts.promotion}${notationParts.gameState}`;

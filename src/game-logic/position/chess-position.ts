@@ -1,7 +1,6 @@
-
 /**
  * Position is represented by a number
- * 
+ *
  * [8, 9, 10....]
  * [0, 1, 2, 3, 4, 5, 6, 7]
  */
@@ -11,15 +10,14 @@ export type ChessCell = number;
  * Instance represents a single position
  * Static methods handle all board positions
  * Accessed by col, row to correspond to "a6" type notation
- * 
+ *
  */
 export class ChessPosition {
-
     /**
      * Get a particular position on the board
      */
     public static get(col: number, row: number): ChessCell {
-        return (row-1) * 8 + col - 1;
+        return (row - 1) * 8 + col - 1;
     }
 
     public static cellToColRow(cell: ChessCell): [number, number] {

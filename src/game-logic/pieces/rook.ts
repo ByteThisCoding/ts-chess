@@ -3,14 +3,19 @@ import { ChessPiece } from "./chess-piece";
 import { ChessCell, ChessPosition } from "../position/chess-position";
 import { ChessPlayer } from "../enums";
 import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set";
+import { QueenPiece } from "./queen";
 
 /**
  * Encapsulation of a rook
  */
 export class RookPiece extends ChessPiece {
+    static letter = "R";
+    letter: string = RookPiece.letter;
+
     name: string = "Rook";
-    letter: string = "R";
-    pointsValue: number = 5;
+
+    static pointsValue = 5;
+    pointsValue: number = RookPiece.pointsValue;
 
     constructor(public player: ChessPlayer, position: ChessCell) {
         super(position, 14);

@@ -10,7 +10,6 @@ import { ChessPosition } from "../position/chess-position";
  * Utility responsible for checking if a move is valid
  */
 export class ChessMoveValidator {
-
     public static isMoveValid(
         boardState: ChessBoardState,
         move: ChessBoardSingleMove
@@ -40,7 +39,7 @@ export class ChessMoveValidator {
                     piece: piece.toString(),
                     fromPiece: fromPiece?.toString(),
                     board: boardState.toString(),
-                    move: move.toString()
+                    move: move.toString(),
                 }
             );
         }
@@ -63,10 +62,16 @@ export class ChessMoveValidator {
         }
 
         // tentatively make move to detect if player would be in invalid check
-        if (boardState.doesMovePutPlayerInIllegalCheck(move)) {
+        const { inCheck, piece: checkPiece } =
+            boardState.doesMovePutPlayerInIllegalCheck(move);
+        if (inCheck) {
             return new ChessBoardMoveValidationStatus(
                 false,
-                ChessBoardMoveValidationFailure.invalidCheck
+                ChessBoardMoveValidationFailure.invalidCheck,
+                {
+                    piece: checkPiece!.toString(),
+                    move: move.toString()
+                }
             );
         }
 

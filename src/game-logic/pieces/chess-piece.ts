@@ -46,7 +46,9 @@ export abstract class ChessPiece {
         this.prevPosition = this.position;
         this.position = pos;
         this.lastPositionChangeTurn = turnNumber;
-        this.isActivated = true;
+        this.isActivated =
+            ChessPosition.cellToColRow(pos)[1] !==
+            ChessPosition.cellToColRow(this.startPosition)[1];
     }
 
     /**
@@ -85,7 +87,9 @@ export abstract class ChessPiece {
     }
 
     toString(): string {
-        return `(${this.player} ${this.name} : ${ChessPosition.toString(this.position)})`;
+        return `(${this.player} ${this.name} : ${ChessPosition.toString(
+            this.position
+        )})`;
     }
 
     /**
