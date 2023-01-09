@@ -20,10 +20,11 @@ export class PawnPiece extends ChessPiece {
     static pointsValue = 1;
     pointsValue: number = PawnPiece.pointsValue;
 
+    // if rook or bishop, might as well make it a queen instead
     private promotionLetters = [
-        RookPiece.letter,
+        //RookPiece.letter,
         KnightPiece.letter,
-        BishopPiece.letter,
+        //BishopPiece.letter,
         QueenPiece.letter,
     ];
 
@@ -164,6 +165,7 @@ export class PawnPiece extends ChessPiece {
 
                 if (
                     leftPawn &&
+                    leftPawn.letter === PawnPiece.letter &&
                     leftPawn.getLastPositionChangeTurn() ===
                         boardState.getMoveNumber()
                 ) {
@@ -183,6 +185,7 @@ export class PawnPiece extends ChessPiece {
                 const rightPawn = boardState.getPieceAtPosition(rightPawnPos);
                 if (
                     rightPawn &&
+                    rightPawn.letter === PawnPiece.letter &&
                     rightPawn.getLastPositionChangeTurn() ===
                         boardState.getMoveNumber()
                 ) {

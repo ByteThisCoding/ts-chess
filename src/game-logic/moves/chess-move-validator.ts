@@ -70,7 +70,7 @@ export class ChessMoveValidator {
                 ChessBoardMoveValidationFailure.invalidCheck,
                 {
                     piece: checkPiece!.toString(),
-                    move: move.toString()
+                    move: move.toString(),
                 }
             );
         }

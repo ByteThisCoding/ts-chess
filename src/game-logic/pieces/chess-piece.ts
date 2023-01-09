@@ -47,8 +47,7 @@ export abstract class ChessPiece {
         this.position = pos;
         this.lastPositionChangeTurn = turnNumber;
         this.isActivated =
-            ChessPosition.cellToColRow(pos)[1] !==
-            ChessPosition.cellToColRow(this.startPosition)[1];
+            pos !== this.startPosition && this.lastPositionChangeTurn === 0;
     }
 
     /**

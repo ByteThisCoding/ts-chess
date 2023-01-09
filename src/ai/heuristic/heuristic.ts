@@ -16,28 +16,7 @@ import {
     iChessAiHeuristic,
     iChessAiHeuristicEvaluation,
 } from "../models/heuristic";
-
-/**
- * Encapsulate a single data point
- */
-class HeuristicDataPoint {
-    public value: number = 0;
-
-    constructor(
-        public readonly weight: number,
-        public readonly maxValueAbs: number
-    ) {}
-
-    getNorm(): number {
-        let value = this.value / this.maxValueAbs;
-        if (value > 1) {
-            value = 1;
-        } else if (value < -1) {
-            value = -1;
-        }
-        return value;
-    }
-}
+import { HeuristicDataPoint } from "./heuristic-data-point";
 
 export class ChessAiHeuristic implements iChessAiHeuristic {
     private maxPiecePoints =
@@ -56,25 +35,33 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
     // TODO: genetic algorithm or manually adjust values
     private dataPoints = {
         // the relative value of each piece score
-        relativePiecesScore: new HeuristicDataPoint(0.725, this.maxPiecePoints),
-        skewerScore: new HeuristicDataPoint(0.09, this.maxSkewerPinScore),
-        pinScore: new HeuristicDataPoint(0.09, this.maxSkewerPinScore),
-        // score based on what is threatening
-        threatenedScore: new HeuristicDataPoint(0.01, this.maxPiecePoints),
+        relativePiecesScore: new HeuristicDataPoint(0.60, this.maxPiecePoints),
+        // score based on if player is threatening with a skewer
+        skewerScore: new HeuristicDataPoint(0.03, this.maxSkewerPinScore),
+        // score based on if player is being threatened by a skewered
+        skeweredByScore: new HeuristicDataPoint(0.05, this.maxSkewerPinScore),
+        // score based on if player is threatening with a pin
+        pinScore: new HeuristicDataPoint(0.03, this.maxSkewerPinScore),
+        // score based on if player is threatened with a pin
+        pinnedByScore: new HeuristicDataPoint(0.05, this.maxSkewerPinScore),
+        // score based on what each player is threatening
+        threateningScore: new HeuristicDataPoint(0.04, this.maxPiecePoints),
+        // score based on what each player is threatened by, giving it higher weight
+        threatenedByScore: new HeuristicDataPoint(0.09, this.maxPiecePoints),
         // passed pawn score
-        passedPawnScore: new HeuristicDataPoint(0.03, 8),
+        passedPawnScore: new HeuristicDataPoint(0.02, 8),
         // activation score
         activatedScore: new HeuristicDataPoint(
-            0.015,
+            0.02,
             // 1.25 for bishop, 1.15 for knight, 1 for pawn
             1.25 * 2 + 1.15 * 2 + 1 * 2
         ),
         // control of center
-        centerControlScore: new HeuristicDataPoint(0.03, 16),
+        centerControlScore: new HeuristicDataPoint(0.01, 16),
         // mobility
         mobilityScore: new HeuristicDataPoint(
-            0.02,
-            50 //TODO: find better value
+            0.015,
+            40 //TODO: find better value
         ),
     };
 
@@ -110,6 +97,7 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
         const centerControlWhite = new Set<ChessCell>();
         const centerControlBlack = new Set<ChessCell>();
 
+        // iterate over all pieces and assemble data points
         for (const piece of boardState.getAllPieces()) {
             let inc = 0;
             const possibleMoves =
@@ -186,24 +174,43 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
                     ) {
                         // if there wasn't a threat yet, add to it
                         if (!threatenedPiece) {
-                            this.dataPoints.threatenedScore.value +=
+                            this.dataPoints.threateningScore.value +=
                                 inc * pieceAtPos.pointsValue;
+
+                            // add negation for being threatened by the opponent
+                            this.dataPoints.threatenedByScore.value +=
+                                pieceAtPos.pointsValue * inc * -1;
+
                             threatenedPiece = pieceAtPos;
                         } else if (!isSkewerPin) {
+                            // if the piece behind can capture, don't consider it a skewer
                             // if there was a threat, then this is a pin or skewer
-                            if (
-                                pieceAtPos.pointsValue <=
-                                threatenedPiece.pointsValue
-                            ) {
-                                // this is a skewer (consider a tie a skewer)
-                                this.dataPoints.skewerScore.value +=
-                                    pieceAtPos.pointsValue;
-                            } else {
-                                // this is a pin
-                                this.dataPoints.pinScore.value +=
-                                    pieceAtPos.pointsValue;
+                            // assess if the piece that is threatening can be taken, or if the trade results in benefit
+                            const backPieceCanTake = pieceAtPosPossibleMoves.hasMoveToPosition(
+                                threatenedPiece.getPosition()
+                            );
+
+                            if (!backPieceCanTake || piece.pointsValue <= threatenedPiece.pointsValue) {
+                                if (
+                                    move.pieceMoved.pointsValue <=
+                                    threatenedPiece.pointsValue
+                                ) {
+                                    // this is a skewer (consider a tie a skewer)
+                                    this.dataPoints.skewerScore.value +=
+                                        inc * pieceAtPos.pointsValue;
+
+                                    this.dataPoints.skeweredByScore.value +=
+                                        inc * pieceAtPos.pointsValue * -1;
+                                } else {
+                                    // this is a pin
+                                    this.dataPoints.pinScore.value +=
+                                        inc * pieceAtPos.pointsValue;
+
+                                    this.dataPoints.pinnedByScore.value +=
+                                        inc * pieceAtPos.pointsValue * -1;
+                                }
+                                isSkewerPin = true;
                             }
-                            isSkewerPin = true;
                         }
                     }
                 }
@@ -246,8 +253,9 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
             data[key] = {
                 value: datapoint.value,
                 norm: datapoint.getNorm(),
+                weight: datapoint.weight,
             };
-            totalScore += datapoint.getNorm();
+            totalScore += datapoint.getNorm() * datapoint.weight;
         }
         return {
             score: totalScore,
