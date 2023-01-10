@@ -7,6 +7,7 @@
         "run": "ts-node cli-game.ts"
     },
     "devDependencies": {
+        "@types/collections": "^5.1.2",
         "@types/node": "^18.11.18",
         "prettier": "^2.8.1",
         "ts-node-dev": "^2.0.0",

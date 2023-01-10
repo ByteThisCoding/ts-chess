@@ -16,6 +16,8 @@ export class QueenPiece extends ChessPiece {
     static pointsValue = 9;
     pointsValue: number = QueenPiece.pointsValue;
 
+    doCacheMoves = true;
+
     constructor(public player: ChessPlayer, position: ChessCell) {
         super(position, 28);
     }
@@ -45,6 +47,14 @@ export class QueenPiece extends ChessPiece {
             if (existingPiece) {
                 if (existingPiece.player !== this.player) {
                     moves.add(this.newMove(boardState, toPosition));
+                    // block the next position
+                    const blockedPosition = ChessPosition.get(
+                        col,
+                        posRow + rowOffset + 1
+                    );
+                    moves.addBlockedPosition(blockedPosition);
+                } else {
+                    moves.addBlockedPosition(toPosition);
                 }
 
                 break;
@@ -66,6 +76,14 @@ export class QueenPiece extends ChessPiece {
             if (existingPiece) {
                 if (existingPiece.player !== this.player) {
                     moves.add(this.newMove(boardState, toPosition));
+                    // block the next position
+                    const blockedPosition = ChessPosition.get(
+                        col,
+                        posRow + rowOffset - 1
+                    );
+                    moves.addBlockedPosition(blockedPosition);
+                } else {
+                    moves.addBlockedPosition(toPosition);
                 }
 
                 break;
@@ -87,6 +105,14 @@ export class QueenPiece extends ChessPiece {
             if (existingPiece) {
                 if (existingPiece.player !== this.player) {
                     moves.add(this.newMove(boardState, toPosition));
+                    // block the next position
+                    const blockedPosition = ChessPosition.get(
+                        col,
+                        posRow + rowOffset + 1
+                    );
+                    moves.addBlockedPosition(blockedPosition);
+                } else {
+                    moves.addBlockedPosition(toPosition);
                 }
 
                 break;
@@ -107,6 +133,14 @@ export class QueenPiece extends ChessPiece {
             if (existingPiece) {
                 if (existingPiece.player !== this.player) {
                     moves.add(this.newMove(boardState, toPosition));
+                    // block the next position
+                    const blockedPosition = ChessPosition.get(
+                        col,
+                        posRow + rowOffset - 1
+                    );
+                    moves.addBlockedPosition(blockedPosition);
+                } else {
+                    moves.addBlockedPosition(toPosition);
                 }
 
                 break;
@@ -124,6 +158,11 @@ export class QueenPiece extends ChessPiece {
             if (existingPiece) {
                 if (existingPiece.player !== this.player) {
                     moves.add(this.newMove(boardState, newPos));
+                    // ensure next position is marked as blocked
+                    const blockedPosition = ChessPosition.get(i + 1, posRow);
+                    moves.addBlockedPosition(blockedPosition);
+                } else {
+                    moves.addBlockedPosition(newPos);
                 }
 
                 break;
@@ -140,6 +179,11 @@ export class QueenPiece extends ChessPiece {
             if (existingPiece) {
                 if (existingPiece.player !== this.player) {
                     moves.add(this.newMove(boardState, newPos));
+                    // ensure next position is marked as blocked
+                    const blockedPosition = ChessPosition.get(i - 1, posRow);
+                    moves.addBlockedPosition(blockedPosition);
+                } else {
+                    moves.addBlockedPosition(newPos);
                 }
 
                 break;
@@ -156,6 +200,11 @@ export class QueenPiece extends ChessPiece {
             if (existingPiece) {
                 if (existingPiece.player !== this.player) {
                     moves.add(this.newMove(boardState, newPos));
+                    // ensure next position is marked as blocked
+                    const blockedPosition = ChessPosition.get(posCol, i + 1);
+                    moves.addBlockedPosition(blockedPosition);
+                } else {
+                    moves.addBlockedPosition(newPos);
                 }
 
                 break;
@@ -172,6 +221,11 @@ export class QueenPiece extends ChessPiece {
             if (existingPiece) {
                 if (existingPiece.player !== this.player) {
                     moves.add(this.newMove(boardState, newPos));
+                    // ensure next position is marked as blocked
+                    const blockedPosition = ChessPosition.get(posCol, i - 1);
+                    moves.addBlockedPosition(blockedPosition);
+                } else {
+                    moves.addBlockedPosition(newPos);
                 }
 
                 break;

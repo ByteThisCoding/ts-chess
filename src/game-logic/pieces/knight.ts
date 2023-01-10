@@ -16,6 +16,8 @@ export class KnightPiece extends ChessPiece {
     static pointsValue = 3;
     pointsValue: number = KnightPiece.pointsValue;
 
+    doCacheMoves = true;
+
     constructor(public player: ChessPlayer, position: ChessCell) {
         super(position, 8);
     }
@@ -35,78 +37,78 @@ export class KnightPiece extends ChessPiece {
         //  ^
         //  B
         if (posCol < 8 && posRow < 7) {
-            moves.add(
-                this.newMove(
-                    boardState,
-                    ChessPosition.get(posCol + 1, posRow + 2)
-                )
-            );
+            const toPos = ChessPosition.get(posCol + 1, posRow + 2);
+            if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
+                moves.addBlockedPosition(toPos);
+            } else {
+                moves.add(this.newMove(boardState, toPos));
+            }
         }
 
         if (posCol > 1 && posRow < 7) {
-            moves.add(
-                this.newMove(
-                    boardState,
-                    ChessPosition.get(posCol - 1, posRow + 2)
-                )
-            );
+            const toPos = ChessPosition.get(posCol - 1, posRow + 2);
+            if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
+                moves.addBlockedPosition(toPos);
+            } else {
+                moves.add(this.newMove(boardState, toPos));
+            }
         }
 
         if (posCol < 8 && posRow > 2) {
-            moves.add(
-                this.newMove(
-                    boardState,
-                    ChessPosition.get(posCol + 1, posRow - 2)
-                )
-            );
+            const toPos = ChessPosition.get(posCol + 1, posRow - 2);
+            if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
+                moves.addBlockedPosition(toPos);
+            } else {
+                moves.add(this.newMove(boardState, toPos));
+            }
         }
 
         if (posCol > 1 && posRow > 2) {
-            moves.add(
-                this.newMove(
-                    boardState,
-                    ChessPosition.get(posCol - 1, posRow - 2)
-                )
-            );
+            const toPos = ChessPosition.get(posCol - 1, posRow - 2);
+            if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
+                moves.addBlockedPosition(toPos);
+            } else {
+                moves.add(this.newMove(boardState, toPos));
+            }
         }
 
         // <-<->->
         //    ^
         //    B
         if (posCol < 7 && posRow < 8) {
-            moves.add(
-                this.newMove(
-                    boardState,
-                    ChessPosition.get(posCol + 2, posRow + 1)
-                )
-            );
+            const toPos = ChessPosition.get(posCol + 2, posRow + 1);
+            if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
+                moves.addBlockedPosition(toPos);
+            } else {
+                moves.add(this.newMove(boardState, toPos));
+            }
         }
 
         if (posCol < 7 && posRow > 1) {
-            moves.add(
-                this.newMove(
-                    boardState,
-                    ChessPosition.get(posCol + 2, posRow - 1)
-                )
-            );
+            const toPos = ChessPosition.get(posCol + 2, posRow - 1);
+            if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
+                moves.addBlockedPosition(toPos);
+            } else {
+                moves.add(this.newMove(boardState, toPos));
+            }
         }
 
         if (posCol > 2 && posRow < 8) {
-            moves.add(
-                this.newMove(
-                    boardState,
-                    ChessPosition.get(posCol - 2, posRow + 1)
-                )
-            );
+            const toPos = ChessPosition.get(posCol - 2, posRow + 1);
+            if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
+                moves.addBlockedPosition(toPos);
+            } else {
+                moves.add(this.newMove(boardState, toPos));
+            }
         }
 
         if (posCol > 2 && posRow > 1) {
-            moves.add(
-                this.newMove(
-                    boardState,
-                    ChessPosition.get(posCol - 2, posRow - 1)
-                )
-            );
+            const toPos = ChessPosition.get(posCol - 2, posRow - 1);
+            if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
+                moves.addBlockedPosition(toPos);
+            } else {
+                moves.add(this.newMove(boardState, toPos));
+            }
         }
 
         return moves;

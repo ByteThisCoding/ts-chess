@@ -13,17 +13,23 @@ interface iLookahedResponse {
     move: ChessBoardSingleMove;
 }
 
+enum TranspositionTableType {
+    exact,
+    lowerbound,
+    upperbound
+}
+
 interface iTranspositionTableEntry extends iLookahedResponse {
     depthRemaining: number;
-    type: 'exact' | 'lowerbound' | 'upperbound';
+    type: TranspositionTableType;
 }
 
 /**
  * Negamax with alpha beta pruning
  */
-export class ChessMinimaxAiPlayer implements iChessAiPlayer {
+export class ChessNegamaxAiPlayer implements iChessAiPlayer {
     // TODO: make configurable
-    private MAX_DEPTH = 4;
+    private MAX_DEPTH = 5;
 
     constructor(
         // the main heuristic to evaluate leaf nodes in the negamax traversal
@@ -33,6 +39,7 @@ export class ChessMinimaxAiPlayer implements iChessAiPlayer {
     ) { }
 
     // TODO: add a node to record previous traversals from previous moves to save time (we restart at each node)
+    // TODO: add iterative deepening
 
     /**
      * Assumes this player is the opposite of the player that just went
@@ -52,14 +59,15 @@ export class ChessMinimaxAiPlayer implements iChessAiPlayer {
                 : ChessPlayer.white;
 
         // clone once for mutation safety of the original board
-        const cloneBoard = boardState.clone();
+        //const cloneBoard = boardState.clone();
         const negateMult = player === ChessPlayer.white ? 1 : -1;
 
         const depth = this.MAX_DEPTH;
 
         const transpositionTable = new Map<string, iTranspositionTableEntry>();
         const { hScore, move } = this.lookAheadAtMove(
-            cloneBoard,
+            //cloneBoard,
+            boardState,
             player,
             enemy,
             depth,
@@ -120,8 +128,6 @@ export class ChessMinimaxAiPlayer implements iChessAiPlayer {
         //let bestMovePath = pathMoves;
         let bestMove!: ChessBoardSingleMove;
 
-        //const transpositionTableKey = boardState.toString();
-
         if (depthRemaining === 0) {
             // base case, depth is 0
             bestMoveH = this.heuristic.getScore(boardState);
@@ -153,32 +159,56 @@ export class ChessMinimaxAiPlayer implements iChessAiPlayer {
             // sort the moves based on initial heuristic estimate
             possibleMoves.sort((a, b) => b.score - a.score);
 
-            let alphaOriginal = alphaPrune;
-
             for (const { move } of possibleMoves) {
+                let alphaOriginal = alphaPrune;
+
                 let thisMoveH!: iLookahedResponse;
-                // commented out until bug resolution is found
-                /*if (transpositionTable.has(transpositionTableKey)) {
-                    const tableResult = transpositionTable.get(transpositionTableKey)!;
+
+                // if we didn't grab from the transposition table, make the move now
+                boardState.setPiecesFromMove(move, "");
+                const transpositionTableKey = boardState.toString();
+
+                if (transpositionTable.has(transpositionTableKey)) {
+                    const tableResult = transpositionTable.get(
+                        transpositionTableKey
+                    )!;
                     if (tableResult.depthRemaining <= depthRemaining) {
                         switch (tableResult.type) {
-                            case 'exact':
-                                thisMoveH = {...tableResult};
-                                thisMoveH.hScore.score *= negateMult;
+                            case TranspositionTableType.exact:
+                                thisMoveH = { ...tableResult };
+                                thisMoveH.hScore.score *= negateMult - -1;
                                 break;
-                            case 'upperbound':
-                                alphaPrune = Math.max(alphaPrune, tableResult.hScore.score * negateMult);
+                            case TranspositionTableType.upperbound:
+                                if (player === ChessPlayer.white) {
+                                    alphaPrune = Math.max(
+                                        alphaPrune,
+                                        tableResult.hScore.score
+                                    );
+                                } else {
+                                    betaPrune = Math.min(
+                                        betaPrune,
+                                        tableResult.hScore.score * -1
+                                    );
+                                }
                                 break;
-                            case 'lowerbound':
-                                betaPrune = Math.min(betaPrune, tableResult.hScore.score * negateMult);
+                            case TranspositionTableType.lowerbound:
+                                if (player === ChessPlayer.white) {
+                                    betaPrune = Math.min(
+                                        betaPrune,
+                                        tableResult.hScore.score
+                                    );
+                                } else {
+                                    alphaPrune = Math.max(
+                                        alphaPrune,
+                                        tableResult.hScore.score * -1
+                                    )
+                                }
                                 break;
                         }
                     }
-                }*/
+                }
 
-                // if we didn't grab from the transposition table, make the move now
                 if (!thisMoveH) {
-                    boardState.setPiecesFromMove(move, "");
                     thisMoveH = this.lookAheadAtMove(
                         boardState,
                         enemy,
@@ -189,41 +219,37 @@ export class ChessMinimaxAiPlayer implements iChessAiPlayer {
                         -negateMult,
                         transpositionTable
                     );
-                    // cleanup for next iteration
-                    boardState.undoLastMove();
-                    thisMoveH.hScore.score *= -1;
-                }
 
+                    thisMoveH.hScore.score *= -1;
+
+                    // add to transposition table
+                    let type: TranspositionTableType;
+                    if (bestMoveH.score <= alphaOriginal) {
+                        type = TranspositionTableType.upperbound;
+                    } else if (bestMoveH.score >= betaPrune) {
+                        type = TranspositionTableType.lowerbound;
+                    } else {
+                        type = TranspositionTableType.exact;
+                    }
+
+                    transpositionTable.set(transpositionTableKey, {
+                        type,
+                        depthRemaining,
+                        hScore: { ...thisMoveH.hScore },
+                        move,
+                    });
+                }
+                // cleanup for next iteration
+                boardState.undoLastMove();
 
                 // compare scores
                 if (thisMoveH.hScore.score >= bestMoveH.score) {
                     bestMoveH = thisMoveH.hScore;
                 }
 
-                // commented out until bug resolution is found
-                // add to transposition table
-                /*let type: 'exact' | 'lowerbound' | 'upperbound';
-                if (bestMoveH.score <= alphaOriginal) {
-                    type = 'upperbound';
-                } else if (bestMoveH.score >= betaPrune) {
-                    type = 'lowerbound';
-                } else {
-                    type = 'exact';
-                }
-                // multiply back by negate multi to put the score to to absolute value
-                const tableScore = { ...thisMoveH.hScore };
-                tableScore.score *= negateMult;
-                transpositionTable.set(transpositionTableKey, {
-                    depthRemaining,
-                    move,
-                    hScore: tableScore,
-                    type
-                });*/
-
                 if (bestMoveH.score > alphaPrune) {
                     alphaPrune = bestMoveH.score;
                     bestMove = move;
-
                 }
 
                 if (alphaPrune >= betaPrune) {
@@ -232,9 +258,7 @@ export class ChessMinimaxAiPlayer implements iChessAiPlayer {
             }
         }
 
-        const returnValue = { hScore: bestMoveH, move: bestMove };
-
-        return returnValue;
+        return { hScore: bestMoveH, move: bestMove };
     }
 
     /**

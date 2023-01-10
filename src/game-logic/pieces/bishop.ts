@@ -11,6 +11,8 @@ export class BishopPiece extends ChessPiece {
     static letter = "B";
     letter: string = BishopPiece.letter;
 
+    doCacheMoves = true;
+
     name: string = "Bishop";
 
     static pointsValue = 3;
@@ -44,6 +46,14 @@ export class BishopPiece extends ChessPiece {
             if (existingPiece) {
                 if (existingPiece.player !== this.player) {
                     moves.add(this.newMove(boardState, toPosition));
+                    // block the next position
+                    const blockedPosition = ChessPosition.get(
+                        col,
+                        posRow + rowOffset + 1
+                    );
+                    moves.addBlockedPosition(blockedPosition);
+                } else {
+                    moves.addBlockedPosition(toPosition);
                 }
 
                 break;
@@ -65,6 +75,14 @@ export class BishopPiece extends ChessPiece {
             if (existingPiece) {
                 if (existingPiece.player !== this.player) {
                     moves.add(this.newMove(boardState, toPosition));
+                    // block the next position
+                    const blockedPosition = ChessPosition.get(
+                        col,
+                        posRow + rowOffset - 1
+                    );
+                    moves.addBlockedPosition(blockedPosition);
+                } else {
+                    moves.addBlockedPosition(toPosition);
                 }
 
                 break;
@@ -86,6 +104,14 @@ export class BishopPiece extends ChessPiece {
             if (existingPiece) {
                 if (existingPiece.player !== this.player) {
                     moves.add(this.newMove(boardState, toPosition));
+                    // block the next position
+                    const blockedPosition = ChessPosition.get(
+                        col,
+                        posRow + rowOffset + 1
+                    );
+                    moves.addBlockedPosition(blockedPosition);
+                } else {
+                    moves.addBlockedPosition(toPosition);
                 }
 
                 break;
@@ -106,6 +132,14 @@ export class BishopPiece extends ChessPiece {
             if (existingPiece) {
                 if (existingPiece.player !== this.player) {
                     moves.add(this.newMove(boardState, toPosition));
+                    // block the next position
+                    const blockedPosition = ChessPosition.get(
+                        col,
+                        posRow + rowOffset - 1
+                    );
+                    moves.addBlockedPosition(blockedPosition);
+                } else {
+                    moves.addBlockedPosition(toPosition);
                 }
 
                 break;

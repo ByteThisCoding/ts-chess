@@ -67,9 +67,11 @@ export class ChessNotation {
             // see which piece can make this move
             const possibleMoves =
                 boardState.getPossibleMovesForPlayer(movePlayer);
+            
             let numPiecesFound = 0;
             let fromMove: ChessBoardSingleMove | null = null;
             for (const move of possibleMoves.getMoves()) {
+                //console.log(move.toString());
                 if (
                     move.toPosition === toPos &&
                     move.pieceMoved.letter.toLocaleLowerCase() === pieceLetter
@@ -109,7 +111,7 @@ export class ChessNotation {
         } else {
             // if there's a missing letter, it's a pawn move, add the letter for convenience
             if (notation.length === 4) {
-                notation = "P" + notation;
+                notation = PawnPiece.letter.toUpperCase() + notation;
             }
 
             pieceLetter = notation.substring(0, 1).toLocaleLowerCase();

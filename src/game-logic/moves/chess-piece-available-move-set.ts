@@ -9,6 +9,8 @@ import { ChessBoardSingleMove } from "./chess-board-move";
  */
 export class ChessPieceAvailableMoveSet {
     private availableMoves = new Map<ChessCell, ChessBoardSingleMove[]>();
+    private blockedPositions = new Set<ChessCell>();
+
     private numMoves = 0;
 
     constructor(
@@ -18,6 +20,12 @@ export class ChessPieceAvailableMoveSet {
 
     getNumMoves(): number {
         return this.numMoves;
+    }
+
+    addBlockedPosition(pos: ChessCell): void {
+        if (pos > -1 && pos < 64) {
+            this.blockedPositions.add(pos);
+        }
     }
 
     /**
@@ -68,6 +76,10 @@ export class ChessPieceAvailableMoveSet {
         }
     }
 
+    removeBlockedPosition(pos: ChessCell): void {
+        this.blockedPositions.delete(pos);
+    }
+
     /**
      * Combine the moves of another instance of this class into this
      */
@@ -85,6 +97,16 @@ export class ChessPieceAvailableMoveSet {
                 yield move;
             }
         }
+    }
+
+    *getBlockedPositions(): Iterable<ChessCell> {
+        for (const pos of this.blockedPositions) {
+            yield pos;
+        }
+    }
+
+    hasBlockedPosition(pos: ChessCell): boolean {
+        return this.blockedPositions.has(pos);
     }
 
     *getMovesForPieceType(

@@ -1,7 +1,7 @@
 import readline from "readline";
 import { ChessAiHeuristic } from "./src/ai/heuristic/heuristic";
 import { ChessAiSortHeuristic } from "./src/ai/heuristic/sort-heuristic";
-import { ChessMinimaxAiPlayer } from "./src/ai/minimax-ai/ai";
+import { ChessNegamaxAiPlayer } from "./src/ai/negamax-ai/ai";
 import { ChessBoardState } from "./src/game-logic/board-state/chess-board-state";
 import { ChessGame } from "./src/game-logic/chess-game";
 import { ChessPlayer } from "./src/game-logic/enums";
@@ -72,7 +72,7 @@ async function loopNoAi(game: ChessGame) {
 async function loopOneAi(game: ChessGame) {
     const playerColor = await requestPlayerColor();
     const heuristic = new ChessAiHeuristic();
-    const aiPlayer = new ChessMinimaxAiPlayer(
+    const aiPlayer = new ChessNegamaxAiPlayer(
         heuristic,
         new ChessAiSortHeuristic()
     );
@@ -92,10 +92,10 @@ async function loopOneAi(game: ChessGame) {
         console.log(
             game.getBoardStateHistory().getBoardState().toStringDetailed()
         );
-        console.log(
+        /*console.log(
             "________________________",
             heuristic.getScore(game.getBoardStateHistory().getBoardState())
-        );
+        );*/
     }
 
     while (!game.isGameOver()) {
@@ -108,10 +108,10 @@ async function loopOneAi(game: ChessGame) {
             console.log(
                 game.getBoardStateHistory().getBoardState().toStringDetailed()
             );
-            console.log(
+            /*console.log(
                 "________________________",
                 heuristic.getScore(game.getBoardStateHistory().getBoardState())
-            );
+            );*/
 
             // get the AI's move
             if (!game.isGameOver()) {
@@ -130,12 +130,12 @@ async function loopOneAi(game: ChessGame) {
                         .getBoardState()
                         .toStringDetailed()
                 );
-                console.log(
+                /*console.log(
                     "________________________",
                     heuristic.getScore(
                         game.getBoardStateHistory().getBoardState()
                     )
-                );
+                );*/
             }
         } catch (err) {
             console.log(`There was a problem with that move.`, err);
@@ -148,11 +148,11 @@ async function loopOneAi(game: ChessGame) {
 async function loopTwoAis(game: ChessGame) {
     console.log("Two AI players game has started");
 
-    const aiPlayerWhite = new ChessMinimaxAiPlayer(
+    const aiPlayerWhite = new ChessNegamaxAiPlayer(
         new ChessAiHeuristic(),
         new ChessAiSortHeuristic()
     );
-    const aiPlayerBlack = new ChessMinimaxAiPlayer(
+    const aiPlayerBlack = new ChessNegamaxAiPlayer(
         new ChessAiHeuristic(),
         new ChessAiSortHeuristic()
     );

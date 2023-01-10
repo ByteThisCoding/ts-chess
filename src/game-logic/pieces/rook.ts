@@ -17,6 +17,8 @@ export class RookPiece extends ChessPiece {
     static pointsValue = 5;
     pointsValue: number = RookPiece.pointsValue;
 
+    doCacheMoves = true;
+
     constructor(public player: ChessPlayer, position: ChessCell) {
         super(position, 14);
     }
@@ -39,6 +41,11 @@ export class RookPiece extends ChessPiece {
             if (existingPiece) {
                 if (existingPiece.player !== this.player) {
                     moves.add(this.newMove(boardState, newPos));
+                    // ensure next position is marked as blocked
+                    const blockedPosition = ChessPosition.get(i + 1, posRow);
+                    moves.addBlockedPosition(blockedPosition);
+                } else {
+                    moves.addBlockedPosition(newPos);
                 }
 
                 break;
@@ -55,6 +62,11 @@ export class RookPiece extends ChessPiece {
             if (existingPiece) {
                 if (existingPiece.player !== this.player) {
                     moves.add(this.newMove(boardState, newPos));
+                    // ensure next position is marked as blocked
+                    const blockedPosition = ChessPosition.get(i - 1, posRow);
+                    moves.addBlockedPosition(blockedPosition);
+                } else {
+                    moves.addBlockedPosition(newPos);
                 }
 
                 break;
@@ -71,6 +83,11 @@ export class RookPiece extends ChessPiece {
             if (existingPiece) {
                 if (existingPiece.player !== this.player) {
                     moves.add(this.newMove(boardState, newPos));
+                    // ensure next position is marked as blocked
+                    const blockedPosition = ChessPosition.get(posCol, i + 1);
+                    moves.addBlockedPosition(blockedPosition);
+                } else {
+                    moves.addBlockedPosition(newPos);
                 }
 
                 break;
@@ -87,6 +104,11 @@ export class RookPiece extends ChessPiece {
             if (existingPiece) {
                 if (existingPiece.player !== this.player) {
                     moves.add(this.newMove(boardState, newPos));
+                    // ensure next position is marked as blocked
+                    const blockedPosition = ChessPosition.get(posCol, i - 1);
+                    moves.addBlockedPosition(blockedPosition);
+                } else {
+                    moves.addBlockedPosition(newPos);
                 }
 
                 break;

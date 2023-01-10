@@ -25,8 +25,8 @@ export class ChessAiSortHeuristic implements iChessAiHeuristic {
         if (boardState.isGameInCheckmate()) {
             return {
                 score: boardState.isPlayerInCheckmate(ChessPlayer.white)
-                    ? -Infinity
-                    : Infinity,
+                    ? -1
+                    : 1,
                 data: {},
             };
         }

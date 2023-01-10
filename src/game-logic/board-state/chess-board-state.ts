@@ -62,8 +62,17 @@ export class ChessBoardState {
     private whiteKingPiece!: KingPiece;
     private blackKingPiece!: KingPiece;
 
+    // for each position, keep a cache of pieces which have moves to it
+    private cellMovesPieces: Set<ChessPiece>[] = new Array(64)
+        .fill(null)
+        .map(() => new Set());
+
     // store information about the last move
-    private constructor(private positions: (ChessPiece | null)[]) {}
+    private constructor(private positions: (ChessPiece | null)[]) {
+        // build cache
+        this.getPossibleMovesForPlayer(ChessPlayer.white);
+        this.getPossibleMovesForPlayer(ChessPlayer.black);
+    }
 
     getBlackPiecesValue(): number {
         return this.boardStats.blackPiecesValue;
@@ -82,17 +91,29 @@ export class ChessBoardState {
     getPossibleMovementsForPiece(
         piece: ChessPiece
     ): ChessPieceAvailableMoveSet {
-        if (
+        /*if (
             !this._useAvailableMovesCache ||
             !this._availableMovesCache.has(piece)
-        ) {
-            this._availableMovesCache.set(
+        ) {*/
+        const moves = piece.getPossibleMovements(this);
+        /*this._availableMovesCache.set(
                 piece,
-                piece.getPossibleMovements(this)
-            );
+                moves
+            );*/
+        // update positions cache
+        if (piece.areMovesCached()) {
+            for (const move of moves.getMoves()) {
+                this.cellMovesPieces[move.toPosition].add(piece);
+            }
+            for (const pos of moves.getBlockedPositions()) {
+                this.cellMovesPieces[pos].add(piece);
+            }
         }
+        /*}
 
-        return this._availableMovesCache.get(piece)!;
+        return this._availableMovesCache.get(piece)!;*/
+
+        return moves;
     }
 
     isPlayerInCheck(player: ChessPlayer): boolean {
@@ -250,6 +271,14 @@ export class ChessBoardState {
 
         this._availableMovesCache.clear();
         this._useAvailableMovesCache = true;
+
+        /*for (let i=0; i<64; i++) {
+            let str = "";
+            for (const mv of this.cellMovesPieces[i]) {
+                str += mv.toString();
+            }
+            console.log(ChessPosition.toString(i)+": "+str);
+        }*/
     }
 
     /**
@@ -409,6 +438,9 @@ export class ChessBoardState {
         moveNumber: number,
         promotionPiece?: ChessPiece
     ): void {
+        // collect all places we need to invalidate, then do it
+        let prevPosition = piece?.getPosition();
+
         // if there is an existing piece, add entry in reverse map to replace it
         const existingPiece = this.positions[pos];
         if (existingPiece) {
@@ -441,14 +473,12 @@ export class ChessBoardState {
         } else if (promotionPiece) {
             // special case, we're promoting a piece
             // we need to add that piece, then reverse map to put the pawn piece back
-            const prevPos = piece.getPosition();
 
             // clear old position
-            this.positions[prevPos] = null;
+            this.positions[prevPosition!] = null;
 
             // set new position
             this.positions[pos] = promotionPiece;
-            promotionPiece.setPosition(pos, moveNumber);
 
             // update relative score
             if (piece.player === ChessPlayer.white) {
@@ -460,26 +490,53 @@ export class ChessBoardState {
             }
 
             // add entry to reverse-map to put it back to its original spot
-            this.boardStats.lastMoveReverseUpdates.set(prevPos, {
+            this.boardStats.lastMoveReverseUpdates.set(prevPosition!, {
                 piece,
                 turnNumber: this.boardStats.moveNumber - 1,
             });
         } else {
-            const prevPos = piece.getPosition();
-
             // clear old position
-            this.positions[prevPos] = null;
+            this.positions[prevPosition!] = null;
 
             // set new position
             this.positions[pos] = piece;
             piece.setPosition(pos, moveNumber);
 
             // add entry to reverse-map to put it back to its original spot
-            this.boardStats.lastMoveReverseUpdates.set(prevPos, {
+            this.boardStats.lastMoveReverseUpdates.set(prevPosition!, {
                 piece,
                 turnNumber: this.boardStats.moveNumber - 1,
             });
         }
+
+        // invalidate
+        const removePieces = new Set<ChessPiece>();
+        for (let cell = 0; cell < 64; cell++) {
+            for (const piece of this.cellMovesPieces[cell]) {
+                if (!removePieces.has(piece)/* && piece.areMovesCached()*/) {
+                    const moves = piece.getPossibleMovements(this);
+                    if (
+                        moves.hasBlockedPosition(pos) ||
+                        moves.hasMoveToPosition(pos) ||
+                        (prevPosition &&
+                            moves.hasMoveToPosition(prevPosition)) ||
+                        (prevPosition && moves.hasBlockedPosition(prevPosition))
+                    ) {
+                        piece.invalidateMovesCache();
+                        removePieces.add(piece);
+                    }
+                }
+            }
+        }
+
+        // iterate again, removing all stale pieces
+        for (let cell = 0; cell < 64; cell++) {
+            for (const piece of removePieces) {
+                this.cellMovesPieces[cell].delete(piece);
+            }
+        }
+
+        //console.log(removePieces);
     }
 
     /**
@@ -494,14 +551,37 @@ export class ChessBoardState {
         // get the revesre moves to make
         const reverseMoves = this.boardStats.lastMoveReverseUpdates;
 
+        const removePieces = new Set<ChessPiece>();
         for (const [pos, { piece, turnNumber }] of reverseMoves) {
             // place a piece at pos
             if (piece) {
                 this.positions[pos] = piece;
                 piece.setPosition(pos, turnNumber);
+                removePieces.add(piece);
             } else {
+                const existing = this.positions[pos];
+                if (existing) {
+                    existing.invalidateMovesCache();
+                    removePieces.add(existing);
+                }
+
                 // delete a piece from pos
+                for (const piece of this.cellMovesPieces[pos]) {
+                    removePieces.add(piece);
+                }
                 this.positions[pos] = null;
+            }
+
+            for (const ePiece of this.cellMovesPieces[pos]) {
+                removePieces.add(ePiece);
+            }
+        }
+
+        // iterate again, removing all stale pieces
+        for (let cell = 0; cell < 64; cell++) {
+            for (const piece of removePieces) {
+                piece.invalidateMovesCache();
+                this.cellMovesPieces[cell].delete(piece);
             }
         }
 
@@ -545,7 +625,7 @@ export class ChessBoardState {
     toString(): string {
         let str = "";
         for (let i = 0; i < 64; i++) {
-            const piece = this.getPieceAtPosition(i);
+            const piece = this.positions[i];
             if (piece) {
                 str +=
                     piece.player === ChessPlayer.white

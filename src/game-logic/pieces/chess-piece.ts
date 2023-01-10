@@ -12,6 +12,7 @@ export abstract class ChessPiece {
     abstract letter: string;
     abstract player: ChessPlayer;
     abstract pointsValue: number;
+    abstract doCacheMoves: boolean;
 
     // TODO: is bug with isActivated when looking ahead, doesn't unset
     private isActivated = false;
@@ -19,11 +20,21 @@ export abstract class ChessPiece {
     private startPosition: ChessCell;
     private prevPosition: ChessCell | null = null;
 
+    private movesCache: ChessPieceAvailableMoveSet | null = null;
+
     constructor(
         private position: ChessCell,
         private maxNumPossibleMoves: number
     ) {
         this.startPosition = position;
+    }
+
+    areMovesCached(): boolean {
+        return this.doCacheMoves && !!this.movesCache;
+    }
+
+    invalidateMovesCache(): void {
+        this.movesCache = null;
     }
 
     getPosition(): ChessCell {
@@ -48,6 +59,7 @@ export abstract class ChessPiece {
         this.lastPositionChangeTurn = turnNumber;
         this.isActivated =
             pos !== this.startPosition && this.lastPositionChangeTurn === 0;
+        this.invalidateMovesCache();
     }
 
     /**
@@ -56,12 +68,22 @@ export abstract class ChessPiece {
     getPossibleMovements(
         boardState: ChessBoardState
     ): ChessPieceAvailableMoveSet {
-        const moves =
-            this.player === ChessPlayer.white
-                ? this.getPossibleMovementsWhite(boardState)
-                : this.getPossibleMovementsBlack(boardState);
+        if (this.doCacheMoves) {
+            if (this.movesCache === null) {
+                this.movesCache =
+                    this.player === ChessPlayer.white
+                        ? this.getPossibleMovementsWhite(boardState)
+                        : this.getPossibleMovementsBlack(boardState);
+            }
+            return this.movesCache;
+        } else {
+            const moves =
+                this.player === ChessPlayer.white
+                    ? this.getPossibleMovementsWhite(boardState)
+                    : this.getPossibleMovementsBlack(boardState);
 
-        return moves;
+            return moves;
+        }
     }
 
     clone(): ChessPiece {

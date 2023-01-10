@@ -16,6 +16,9 @@ export class KingPiece extends ChessPiece {
     static pointsValue = 50;
     pointsValue: number = KingPiece.pointsValue;
 
+    // don't want to cache because of castling
+    doCacheMoves = false;
+
     constructor(public player: ChessPlayer, position: ChessCell) {
         super(position, 10);
     }
@@ -61,7 +64,13 @@ export class KingPiece extends ChessPiece {
             return;
         }
 
-        // check rook on a1
+        // invalid if king is in wrong position (sanity check, other conditions not sufficient at time of writing)
+        const [col] = ChessPosition.cellToColRow(this.getPosition());
+        if (col !== 5) {
+            return;
+        }
+
+        // queenside rook
         const firstRookPos = ChessPosition.get(1, row);
         const firstRook = boardState.getPieceAtPosition(firstRookPos);
         if (firstRook && !firstRook.getIsActivated()) {
@@ -76,6 +85,7 @@ export class KingPiece extends ChessPiece {
             }
         }
 
+        // kingside rook
         const secondRookPos = ChessPosition.get(8, row);
         const secondRook = boardState.getPieceAtPosition(secondRookPos);
         if (secondRook && !secondRook.getIsActivated()) {

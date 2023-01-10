@@ -18,6 +18,8 @@ import {
 } from "../models/heuristic";
 import { HeuristicDataPoint } from "./heuristic-data-point";
 
+// TODO: higher score for skewer / pin w/ king
+
 export class ChessAiHeuristic implements iChessAiHeuristic {
     private maxPiecePoints =
         PawnPiece.pointsValue * 8 +
@@ -35,7 +37,7 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
     // TODO: genetic algorithm or manually adjust values
     private dataPoints = {
         // the relative value of each piece score
-        relativePiecesScore: new HeuristicDataPoint(0.60, this.maxPiecePoints),
+        relativePiecesScore: new HeuristicDataPoint(0.6, this.maxPiecePoints),
         // score based on if player is threatening with a skewer
         skewerScore: new HeuristicDataPoint(0.03, this.maxSkewerPinScore),
         // score based on if player is being threatened by a skewered
@@ -78,8 +80,8 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
         if (boardState.isGameInCheckmate()) {
             return {
                 score: boardState.isPlayerInCheckmate(ChessPlayer.white)
-                    ? -Infinity
-                    : Infinity,
+                    ? -1
+                    : 1,
                 data: {},
             };
         }
@@ -172,6 +174,7 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
                             move.toPosition
                         )
                     ) {
+                        // TODO: the way this code is, it's impossible to actually detect a pin / skewer, need to determine way to accomplish
                         // if there wasn't a threat yet, add to it
                         if (!threatenedPiece) {
                             this.dataPoints.threateningScore.value +=
@@ -186,29 +189,32 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
                             // if the piece behind can capture, don't consider it a skewer
                             // if there was a threat, then this is a pin or skewer
                             // assess if the piece that is threatening can be taken, or if the trade results in benefit
-                            const backPieceCanTake = pieceAtPosPossibleMoves.hasMoveToPosition(
-                                threatenedPiece.getPosition()
-                            );
+                            const backPieceCanTake =
+                                pieceAtPosPossibleMoves.hasMoveToPosition(
+                                    threatenedPiece.getPosition()
+                                );
 
-                            if (!backPieceCanTake || piece.pointsValue <= threatenedPiece.pointsValue) {
-                                if (
-                                    move.pieceMoved.pointsValue <=
-                                    threatenedPiece.pointsValue
-                                ) {
+                            if (
+                                move.pieceMoved.pointsValue <=
+                                threatenedPiece.pointsValue
+                            ) {
+                                if (!backPieceCanTake) {
                                     // this is a skewer (consider a tie a skewer)
                                     this.dataPoints.skewerScore.value +=
                                         inc * pieceAtPos.pointsValue;
 
                                     this.dataPoints.skeweredByScore.value +=
                                         inc * pieceAtPos.pointsValue * -1;
-                                } else {
-                                    // this is a pin
-                                    this.dataPoints.pinScore.value +=
-                                        inc * pieceAtPos.pointsValue;
 
-                                    this.dataPoints.pinnedByScore.value +=
-                                        inc * pieceAtPos.pointsValue * -1;
+                                    isSkewerPin = true;
                                 }
+                            } else {
+                                // this is a pin
+                                this.dataPoints.pinScore.value +=
+                                    inc * pieceAtPos.pointsValue;
+
+                                this.dataPoints.pinnedByScore.value +=
+                                    inc * pieceAtPos.pointsValue * -1;
                                 isSkewerPin = true;
                             }
                         }
