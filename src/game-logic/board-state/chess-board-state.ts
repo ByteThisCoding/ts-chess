@@ -513,7 +513,7 @@ export class ChessBoardState {
         const removePieces = new Set<ChessPiece>();
         for (let cell = 0; cell < 64; cell++) {
             for (const piece of this.cellMovesPieces[cell]) {
-                if (!removePieces.has(piece)/* && piece.areMovesCached()*/) {
+                if (!removePieces.has(piece) /* && piece.areMovesCached()*/) {
                     const moves = piece.getPossibleMovements(this);
                     if (
                         moves.hasBlockedPosition(pos) ||

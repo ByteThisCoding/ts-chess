@@ -16,7 +16,7 @@ interface iLookahedResponse {
 enum TranspositionTableType {
     exact,
     lowerbound,
-    upperbound
+    upperbound,
 }
 
 interface iTranspositionTableEntry extends iLookahedResponse {
@@ -29,17 +29,26 @@ interface iTranspositionTableEntry extends iLookahedResponse {
  */
 export class ChessNegamaxAiPlayer implements iChessAiPlayer {
     // TODO: make configurable
-    private MAX_DEPTH = 5;
+    //private MAX_DEPTH = 4;
+
+    // there are 20 opening moves, constant roughly represents with depth 4
+    private depthNumerator = 4*Math.log2(17);
 
     constructor(
         // the main heuristic to evaluate leaf nodes in the negamax traversal
         private heuristic: iChessAiHeuristic,
         // a less-expensive heuristic to order moves to potentially save time
         private sortHeuristic: iChessAiHeuristic
-    ) { }
+    ) {}
 
     // TODO: add a node to record previous traversals from previous moves to save time (we restart at each node)
     // TODO: add iterative deepening
+
+    getSearchDepth(player: ChessPlayer, boardState: ChessBoardState): number {
+        // we're assuming an average of 32 possible moves at the top = depth 4
+        const numMoves = boardState.getPossibleMovesForPlayer(player).getNumMoves();
+        return Math.min(Math.ceil(this.depthNumerator/Math.log2(numMoves)), 7);
+    }
 
     /**
      * Assumes this player is the opposite of the player that just went
@@ -62,7 +71,10 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
         //const cloneBoard = boardState.clone();
         const negateMult = player === ChessPlayer.white ? 1 : -1;
 
-        const depth = this.MAX_DEPTH;
+        //const depth = this.MAX_DEPTH;
+        const depth = this.getSearchDepth(player, boardState);
+
+        console.log("AI starting search of depth " + depth);
 
         const transpositionTable = new Map<string, iTranspositionTableEntry>();
         const { hScore, move } = this.lookAheadAtMove(
@@ -95,13 +107,13 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
 
         console.log(
             "AI move determined in " +
-            (+new Date() - start) / 1000 +
-            " seconds and depth of " +
-            depth +
-            " (" +
-            hScore?.score +
-            ") " +
-            bestMoveOriginal?.toString() || ":resign:",
+                (+new Date() - start) / 1000 +
+                " seconds and depth of " +
+                depth +
+                " (" +
+                hScore?.score +
+                ") " +
+                bestMoveOriginal?.toString() || ":resign:",
             hScore?.data
         );
         return bestMoveOriginal || null;
@@ -172,7 +184,7 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
                     const tableResult = transpositionTable.get(
                         transpositionTableKey
                     )!;
-                    if (tableResult.depthRemaining <= depthRemaining) {
+                    if (tableResult.depthRemaining >= depthRemaining) {
                         switch (tableResult.type) {
                             case TranspositionTableType.exact:
                                 thisMoveH = { ...tableResult };
@@ -201,7 +213,7 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
                                     alphaPrune = Math.max(
                                         alphaPrune,
                                         tableResult.hScore.score * -1
-                                    )
+                                    );
                                 }
                                 break;
                         }

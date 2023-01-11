@@ -6,6 +6,7 @@ import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-
 
 /**
  * Encapsulation of a knight
+ * This piece doesn't use shadow moves because it can only move to specific square (i.e. not in a line)
  */
 export class KnightPiece extends ChessPiece {
     static letter = "N";
@@ -41,7 +42,7 @@ export class KnightPiece extends ChessPiece {
             if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
                 moves.addBlockedPosition(toPos);
             } else {
-                moves.add(this.newMove(boardState, toPos));
+                moves.addMove(ChessPiece.newMove(this, toPos));
             }
         }
 
@@ -50,7 +51,7 @@ export class KnightPiece extends ChessPiece {
             if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
                 moves.addBlockedPosition(toPos);
             } else {
-                moves.add(this.newMove(boardState, toPos));
+                moves.addMove(ChessPiece.newMove(this, toPos));
             }
         }
 
@@ -59,7 +60,7 @@ export class KnightPiece extends ChessPiece {
             if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
                 moves.addBlockedPosition(toPos);
             } else {
-                moves.add(this.newMove(boardState, toPos));
+                moves.addMove(ChessPiece.newMove(this, toPos));
             }
         }
 
@@ -68,7 +69,7 @@ export class KnightPiece extends ChessPiece {
             if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
                 moves.addBlockedPosition(toPos);
             } else {
-                moves.add(this.newMove(boardState, toPos));
+                moves.addMove(ChessPiece.newMove(this, toPos));
             }
         }
 
@@ -80,7 +81,7 @@ export class KnightPiece extends ChessPiece {
             if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
                 moves.addBlockedPosition(toPos);
             } else {
-                moves.add(this.newMove(boardState, toPos));
+                moves.addMove(ChessPiece.newMove(this, toPos));
             }
         }
 
@@ -89,7 +90,7 @@ export class KnightPiece extends ChessPiece {
             if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
                 moves.addBlockedPosition(toPos);
             } else {
-                moves.add(this.newMove(boardState, toPos));
+                moves.addMove(ChessPiece.newMove(this, toPos));
             }
         }
 
@@ -98,7 +99,7 @@ export class KnightPiece extends ChessPiece {
             if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
                 moves.addBlockedPosition(toPos);
             } else {
-                moves.add(this.newMove(boardState, toPos));
+                moves.addMove(ChessPiece.newMove(this, toPos));
             }
         }
 
@@ -107,7 +108,7 @@ export class KnightPiece extends ChessPiece {
             if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
                 moves.addBlockedPosition(toPos);
             } else {
-                moves.add(this.newMove(boardState, toPos));
+                moves.addMove(ChessPiece.newMove(this, toPos));
             }
         }
 

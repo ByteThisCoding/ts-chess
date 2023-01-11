@@ -3,6 +3,7 @@ import { ChessCell, ChessPosition } from "../position/chess-position";
 import { ChessPlayer } from "../enums";
 import { ChessBoardSingleMove } from "../moves/chess-board-move";
 import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set";
+import { ChessBoardSingleMoveShadow } from "../moves/chess-board-shadow-move";
 
 /**
  * Abstraction for common chess piece logic + external reference
@@ -116,8 +117,8 @@ export abstract class ChessPiece {
     /**
      * Helper method to simplify creating new move objects for subclasses
      */
-    protected newMove(
-        boardState: ChessBoardState,
+    protected static newMove(
+        thisPiece: ChessPiece,
         toPosition: ChessCell,
         isCastle: boolean = false,
         isEnPassant: boolean = false,
@@ -125,14 +126,28 @@ export abstract class ChessPiece {
         promotionLetter: string = ""
     ): ChessBoardSingleMove | null {
         return new ChessBoardSingleMove(
-            this.player,
-            this,
-            this.position,
+            thisPiece.player,
+            thisPiece,
+            thisPiece.position,
             toPosition,
             isCastle,
             isEnPassant,
             isPromotion,
             promotionLetter
+        );
+    }
+
+    protected static newShadowMove(
+        thisPiece: ChessPiece,
+        toPosition: ChessCell,
+        blockingPiece: ChessPiece
+    ): ChessBoardSingleMoveShadow | null {
+        return new ChessBoardSingleMoveShadow(
+            thisPiece.player,
+            thisPiece,
+            thisPiece.position,
+            toPosition,
+            blockingPiece
         );
     }
 

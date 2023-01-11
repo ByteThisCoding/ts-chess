@@ -27,95 +27,168 @@ export class RookPiece extends ChessPiece {
         return new RookPiece(this.player, this.getPosition());
     }
 
-    protected getPossibleMovementsWhite(
-        boardState: ChessBoardState
-    ): ChessPieceAvailableMoveSet {
-        const moves = new ChessPieceAvailableMoveSet(this.player, boardState);
-        const [posCol, posRow] = ChessPosition.cellToColRow(this.getPosition());
+    /**
+     * The Queen piece can re-use this method to get its possible positions
+     */
+    static addPossibleMovesToSet(
+        thisPiece: ChessPiece,
+        boardState: ChessBoardState,
+        moves: ChessPieceAvailableMoveSet
+    ): void {
+        const [posCol, posRow] = ChessPosition.cellToColRow(
+            thisPiece.getPosition()
+        );
+
+        let isShadow: boolean;
+        let blockingPiece: ChessPiece | null = null;
 
         // add all to the right in col
+        isShadow = false;
+        blockingPiece = null;
         for (let i = posCol + 1; i < 9; i++) {
             const newPos = ChessPosition.get(i, posRow);
 
             const existingPiece = boardState.getPieceAtPosition(newPos);
             if (existingPiece) {
-                if (existingPiece.player !== this.player) {
-                    moves.add(this.newMove(boardState, newPos));
+                if (isShadow) {
+                    if (existingPiece.player !== thisPiece.player) {
+                        moves.addShadowMove(
+                            this.newShadowMove(thisPiece, newPos, blockingPiece!)
+                        );
+                    }
+                    break;
+                } else if (existingPiece.player !== thisPiece.player) {
+                    moves.addMove(this.newMove(thisPiece, newPos));
                     // ensure next position is marked as blocked
                     const blockedPosition = ChessPosition.get(i + 1, posRow);
                     moves.addBlockedPosition(blockedPosition);
+                    isShadow = true;
+                    blockingPiece = existingPiece;
                 } else {
                     moves.addBlockedPosition(newPos);
+                    break;
                 }
-
-                break;
+            } else if (isShadow) {
+                moves.addShadowMove(
+                    this.newShadowMove(thisPiece, newPos, blockingPiece!)
+                );
             } else {
-                moves.add(this.newMove(boardState, newPos));
+                moves.addMove(this.newMove(thisPiece, newPos));
             }
         }
 
         // add all to the left in col
+        isShadow = false;
+        blockingPiece = null;
         for (let i = posCol - 1; i > 0; i--) {
             const newPos = ChessPosition.get(i, posRow);
 
             const existingPiece = boardState.getPieceAtPosition(newPos);
             if (existingPiece) {
-                if (existingPiece.player !== this.player) {
-                    moves.add(this.newMove(boardState, newPos));
+                if (isShadow) {
+                    if (existingPiece.player !== thisPiece.player) {
+                        moves.addShadowMove(
+                            this.newShadowMove(thisPiece, newPos, blockingPiece!)
+                        );
+                    }
+                    break;
+                } else if (existingPiece.player !== thisPiece.player) {
+                    moves.addMove(this.newMove(thisPiece, newPos));
                     // ensure next position is marked as blocked
                     const blockedPosition = ChessPosition.get(i - 1, posRow);
                     moves.addBlockedPosition(blockedPosition);
+                    isShadow = true;
+                    blockingPiece = existingPiece;
                 } else {
                     moves.addBlockedPosition(newPos);
+                    break;
                 }
-
-                break;
+            } else if (isShadow) {
+                moves.addShadowMove(
+                    this.newShadowMove(thisPiece, newPos, blockingPiece!)
+                );
             } else {
-                moves.add(this.newMove(boardState, newPos));
+                moves.addMove(this.newMove(thisPiece, newPos));
             }
         }
 
         // add all above in row
+        isShadow = false;
+        blockingPiece = null;
         for (let i = posRow + 1; i < 9; i++) {
             const newPos = ChessPosition.get(posCol, i);
 
             const existingPiece = boardState.getPieceAtPosition(newPos);
             if (existingPiece) {
-                if (existingPiece.player !== this.player) {
-                    moves.add(this.newMove(boardState, newPos));
+                if (isShadow) {
+                    if (existingPiece.player !== thisPiece.player) {
+                        moves.addShadowMove(
+                            this.newShadowMove(thisPiece, newPos, blockingPiece!)
+                        );
+                    }
+                    break;
+                } else if (existingPiece.player !== thisPiece.player) {
+                    moves.addMove(this.newMove(thisPiece, newPos));
                     // ensure next position is marked as blocked
                     const blockedPosition = ChessPosition.get(posCol, i + 1);
                     moves.addBlockedPosition(blockedPosition);
+                    isShadow = true;
+                    blockingPiece = existingPiece;
                 } else {
                     moves.addBlockedPosition(newPos);
+                    break;
                 }
-
-                break;
+            } else if (isShadow) {
+                moves.addShadowMove(
+                    this.newShadowMove(thisPiece, newPos, blockingPiece!)
+                );
             } else {
-                moves.add(this.newMove(boardState, newPos));
+                moves.addMove(this.newMove(thisPiece, newPos));
             }
         }
 
         // add all below in row
+        isShadow = false;
+        blockingPiece = null;
         for (let i = posRow - 1; i > 0; i--) {
             const newPos = ChessPosition.get(posCol, i);
 
             const existingPiece = boardState.getPieceAtPosition(newPos);
             if (existingPiece) {
-                if (existingPiece.player !== this.player) {
-                    moves.add(this.newMove(boardState, newPos));
+                if (isShadow) {
+                    if (existingPiece.player !== thisPiece.player) {
+                        moves.addShadowMove(
+                            this.newShadowMove(thisPiece, newPos, blockingPiece!)
+                        );
+                    }
+                    break;
+                } else if (existingPiece.player !== thisPiece.player) {
+                    moves.addMove(this.newMove(thisPiece, newPos));
                     // ensure next position is marked as blocked
                     const blockedPosition = ChessPosition.get(posCol, i - 1);
                     moves.addBlockedPosition(blockedPosition);
+                    isShadow = true;
+                    blockingPiece = existingPiece;
                 } else {
                     moves.addBlockedPosition(newPos);
+                    break;
                 }
-
-                break;
+            } else if (isShadow) {
+                moves.addShadowMove(
+                    this.newShadowMove(thisPiece, newPos, blockingPiece!)
+                );
             } else {
-                moves.add(this.newMove(boardState, newPos));
+                moves.addMove(this.newMove(thisPiece, newPos));
             }
         }
+    }
+
+    protected getPossibleMovementsWhite(
+        boardState: ChessBoardState
+    ): ChessPieceAvailableMoveSet {
+        const moves = new ChessPieceAvailableMoveSet(this.player, boardState);
+
+        RookPiece.addPossibleMovesToSet(this, boardState, moves);
 
         return moves;
     }

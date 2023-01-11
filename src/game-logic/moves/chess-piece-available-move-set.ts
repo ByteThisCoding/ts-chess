@@ -3,12 +3,14 @@ import { ChessCell, ChessPosition } from "../position/chess-position";
 import { ChessPlayer } from "../enums";
 import { ChessPiece } from "../pieces/chess-piece";
 import { ChessBoardSingleMove } from "./chess-board-move";
+import { ChessBoardSingleMoveShadow } from "./chess-board-shadow-move";
 
 /**
  * Encapsulation of a set of possible moves
  */
 export class ChessPieceAvailableMoveSet {
     private availableMoves = new Map<ChessCell, ChessBoardSingleMove[]>();
+    private shadowMoves = new Map<ChessCell, ChessBoardSingleMoveShadow[]>();
     private blockedPositions = new Set<ChessCell>();
 
     private numMoves = 0;
@@ -31,7 +33,7 @@ export class ChessPieceAvailableMoveSet {
     /**
      * Add a potential move, wrapping move if it's a chess position
      */
-    add(move: ChessBoardSingleMove | null): void {
+    addMove(move: ChessBoardSingleMove | null): void {
         // if trying to add an empty move (probably item out of bounds), return
         if (!move) {
             return;
@@ -53,6 +55,22 @@ export class ChessPieceAvailableMoveSet {
 
         this.availableMoves.get(move.toPosition)!.push(move);
         this.numMoves++;
+    }
+
+    /**
+     * A shadow move is a move which is blocked by a single piece which is owned by the enemy
+     */
+    addShadowMove(move: ChessBoardSingleMoveShadow | null): void {
+        // if trying to add an empty move (probably item out of bounds), return
+        if (!move) {
+            return;
+        }
+
+        if (!this.shadowMoves.has(move.toPosition)) {
+            this.shadowMoves.set(move.toPosition, []);
+        }
+
+        this.shadowMoves.get(move.toPosition)!.push(move);
     }
 
     /**
@@ -82,17 +100,36 @@ export class ChessPieceAvailableMoveSet {
 
     /**
      * Combine the moves of another instance of this class into this
+     * This does not add shadow moves
      */
     merge(movesSet: ChessPieceAvailableMoveSet): void {
         for (const [pos, moves] of movesSet.availableMoves) {
             for (const move of moves) {
-                this.add(move);
+                this.addMove(move);
             }
+        }
+
+        for (const [pos, moves] of movesSet.shadowMoves) {
+            for (const move of moves) {
+                this.addShadowMove(move);
+            }
+        }
+
+        for (const pos of movesSet.blockedPositions) {
+            this.addBlockedPosition(pos);
         }
     }
 
     *getMoves(): Iterable<ChessBoardSingleMove> {
         for (const [pos, moves] of this.availableMoves) {
+            for (const move of moves) {
+                yield move;
+            }
+        }
+    }
+
+    *getShadowMoves(): Iterable<ChessBoardSingleMoveShadow> {
+        for (const [pos, moves] of this.shadowMoves) {
             for (const move of moves) {
                 yield move;
             }
@@ -132,11 +169,20 @@ export class ChessPieceAvailableMoveSet {
         return this.getMovesToPosition(pos).length > 0;
     }
 
+    hasShadowMoveToPosition(pos: ChessCell): boolean {
+        return this.getShadowMovesToPosition(pos).length > 0;
+    }
+
     /**
      * Get a move to a position if it exists, or null if none exists
      */
     getMovesToPosition(pos: ChessCell): ChessBoardSingleMove[] {
         const moves = this.availableMoves.get(pos);
+        return moves || [];
+    }
+
+    getShadowMovesToPosition(pos: ChessCell): ChessBoardSingleMoveShadow[] {
+        const moves = this.shadowMoves.get(pos);
         return moves || [];
     }
 }

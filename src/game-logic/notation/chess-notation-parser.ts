@@ -67,7 +67,7 @@ export class ChessNotation {
             // see which piece can make this move
             const possibleMoves =
                 boardState.getPossibleMovesForPlayer(movePlayer);
-            
+
             let numPiecesFound = 0;
             let fromMove: ChessBoardSingleMove | null = null;
             for (const move of possibleMoves.getMoves()) {
