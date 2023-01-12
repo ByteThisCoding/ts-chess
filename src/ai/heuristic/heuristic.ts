@@ -16,6 +16,7 @@ import {
     iChessAiHeuristic,
     iChessAiHeuristicEvaluation,
 } from "../models/heuristic";
+import { iChessAiHeuristicDataPoint, iChessAiHeuristicDataPoints } from "../models/heuristic-data-point";
 import { HeuristicDataPoint } from "./heuristic-data-point";
 
 // TODO: higher score for skewer / pin w/ king
@@ -29,30 +30,55 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
         QueenPiece.pointsValue;
 
     // TODO: genetic algorithm or manually adjust values
-    private dataPoints = {
-        // the relative value of each piece score
-        relativePiecesScore: new HeuristicDataPoint(0.7, this.maxPiecePoints),
-        // score based on if player is threatening with a skewer (TODO: max value of 2)
-        pinSkewerScore: new HeuristicDataPoint(0.1, 2),
-        // score based on what each player is threatening
-        threateningScore: new HeuristicDataPoint(0.06, this.maxPiecePoints),
-        // passed pawn score
-        passedPawnScore: new HeuristicDataPoint(0.04, 8),
-        // activation score
-        activatedScore: new HeuristicDataPoint(
-            0.03,
-            // 1.25 for bishop, 1.15 for knight, 1 for pawn
-            1.25 * 2 + 1.15 * 2 + 1 * 2
-        ),
-        // control of center
-        centerControlScore: new HeuristicDataPoint(0.02, 16),
-        // mobility
-        mobilityScore: new HeuristicDataPoint(
-            0.05,
-            40 //TODO: find better value
-        ),
-        // doubled pawns?
-    };
+    private dataPoints: iChessAiHeuristicDataPoints<iChessAiHeuristicDataPoint>;
+
+    private defaultWeights: iChessAiHeuristicDataPoints<number> = {
+        relativePiecesScore: 0.7,
+        pinSkewerScore: 0.1,
+        threateningScore: 0.06,
+        passedPawnScore: 0.04,
+        activatedScore: 0.03,
+        centerControlScore: 0.02,
+        mobilityScore: 0.04,
+        stackedPawnScore: 0.01
+    }
+
+    constructor(
+        weights?: iChessAiHeuristicDataPoints<number>
+    ) {
+        if (!weights) {
+            weights = this.defaultWeights;
+        }
+
+        this.dataPoints = {
+            // the relative value of each piece score
+            relativePiecesScore: new HeuristicDataPoint(weights.relativePiecesScore, this.maxPiecePoints),
+            // score based on if player is threatening with a skewer (TODO: max value of 2)
+            pinSkewerScore: new HeuristicDataPoint(weights.pinSkewerScore, 2),
+            // score based on what each player is threatening
+            threateningScore: new HeuristicDataPoint(weights.threateningScore, this.maxPiecePoints),
+            // passed pawn score
+            passedPawnScore: new HeuristicDataPoint(weights.passedPawnScore, 8),
+            // activation score
+            activatedScore: new HeuristicDataPoint(
+                weights.activatedScore,
+                // 1.25 for bishop, 1.15 for knight, 1 for pawn
+                1.25 * 2 + 1.15 * 2 + 1 * 2
+            ),
+            // control of center
+            centerControlScore: new HeuristicDataPoint(weights.centerControlScore, 16),
+            // mobility
+            mobilityScore: new HeuristicDataPoint(
+                weights.mobilityScore,
+                40 //TODO: find better value
+            ),
+            // doubled pawns, tripled, etc
+            stackedPawnScore: new HeuristicDataPoint(
+                weights.stackedPawnScore,
+                4
+            )
+        };
+    }
 
     /**
      * TODO: add more criteria
@@ -191,6 +217,29 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
                     if (!boardState.getPossibleMovementsForPiece(blockingPiece).hasMoveToPosition(move.pieceMoved.getPosition())) {
                         // we should only increment if the threatened piece doesn't have the power to take original piece
                         this.dataPoints.pinSkewerScore.value += inc;
+                    }
+                }
+            }
+        }
+        
+        // check doubled / stacked pawns, enemy having them helps us
+        for (let col=0; col<8; col++) {
+            let blackPawnInCol = false;
+            let whitePawnInCol = false;
+
+            for (let row=0; row<8; row++) { 
+                const piece = boardState.getPieceAtPosition(ChessPosition.get(col, row));
+                if (piece?.letter === PawnPiece.letter) {
+                    if (piece.player === ChessPlayer.white) {
+                        if (whitePawnInCol) {
+                            this.dataPoints.stackedPawnScore.value += 1;
+                        }
+                        whitePawnInCol = true;
+                    } else {
+                        if (blackPawnInCol) {
+                            this.dataPoints.stackedPawnScore.value -= 1;
+                        }
+                        blackPawnInCol = true;
                     }
                 }
             }

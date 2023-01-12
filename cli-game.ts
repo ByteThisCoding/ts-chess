@@ -146,6 +146,7 @@ async function loopOneAi(game: ChessGame) {
 }
 
 async function loopTwoAis(game: ChessGame) {
+    const start = +new Date();
     console.log("Two AI players game has started");
 
     const aiPlayerWhite = new ChessNegamaxAiPlayer(
@@ -182,6 +183,7 @@ async function loopTwoAis(game: ChessGame) {
             repetitionMap.set(boardStr, (repetitionMap.get(boardStr) || 0) + 1);
             if (repetitionMap.get(boardStr)! > 3) {
                 console.log("Game over due to repetition!");
+                console.log("Time: ", +new Date() - start);
                 return;
             }
 
@@ -214,6 +216,7 @@ async function loopTwoAis(game: ChessGame) {
                 );
                 if (repetitionMap.get(boardStr)! > 3) {
                     console.log("Game over due to repetition!");
+                    console.log("Time: ", +new Date() - start);
                     return;
                 }
             }
@@ -225,6 +228,7 @@ async function loopTwoAis(game: ChessGame) {
         }
     }
 
+    console.log("Time: ", +new Date() - start);
     console.log("Game over!");
 }
 

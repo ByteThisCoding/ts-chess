@@ -32,7 +32,7 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
     //private MAX_DEPTH = 4;
 
     // there are 20 opening moves, constant roughly represents with depth 4
-    private depthNumerator = 4*Math.log2(17);
+    private depthNumerator = 4*Math.log2(34);
 
     constructor(
         // the main heuristic to evaluate leaf nodes in the negamax traversal
@@ -47,7 +47,7 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
     getSearchDepth(player: ChessPlayer, boardState: ChessBoardState): number {
         // we're assuming an average of 32 possible moves at the top = depth 4
         const numMoves = boardState.getPossibleMovesForPlayer(player).getNumMoves();
-        return Math.min(Math.ceil(this.depthNumerator/Math.log2(numMoves)), 7);
+        return Math.min(Math.floor(this.depthNumerator/Math.log2(numMoves)), 6);
     }
 
     /**
@@ -113,8 +113,7 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
                 " (" +
                 hScore?.score +
                 ") " +
-                bestMoveOriginal?.toString() || ":resign:",
-            hScore?.data
+                bestMoveOriginal?.toString() || ":resign:"
         );
         return bestMoveOriginal || null;
     }

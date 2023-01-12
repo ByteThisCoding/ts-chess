@@ -1,7 +1,9 @@
+import { iChessAiHeuristicDataPoint } from "../models/heuristic-data-point";
+
 /**
  * Encapsulate a single data point
  */
-export class HeuristicDataPoint {
+export class HeuristicDataPoint implements iChessAiHeuristicDataPoint {
     public value: number = 0;
 
     constructor(
