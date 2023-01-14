@@ -32,7 +32,7 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
     //private MAX_DEPTH = 4;
 
     // there are 20 opening moves, constant roughly represents with depth 4
-    private depthNumerator = 4*Math.log2(34);
+    private depthNumerator = 4 * Math.log2(38);
 
     constructor(
         // the main heuristic to evaluate leaf nodes in the negamax traversal
@@ -46,8 +46,13 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
 
     getSearchDepth(player: ChessPlayer, boardState: ChessBoardState): number {
         // we're assuming an average of 32 possible moves at the top = depth 4
-        const numMoves = boardState.getPossibleMovesForPlayer(player).getNumMoves();
-        return Math.min(Math.floor(this.depthNumerator/Math.log2(numMoves)), 6);
+        const numMoves = boardState
+            .getPossibleMovesForPlayer(player)
+            .getNumMoves();
+        return Math.min(
+            Math.floor(this.depthNumerator / Math.log2(numMoves)),
+            6
+        );
     }
 
     /**
@@ -93,7 +98,7 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
         // find the uncloned version of the move, we need object referential equality
         let bestMoveOriginal!: ChessBoardSingleMove;
         if (move) {
-            for (const findMove of boardState
+            /*for (const findMove of boardState
                 .getPossibleMovesForPlayer(player)
                 .getMoves()) {
                 // TODO: comparing strings is done to validate if a bug exists, remove when done
@@ -102,6 +107,18 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
                     bestMoveOriginal = findMove;
                     break;
                 }
+            }*/
+            bestMoveOriginal = move;
+        } else {
+            // if the AI didn't determine a move, just grab whatever first move and proceed, this means checkmate can't be avoided
+            for (const firstMove of boardState
+                .getPossibleMovesForPlayer(player)
+                .getMoves()) {
+                if (this.tryMakeMove(boardState, firstMove)) {
+                    bestMoveOriginal = firstMove;
+                    boardState.undoLastMove();
+                }
+                break;
             }
         }
 

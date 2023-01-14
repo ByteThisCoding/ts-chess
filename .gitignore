@@ -7,7 +7,7 @@
 /coverage
 /build
 
-gen-results.txt
+gen-results**.txt
 
 # User-specific files
 *.rsuser

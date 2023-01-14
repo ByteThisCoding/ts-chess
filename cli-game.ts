@@ -22,8 +22,8 @@ RunGame();
 async function RunGame() {
     const game = new ChessGame();
     //await loopNoAi(game);
-    //await loopOneAi(game);
-    await loopTwoAis(game);
+    await loopOneAi(game);
+    //await loopTwoAis(game);
 
     console.log(printGameCheckmatePieces(game.getCurrentBoardState()));
 
@@ -71,7 +71,31 @@ async function loopNoAi(game: ChessGame) {
  */
 async function loopOneAi(game: ChessGame) {
     const playerColor = await requestPlayerColor();
-    const heuristic = new ChessAiHeuristic();
+    //const heuristic = new ChessAiHeuristic({ "relativePiecesScore": 0.3565, "pinSkewerScore": 0.0985, "threateningScore": 0.08000000000000002, "passedPawnScore": 0.11699999999999998, "activatedScore": 0.03249999999999999, "centerControlScore": 0.08, "mobilityScore": 0.1525, "stackedPawnScore": 0.083 });
+    /*const heuristic = new ChessAiHeuristic({
+        "relativePiecesScore": 0.5362038461538461,
+        "pinSkewerScore": 0.09336538461538462,
+        "threateningScore": 0.06973076923076922,
+        "passedPawnScore": 0.077384,
+        "activatedScore": 0.031188461538461538,
+        "centerControlScore": 0.04992307692307692,
+        "mobilityScore": 0.09567692307692307,
+        "stackedPawnScore": 0.0464
+    });*/
+    //const heuristic = new ChessAiHeuristic({"relativePiecesScore":0.907,"passedPawnScore":0,"pinSkewerScore":0.0029999999999999923,"threateningScore":0.07099999999999998,"activatedScore":0.004,"mobilityScore":0.002,"centerControlScore":0.004,"stackedPawnScore":0.009});
+    //const heuristic = new ChessAiHeuristic({"relativePiecesScore":0.7321249999999999,"pinSkewerScore":0.058625,"threateningScore":0.056749999999999995,"passedPawnScore":0.02275,"activatedScore":0.024875,"centerControlScore":0.021124999999999998,"mobilityScore":0.02375,"stackedPawnScore":0.060000000000000005});
+    const heuristic = new ChessAiHeuristic({
+        relativePiecesScore: 0.62225,
+        passedPawnScore: 0.005999999999999998,
+        pinSkewerScore: 0.03174999999999999,
+        threateningScore: 0.1865,
+        activatedScore: 0.019250000000000003,
+        mobilityScore: 0.006500000000000001,
+        centerControlScore: 0.02075,
+        stackedPawnScore: 0.10700000000000001,
+    });
+
+    //const heuristic = new ChessAiHeuristic();
     const aiPlayer = new ChessNegamaxAiPlayer(
         heuristic,
         new ChessAiSortHeuristic()

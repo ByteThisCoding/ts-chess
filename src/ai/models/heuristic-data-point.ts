@@ -4,7 +4,7 @@
 export interface iChessAiHeuristicDataPoint {
     value: number;
 
-    weight: number,
+    weight: number;
     maxValueAbs: number;
 
     getNorm(): number;

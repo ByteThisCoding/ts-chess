@@ -53,7 +53,11 @@ export class RookPiece extends ChessPiece {
                 if (isShadow) {
                     if (existingPiece.player !== thisPiece.player) {
                         moves.addShadowMove(
-                            this.newShadowMove(thisPiece, newPos, blockingPiece!)
+                            this.newShadowMove(
+                                thisPiece,
+                                newPos,
+                                blockingPiece!
+                            )
                         );
                     }
                     break;
@@ -88,7 +92,11 @@ export class RookPiece extends ChessPiece {
                 if (isShadow) {
                     if (existingPiece.player !== thisPiece.player) {
                         moves.addShadowMove(
-                            this.newShadowMove(thisPiece, newPos, blockingPiece!)
+                            this.newShadowMove(
+                                thisPiece,
+                                newPos,
+                                blockingPiece!
+                            )
                         );
                     }
                     break;
@@ -123,7 +131,11 @@ export class RookPiece extends ChessPiece {
                 if (isShadow) {
                     if (existingPiece.player !== thisPiece.player) {
                         moves.addShadowMove(
-                            this.newShadowMove(thisPiece, newPos, blockingPiece!)
+                            this.newShadowMove(
+                                thisPiece,
+                                newPos,
+                                blockingPiece!
+                            )
                         );
                     }
                     break;
@@ -158,7 +170,11 @@ export class RookPiece extends ChessPiece {
                 if (isShadow) {
                     if (existingPiece.player !== thisPiece.player) {
                         moves.addShadowMove(
-                            this.newShadowMove(thisPiece, newPos, blockingPiece!)
+                            this.newShadowMove(
+                                thisPiece,
+                                newPos,
+                                blockingPiece!
+                            )
                         );
                     }
                     break;
