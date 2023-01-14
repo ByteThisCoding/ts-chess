@@ -1,6 +1,8 @@
-const execSync = require("child_process").execSync;
-const fs = require("fs");
-const path = require("path");
+import { execSync } from "child_process";
+import * as fs from "fs";
+import path from "path";
+
+const __dirname = path.resolve();
 
 let args = process.argv;
 args.splice(0, 2);
@@ -25,11 +27,11 @@ switch (command) {
 process.exit(exitCode);
 
 function build() {
-    /*const testResponse = test();
+    const testResponse = test();
     if (testResponse !== 0) {
         //throw new Error(`Build failed because test execution failed!`);
         console.log(`...test execution failed!`)
-    }*/
+    }
 
     console.log(`Building...`);
 
