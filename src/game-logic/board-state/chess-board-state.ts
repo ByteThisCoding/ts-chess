@@ -209,6 +209,8 @@ export class ChessBoardState {
         this._useAvailableMovesCache = false;
 
         this.boardStats.prevStats = { ...this.boardStats };
+        this.boardStats.prevStats.blackPieceTypeCounts = new Map(this.boardStats.prevStats.blackPieceTypeCounts);
+        this.boardStats.prevStats.whitePieceTypeCounts = new Map(this.boardStats.prevStats.whitePieceTypeCounts);
 
         this.boardStats.lastNotation = notation;
         this.boardStats.moveNumber++;
