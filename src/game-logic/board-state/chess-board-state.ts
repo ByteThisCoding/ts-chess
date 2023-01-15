@@ -9,7 +9,7 @@ import { QueenPiece } from "../pieces/queen";
 import { RookPiece } from "../pieces/rook";
 import { ChessBoardSingleMove } from "../moves/chess-board-move";
 import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set";
-import { ChessPieceFactory } from "../pieces/chess-piece-factory";
+import { ChessPieceFactory, ChessPieceStatic } from "../pieces/chess-piece-factory";
 import { ChessMoveValidator } from "../moves/chess-move-validator";
 
 interface BoardMoveStats {
@@ -29,6 +29,8 @@ interface BoardMoveStats {
     prevStats: BoardMoveStats | null;
     // this is move, not turn, and 0 based, so white's first is 0 and black's first is 1
     moveNumber: number;
+    blackPieceTypeCounts: Map<ChessPieceStatic, number>;
+    whitePieceTypeCounts: Map<ChessPieceStatic, number>;
 }
 
 /**
@@ -48,6 +50,8 @@ export class ChessBoardState {
         lastMoveReverseUpdates: new Map(),
         prevStats: null,
         moveNumber: 0,
+        blackPieceTypeCounts: new Map(),
+        whitePieceTypeCounts: new Map()
     };
 
     // internal, used to prevent infinite recursion when evaluating checkmate
@@ -69,6 +73,26 @@ export class ChessBoardState {
 
     // store information about the last move
     private constructor(private positions: (ChessPiece | null)[]) {
+        // set piece counts
+        for (const position of positions) {
+            switch (position?.player) {
+                case ChessPlayer.white:
+                    const whitePiece = ChessPieceFactory.getPieceClass(position?.letter);
+                    this.boardStats.whitePieceTypeCounts.set(
+                        whitePiece,
+                        (this.boardStats.whitePieceTypeCounts.get(whitePiece) || 0) + 1
+                    );
+                    break;
+                case ChessPlayer.black:
+                    const blackPiece = ChessPieceFactory.getPieceClass(position?.letter);
+                    this.boardStats.blackPieceTypeCounts.set(
+                        blackPiece,
+                        (this.boardStats.blackPieceTypeCounts.get(blackPiece) || 0) + 1
+                    );
+                    break;
+            }
+        }
+
         // build cache
         this.getPossibleMovesForPlayer(ChessPlayer.white);
         this.getPossibleMovesForPlayer(ChessPlayer.black);
@@ -88,18 +112,19 @@ export class ChessBoardState {
         );
     }
 
+    getBlackPieceTypeCounts(): Map<ChessPieceStatic, number> {
+        return this.boardStats.blackPieceTypeCounts;
+    }
+
+    getWhitePieceTypeCounts(): Map<ChessPieceStatic, number> {
+        return this.boardStats.whitePieceTypeCounts;
+    }
+
     getPossibleMovementsForPiece(
         piece: ChessPiece
     ): ChessPieceAvailableMoveSet {
-        /*if (
-            !this._useAvailableMovesCache ||
-            !this._availableMovesCache.has(piece)
-        ) {*/
         const moves = piece.getPossibleMovements(this);
-        /*this._availableMovesCache.set(
-                piece,
-                moves
-            );*/
+
         // update positions cache
         if (piece.areMovesCached()) {
             for (const move of moves.getMoves()) {
@@ -109,9 +134,6 @@ export class ChessBoardState {
                 this.cellMovesPieces[pos].add(piece);
             }
         }
-        /*}
-
-        return this._availableMovesCache.get(piece)!;*/
 
         return moves;
     }
@@ -444,6 +466,7 @@ export class ChessBoardState {
         // if there is an existing piece, add entry in reverse map to replace it
         const existingPiece = this.positions[pos];
         if (existingPiece) {
+            const existingPieceType = ChessPieceFactory.getPieceClass(existingPiece.letter);
             // move number has incremented already, so need to decrement
             this.boardStats.lastMoveReverseUpdates.set(pos, {
                 piece: existingPiece,
@@ -456,8 +479,16 @@ export class ChessBoardState {
                 existingPiece.player === ChessPlayer.white
             ) {
                 this.boardStats.whitePiecesValue -= existingPiece.pointsValue;
+                this.boardStats.whitePieceTypeCounts.set(
+                    existingPieceType,
+                    (this.boardStats.whitePieceTypeCounts.get(existingPieceType) || 0) - 1
+                );
             } else {
                 this.boardStats.blackPiecesValue -= existingPiece.pointsValue;
+                this.boardStats.blackPieceTypeCounts.set(
+                    existingPieceType,
+                    (this.boardStats.blackPieceTypeCounts.get(existingPieceType) || 0) - 1
+                );
             }
         } else {
             this.boardStats.lastMoveReverseUpdates.set(pos, {
@@ -484,9 +515,31 @@ export class ChessBoardState {
             if (piece.player === ChessPlayer.white) {
                 this.boardStats.whitePiecesValue +=
                     promotionPiece.pointsValue - PawnPiece.pointsValue;
+
+                this.boardStats.whitePieceTypeCounts.set(
+                    PawnPiece,
+                    (this.boardStats.whitePieceTypeCounts.get(PawnPiece) || 0) - 1
+                );
+
+                const newPieceType = ChessPieceFactory.getPieceClass(promotionPiece.letter);
+                this.boardStats.whitePieceTypeCounts.set(
+                    newPieceType,
+                    (this.boardStats.whitePieceTypeCounts.get(newPieceType) || 0) + 1
+                );
             } else {
                 this.boardStats.blackPiecesValue +=
                     promotionPiece.pointsValue - PawnPiece.pointsValue;
+
+                this.boardStats.blackPieceTypeCounts.set(
+                    PawnPiece,
+                    (this.boardStats.blackPieceTypeCounts.get(PawnPiece) || 0) - 1
+                );
+
+                const newPieceType = ChessPieceFactory.getPieceClass(promotionPiece.letter);
+                this.boardStats.blackPieceTypeCounts.set(
+                    newPieceType,
+                    (this.boardStats.blackPieceTypeCounts.get(newPieceType) || 0) + 1
+                );
             }
 
             // add entry to reverse-map to put it back to its original spot
@@ -616,6 +669,9 @@ export class ChessBoardState {
         state.blackKingPiece = cloneBlackKing as KingPiece;
         state.boardStats = { ...this.boardStats };
 
+        state.boardStats.blackPieceTypeCounts = new Map(state.boardStats.blackPieceTypeCounts);
+        state.boardStats.whitePieceTypeCounts = new Map(state.boardStats.whitePieceTypeCounts);
+
         return state;
     }
 
@@ -660,20 +716,16 @@ export class ChessBoardState {
 
         board += "\n\n";
         board += `Last move: ${this.boardStats.lastNotation}\n`;
-        board += `White in check: ${
-            this.boardStats.isWhiteInCheck
-        } | White in checkmate: ${
-            this.boardStats.isWhiteInCheckmate
-        } | White King: ${ChessPosition.toString(
-            this.whiteKingPiece.getPosition()
-        )}\n`;
-        board += `Black in check: ${
-            this.boardStats.isBlackInCheck
-        } | Black in checkmate: ${
-            this.boardStats.isBlackInCheckmate
-        } | Black King: ${ChessPosition.toString(
-            this.blackKingPiece.getPosition()
-        )}\n`;
+        board += `White in check: ${this.boardStats.isWhiteInCheck
+            } | White in checkmate: ${this.boardStats.isWhiteInCheckmate
+            } | White King: ${ChessPosition.toString(
+                this.whiteKingPiece.getPosition()
+            )}\n`;
+        board += `Black in check: ${this.boardStats.isBlackInCheck
+            } | Black in checkmate: ${this.boardStats.isBlackInCheckmate
+            } | Black King: ${ChessPosition.toString(
+                this.blackKingPiece.getPosition()
+            )}\n`;
         board += `Stalemate: ${this.boardStats.isStalemate}\n`;
         board += `Move Number: ${this.getMoveNumber()}\n`;
         board += `Board Value: ${this.getScore()}\n`;
