@@ -487,7 +487,7 @@ export class ChessBoardState {
                 this.boardStats.blackPiecesValue -= existingPiece.pointsValue;
                 this.boardStats.blackPieceTypeCounts.set(
                     existingPieceType,
-                    (this.boardStats.whitePieceTypeCounts.get(existingPieceType) || 0) - 1
+                    (this.boardStats.blackPieceTypeCounts.get(existingPieceType) || 0) - 1
                 );
             }
         } else {
