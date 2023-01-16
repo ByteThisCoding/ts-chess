@@ -173,13 +173,14 @@ export class ChessNotation {
                     fromPos,
                 }
             );
-        } else if (piece.letter.toLocaleLowerCase() !== pieceLetter) {
+        } else if (piece.letter.toLocaleLowerCase() !== pieceLetter.toLocaleLowerCase()) {
             return new ChessNotationParseStatus(
                 false,
                 null,
                 ChessNotationParseFailure.pieceDesignationIncorrect,
                 {
                     fromPos,
+                    piece: piece.toString()
                 }
             );
         }
