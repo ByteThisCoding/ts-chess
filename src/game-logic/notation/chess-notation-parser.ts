@@ -21,7 +21,7 @@ export class ChessNotation {
      * This will ignore notation about captures, checks, and checkmates
      * and let the game engine fill in those blanks
      *
-     * TODO: better error handling for this and helper methods
+     * TODO: split this into multiple helper methods, not clean
      */
     public static moveFromNotation(
         boardState: ChessBoardState,
@@ -71,7 +71,6 @@ export class ChessNotation {
             let numPiecesFound = 0;
             let fromMove: ChessBoardSingleMove | null = null;
             for (const move of possibleMoves.getMoves()) {
-                //console.log(move.toString());
                 if (
                     move.toPosition === toPos &&
                     move.pieceMoved.letter.toLocaleLowerCase() === pieceLetter
@@ -453,12 +452,6 @@ export class ChessNotation {
                 notationParts.promotion =
                     "=" + move.promoteToPieceLetter.toUpperCase();
             }
-
-            /*if (isCapture) {
-                notationParts.fromPosition = ChessPosition.toString(
-                    move.fromPosition
-                );
-            }*/
         }
 
         // add position if ambiguous
@@ -470,7 +463,8 @@ export class ChessNotation {
             if (
                 move.toPosition === searchMove.toPosition &&
                 move.pieceMoved.letter === searchMove.pieceMoved.letter &&
-                !move.equals(searchMove)
+                // TODO: converting to string for error handling temporarily
+                move.toString() !== searchMove.toString()
             ) {
                 secondFound = true;
                 break;
