@@ -109,14 +109,54 @@ export class ChessNotation {
             fromPos = fromMove.fromPosition;
             piece = fromMove.pieceMoved;
         } else {
+            let posFrom!: string;
+            let posTo!: string;
             // if there's a missing letter, it's a pawn move, add the letter for convenience
             if (notation.length === 4) {
-                notation = PawnPiece.letter.toUpperCase() + notation;
+                // determine if first letter is column or piece letter
+                const fc = notation.substring(0, 1).toLowerCase().charCodeAt(0);
+                // if column, this is a pawn
+                if ("a".charCodeAt(0) >= fc && "h".charCodeAt(0) <= fc) {
+                    pieceLetter = PawnPiece.letter;
+                    posFrom = notation.substring(0, 2);
+                    posTo = notation.substring(2);
+                } else {
+                    // if not a column, this is a move like "Nfg3" or "N1g3"
+                    pieceLetter = notation.substring(0, 1);
+                    posTo = notation.substring(2);
+                    const fromColRow = notation.substring(1, 2);
+                    // if it's a column, find row
+                    if ("a".charCodeAt(0) >= fromColRow.charCodeAt(0) && "h".charCodeAt(0) <= fromColRow.charCodeAt(0)) {
+                        for (const piece of boardState.getAllPieces()) {
+                            if (piece.letter === pieceLetter.toUpperCase()) {
+                                const [col, row] = ChessPosition.cellToColRow(piece.getPosition());
+                                //@ts-ignore
+                                if (row == fromColRow) {
+                                    posFrom = ChessPosition.toString(piece.getPosition());
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
+                        // if it's a row, find column
+                        for (const piece of boardState.getAllPieces()) {
+                            if (piece.letter === pieceLetter.toUpperCase()) {
+                                const [col, row] = ChessPosition.cellToColRow(piece.getPosition());
+                                const colLetter = String.fromCharCode(col + "a".charCodeAt(0) - 1);
+                                if (colLetter === fromColRow) {
+                                    posFrom = ChessPosition.toString(piece.getPosition());
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            } else /*if (notation.length === 5)*/ {
+                // this will be of the form "Nf3g5"
+                pieceLetter = notation.substring(0, 1);
+                posFrom = notation.substring(1, 3);
+                posTo = notation.substring(3);
             }
-
-            pieceLetter = notation.substring(0, 1).toLocaleLowerCase();
-            const posFrom = notation.substring(1, 3);
-            const posTo = notation.substring(3);
 
             fromPos = ChessPosition.fromString(posFrom);
             toPos = ChessPosition.fromString(posTo);
@@ -413,11 +453,11 @@ export class ChessNotation {
                     "=" + move.promoteToPieceLetter.toUpperCase();
             }
 
-            if (isCapture) {
+            /*if (isCapture) {
                 notationParts.fromPosition = ChessPosition.toString(
                     move.fromPosition
                 );
-            }
+            }*/
         }
 
         // add position if ambiguous
@@ -428,6 +468,7 @@ export class ChessNotation {
         for (const searchMove of possibleMoves) {
             if (
                 move.toPosition === searchMove.toPosition &&
+                move.pieceMoved.letter === searchMove.pieceMoved.letter &&
                 !move.equals(searchMove)
             ) {
                 secondFound = true;
