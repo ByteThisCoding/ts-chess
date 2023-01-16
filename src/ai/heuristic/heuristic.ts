@@ -45,7 +45,16 @@ const GOOD_HEURISTICS: iChessAiHeuristicDataPoints<number>[] = [
         "centerControlScore": 0.0405,
         "stackedPawnScore": 0.21100000000000002
     },
-
+    {
+        "relativePiecesScore": 0.7321249999999999,
+        "pinSkewerScore": 0.058625,
+        "threateningScore": 0.056749999999999995,
+        "passedPawnScore": 0.02275,
+        "activatedScore": 0.024875,
+        "centerControlScore": 0.021124999999999998,
+        "mobilityScore": 0.02375,
+        "stackedPawnScore": 0.060000000000000005
+    }
 ]
 
 export class ChessAiHeuristic implements iChessAiHeuristic {
