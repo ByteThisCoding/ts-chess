@@ -1,10 +1,9 @@
 {
     "name": "@byte-this/ts-chess",
-    "version": "1.0.18",
+    "version": "1.0.17",
     "type:": "module",
     "main": "public-api.js",
     "types": "public-api.d.ts",
-    "type": "module",
     "scripts": {
         "format": "npx prettier --write .",
         "run": "ts-node cli-game.ts",

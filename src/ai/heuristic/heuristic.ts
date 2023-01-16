@@ -22,7 +22,31 @@ import {
 } from "../models/heuristic-data-point";
 import { HeuristicDataPoint } from "./heuristic-data-point";
 
-// TODO: higher score for skewer / pin w/ king
+const GOOD_HEURISTICS: iChessAiHeuristicDataPoints<number>[] = [
+    // hand-picked
+    {
+        relativePiecesScore: 0.7,
+        pinSkewerScore: 0.1,
+        threateningScore: 0.06,
+        passedPawnScore: 0.04,
+        activatedScore: 0.03,
+        centerControlScore: 0.02,
+        mobilityScore: 0.04,
+        stackedPawnScore: 0.01,
+    },
+    // determined by genetic algorithm
+    {
+        "relativePiecesScore": 0.6214999999999999,
+        "passedPawnScore": 0.010999999999999996,
+        "pinSkewerScore": 0.0315,
+        "threateningScore": 0.03599999999999999,
+        "activatedScore": 0.035500000000000004,
+        "mobilityScore": 0.013000000000000001,
+        "centerControlScore": 0.0405,
+        "stackedPawnScore": 0.21100000000000002
+    },
+
+]
 
 export class ChessAiHeuristic implements iChessAiHeuristic {
     private maxPiecePoints =
@@ -35,20 +59,10 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
     // TODO: genetic algorithm or manually adjust values
     private dataPoints: iChessAiHeuristicDataPoints<iChessAiHeuristicDataPoint>;
 
-    private defaultWeights: iChessAiHeuristicDataPoints<number> = {
-        relativePiecesScore: 0.7,
-        pinSkewerScore: 0.1,
-        threateningScore: 0.06,
-        passedPawnScore: 0.04,
-        activatedScore: 0.03,
-        centerControlScore: 0.02,
-        mobilityScore: 0.04,
-        stackedPawnScore: 0.01,
-    };
-
     constructor(weights?: iChessAiHeuristicDataPoints<number>) {
+        // if none provided, pick randomly from one of the reviewed good ones
         if (!weights) {
-            weights = this.defaultWeights;
+            weights = GOOD_HEURISTICS[Math.floor(Math.random() * GOOD_HEURISTICS.length)];
         }
 
         this.dataPoints = {

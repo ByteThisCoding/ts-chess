@@ -7,6 +7,7 @@ import {
     iChessAiHeuristic,
     iChessAiHeuristicEvaluation,
 } from "../models/heuristic";
+import { iChessAiHeuristicDataPoints } from "../models/heuristic-data-point";
 
 interface iLookahedResponse {
     hScore: iChessAiHeuristicEvaluation;
@@ -117,16 +118,6 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
         // find the uncloned version of the move, we need object referential equality
         let bestMoveOriginal!: ChessBoardSingleMove;
         if (move) {
-            /*for (const findMove of boardState
-                .getPossibleMovesForPlayer(player)
-                .getMoves()) {
-                // TODO: comparing strings is done to validate if a bug exists, remove when done
-                //if (findMove.equals(move)) {
-                if (findMove.toString() === move.toString()) {
-                    bestMoveOriginal = findMove;
-                    break;
-                }
-            }*/
             bestMoveOriginal = move;
         } else {
             // if the AI didn't determine a move, just grab whatever first move and proceed, this means checkmate can't be avoided

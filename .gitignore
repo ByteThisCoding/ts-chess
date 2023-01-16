@@ -8,6 +8,7 @@
 /build
 
 gen-results**.txt
+gen-results**.json
 
 # User-specific files
 *.rsuser
