@@ -24,6 +24,12 @@ interface iTranspositionTableEntry extends iLookahedResponse {
     type: TranspositionTableType;
 }
 
+export enum ChessAiDifficultyMode {
+    easy = "Easy",
+    medium = "Medium",
+    hard = "Hard"
+};
+
 /**
  * Negamax with alpha beta pruning
  */
@@ -38,21 +44,34 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
         // the main heuristic to evaluate leaf nodes in the negamax traversal
         private heuristic: iChessAiHeuristic,
         // a less-expensive heuristic to order moves to potentially save time
-        private sortHeuristic: iChessAiHeuristic
+        private sortHeuristic: iChessAiHeuristic,
+        private difficultyMode: ChessAiDifficultyMode = ChessAiDifficultyMode.hard
     ) {}
 
     // TODO: add a node to record previous traversals from previous moves to save time (we restart at each node)
     // TODO: add iterative deepening
 
     getSearchDepth(player: ChessPlayer, boardState: ChessBoardState): number {
-        // we're assuming an average of 32 possible moves at the top = depth 4
+        let avgNumMoves: number;
+        let maxNumMoves!: number;
+        switch (this.difficultyMode) {
+            case ChessAiDifficultyMode.easy:
+                return 1;
+            case ChessAiDifficultyMode.medium:
+                avgNumMoves = 3;
+                maxNumMoves = 4;
+                break;
+            case ChessAiDifficultyMode.hard:
+                avgNumMoves = 4;
+                maxNumMoves = 6;
+                break;
+        }
+
         const numMoves = boardState
             .getPossibleMovesForPlayer(player)
             .getNumMoves();
-        return Math.min(
-            Math.floor(this.depthNumerator / Math.log2(numMoves)),
-            6
-        );
+
+        return Math.min(Math.floor(avgNumMoves * Math.log2(38) / Math.log2(numMoves)), maxNumMoves);
     }
 
     /**
