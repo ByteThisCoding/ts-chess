@@ -128,7 +128,7 @@ export class ChessNotation {
                     // if it's a column, find row
                     if ("a".charCodeAt(0) >= fromColRow.charCodeAt(0) && "h".charCodeAt(0) <= fromColRow.charCodeAt(0)) {
                         for (const piece of boardState.getAllPieces()) {
-                            if (piece.letter === pieceLetter.toUpperCase()) {
+                            if (piece.letter === pieceLetter.toUpperCase() && piece.player === movePlayer) {
                                 const [col, row] = ChessPosition.cellToColRow(piece.getPosition());
                                 //@ts-ignore
                                 if (row == fromColRow) {
@@ -140,7 +140,7 @@ export class ChessNotation {
                     } else {
                         // if it's a row, find column
                         for (const piece of boardState.getAllPieces()) {
-                            if (piece.letter === pieceLetter.toUpperCase()) {
+                            if (piece.letter === pieceLetter.toUpperCase() && piece.player === movePlayer) {
                                 const [col, row] = ChessPosition.cellToColRow(piece.getPosition());
                                 const colLetter = String.fromCharCode(col + "a".charCodeAt(0) - 1);
                                 if (colLetter === fromColRow) {
