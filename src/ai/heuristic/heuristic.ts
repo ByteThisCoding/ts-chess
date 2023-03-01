@@ -126,6 +126,13 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
             };
         }
 
+        if (boardState.isGameInStalemate()) {
+            return {
+                score: 0,
+                data: {}
+            }
+        }
+
         // reset values
         for (const key in this.dataPoints) {
             // @ts-ignore

@@ -31,6 +31,13 @@ export class ChessAiSortHeuristic implements iChessAiHeuristic {
             };
         }
 
+        if (boardState.isGameInStalemate()) {
+            return {
+                score: 0,
+                data: {}
+            }
+        }
+
         return {
             score: boardState.getScore() / this.maxPiecePoints,
             data: {},

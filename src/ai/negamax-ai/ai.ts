@@ -7,7 +7,6 @@ import {
     iChessAiHeuristic,
     iChessAiHeuristicEvaluation,
 } from "../models/heuristic";
-import { iChessAiHeuristicDataPoints } from "../models/heuristic-data-point";
 
 interface iLookahedResponse {
     hScore: iChessAiHeuristicEvaluation;
@@ -28,18 +27,14 @@ interface iTranspositionTableEntry extends iLookahedResponse {
 export enum ChessAiDifficultyMode {
     easy = "Easy",
     medium = "Medium",
-    hard = "Hard"
+    hard = "Challenging",
+    ultra = "Difficult"
 };
 
 /**
  * Negamax with alpha beta pruning
  */
 export class ChessNegamaxAiPlayer implements iChessAiPlayer {
-    // TODO: make configurable
-    //private MAX_DEPTH = 4;
-
-    // there are 20 opening moves, constant roughly represents with depth 4
-    private depthNumerator = 4 * Math.log2(38);
 
     constructor(
         // the main heuristic to evaluate leaf nodes in the negamax traversal
@@ -66,13 +61,17 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
                 avgNumMoves = 4;
                 maxNumMoves = 6;
                 break;
+            case ChessAiDifficultyMode.ultra:
+                avgNumMoves = 5;
+                maxNumMoves = 7
+                break;
         }
 
         const numMoves = boardState
             .getPossibleMovesForPlayer(player)
             .getNumMoves();
 
-        return Math.min(Math.floor(avgNumMoves * Math.log2(38) / Math.log2(numMoves)), maxNumMoves);
+        return Math.min(Math.floor(avgNumMoves * Math.log2(37) / Math.log2(numMoves)), maxNumMoves);
     }
 
     /**
@@ -127,8 +126,8 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
                 if (this.tryMakeMove(boardState, firstMove)) {
                     bestMoveOriginal = firstMove;
                     boardState.undoLastMove();
+                    break;
                 }
-                break;
             }
         }
 
