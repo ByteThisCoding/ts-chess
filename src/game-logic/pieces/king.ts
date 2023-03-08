@@ -67,7 +67,8 @@ export class KingPiece extends ChessPiece {
         }
 
         // invalid if king is in wrong position (sanity check, other conditions not sufficient at time of writing)
-        const [col] = ChessPosition.cellToColRow(this.getPosition());
+        const col = ChessPosition.getCellCol(this.getPosition());
+
         if (col !== 5) {
             return;
         }
@@ -83,7 +84,10 @@ export class KingPiece extends ChessPiece {
                 !boardState.hasPieceAtPosition(knightPos) &&
                 !boardState.hasPieceAtPosition(bishopPos)
             ) {
-                moves.addMove(ChessPiece.newMove(this, firstRookPos, true));
+                moves.addMove(
+                    ChessPiece.newMove(this, firstRookPos, true),
+                    boardState
+                );
             }
         }
 
@@ -98,7 +102,10 @@ export class KingPiece extends ChessPiece {
                 !boardState.hasPieceAtPosition(knightPos) &&
                 !boardState.hasPieceAtPosition(bishopPos)
             ) {
-                moves.addMove(ChessPiece.newMove(this, secondRookPos, true));
+                moves.addMove(
+                    ChessPiece.newMove(this, secondRookPos, true),
+                    boardState
+                );
             }
         }
     }
@@ -109,11 +116,12 @@ export class KingPiece extends ChessPiece {
     private getNonCastleMovements(
         boardState: ChessBoardState
     ): ChessPieceAvailableMoveSet {
-        const moves = new ChessPieceAvailableMoveSet(this.player, boardState);
+        const moves = new ChessPieceAvailableMoveSet(this.player);
 
         // add for bishop like movements
         // add for higher columns
-        const [posCol, posRow] = ChessPosition.cellToColRow(this.getPosition());
+        const posCol = ChessPosition.getCellCol(this.getPosition());
+        const posRow = ChessPosition.getCellRow(this.getPosition());
 
         if (posCol > 1) {
             if (posRow + 1 < 9) {
@@ -121,7 +129,8 @@ export class KingPiece extends ChessPiece {
                     ChessPiece.newMove(
                         this,
                         ChessPosition.get(posCol - 1, posRow + 1)
-                    )
+                    ),
+                    boardState
                 );
             }
             if (posRow - 1 > 0) {
@@ -129,7 +138,8 @@ export class KingPiece extends ChessPiece {
                     ChessPiece.newMove(
                         this,
                         ChessPosition.get(posCol - 1, posRow - 1)
-                    )
+                    ),
+                    boardState
                 );
             }
         }
@@ -141,7 +151,8 @@ export class KingPiece extends ChessPiece {
                     ChessPiece.newMove(
                         this,
                         ChessPosition.get(posCol + 1, posRow + 1)
-                    )
+                    ),
+                    boardState
                 );
             }
             if (posRow - 1 > 0) {
@@ -149,7 +160,8 @@ export class KingPiece extends ChessPiece {
                     ChessPiece.newMove(
                         this,
                         ChessPosition.get(posCol + 1, posRow - 1)
-                    )
+                    ),
+                    boardState
                 );
             }
         }
@@ -158,22 +170,26 @@ export class KingPiece extends ChessPiece {
         // add all in current col
         if (posRow > 1) {
             moves.addMove(
-                ChessPiece.newMove(this, ChessPosition.get(posCol, posRow - 1))
+                ChessPiece.newMove(this, ChessPosition.get(posCol, posRow - 1)),
+                boardState
             );
         }
         if (posRow < 8) {
             moves.addMove(
-                ChessPiece.newMove(this, ChessPosition.get(posCol, posRow + 1))
+                ChessPiece.newMove(this, ChessPosition.get(posCol, posRow + 1)),
+                boardState
             );
         }
         if (posCol > 1) {
             moves.addMove(
-                ChessPiece.newMove(this, ChessPosition.get(posCol - 1, posRow))
+                ChessPiece.newMove(this, ChessPosition.get(posCol - 1, posRow)),
+                boardState
             );
         }
         if (posCol < 8) {
             moves.addMove(
-                ChessPiece.newMove(this, ChessPosition.get(posCol + 1, posRow))
+                ChessPiece.newMove(this, ChessPosition.get(posCol + 1, posRow)),
+                boardState
             );
         }
 

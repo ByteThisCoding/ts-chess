@@ -20,8 +20,12 @@ export class ChessPosition {
         return (row - 1) * 8 + col - 1;
     }
 
-    public static cellToColRow(cell: ChessCell): [number, number] {
-        return [(cell % 8) + 1, Math.floor(cell / 8) + 1];
+    public static getCellCol(cell: ChessCell): number {
+        return (cell % 8) + 1;
+    }
+
+    public static getCellRow(cell: ChessCell): number {
+        return Math.floor(cell / 8) + 1;
     }
 
     /**
@@ -29,7 +33,7 @@ export class ChessPosition {
      */
     public static fromString(str: string): ChessCell {
         const colLetter = str.substring(0, 1).toLowerCase();
-        const col = colLetter.charCodeAt(0) - "a".charCodeAt(0) + 1;
+        const col = colLetter.charCodeAt(0) - 97 /* "a".charCodeAt(0) */ + 1;
         if (col < 1 || col > 8) {
             throw new Error(`Invalid column!`);
         }
@@ -47,8 +51,12 @@ export class ChessPosition {
      * Return a readable string, such as "a6"
      */
     static toString(pos: ChessCell): string {
-        const [colNum, rowNum] = this.cellToColRow(pos);
-        const colLetter = String.fromCharCode("a".charCodeAt(0) + colNum - 1);
+        const colNum = this.getCellCol(pos);
+        const rowNum = this.getCellRow(pos);
+
+        const colLetter = String.fromCharCode(
+            97 /* "a".charCodeAt(0) */ + colNum - 1
+        );
         return `${colLetter}${rowNum}`;
     }
 }

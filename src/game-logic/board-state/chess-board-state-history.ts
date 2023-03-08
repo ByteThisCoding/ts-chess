@@ -22,7 +22,11 @@ export class ChessBoardStateHistory {
     private boardHistory: ChessBoardState[] = [];
 
     getListOfMovesNotation(): string[] {
-        return this.boardHistory.map((bh) => bh.getLastMoveNotation());
+        const moves = this.boardHistory
+            .map((bh) => bh.getLastMoveNotation())
+            .filter((mv) => mv.trim());
+        moves.push(this.latestBoardState.getLastMoveNotation());
+        return moves;
     }
 
     /**

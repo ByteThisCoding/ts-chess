@@ -1,6 +1,6 @@
 {
     "name": "@byte-this/ts-chess",
-    "version": "1.0.22",
+    "version": "1.0.65",
     "type:": "module",
     "main": "public-api.js",
     "types": "public-api.d.ts",

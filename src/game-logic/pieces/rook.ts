@@ -35,9 +35,8 @@ export class RookPiece extends ChessPiece {
         boardState: ChessBoardState,
         moves: ChessPieceAvailableMoveSet
     ): void {
-        const [posCol, posRow] = ChessPosition.cellToColRow(
-            thisPiece.getPosition()
-        );
+        const posCol = ChessPosition.getCellCol(thisPiece.getPosition());
+        const posRow = ChessPosition.getCellRow(thisPiece.getPosition());
 
         let isShadow: boolean;
         let blockingPiece: ChessPiece | null = null;
@@ -62,7 +61,7 @@ export class RookPiece extends ChessPiece {
                     }
                     break;
                 } else if (existingPiece.player !== thisPiece.player) {
-                    moves.addMove(this.newMove(thisPiece, newPos));
+                    moves.addMove(this.newMove(thisPiece, newPos), boardState);
                     // ensure next position is marked as blocked
                     const blockedPosition = ChessPosition.get(i + 1, posRow);
                     moves.addBlockedPosition(blockedPosition);
@@ -77,7 +76,7 @@ export class RookPiece extends ChessPiece {
                     this.newShadowMove(thisPiece, newPos, blockingPiece!)
                 );
             } else {
-                moves.addMove(this.newMove(thisPiece, newPos));
+                moves.addMove(this.newMove(thisPiece, newPos), boardState);
             }
         }
 
@@ -101,7 +100,7 @@ export class RookPiece extends ChessPiece {
                     }
                     break;
                 } else if (existingPiece.player !== thisPiece.player) {
-                    moves.addMove(this.newMove(thisPiece, newPos));
+                    moves.addMove(this.newMove(thisPiece, newPos), boardState);
                     // ensure next position is marked as blocked
                     const blockedPosition = ChessPosition.get(i - 1, posRow);
                     moves.addBlockedPosition(blockedPosition);
@@ -116,7 +115,7 @@ export class RookPiece extends ChessPiece {
                     this.newShadowMove(thisPiece, newPos, blockingPiece!)
                 );
             } else {
-                moves.addMove(this.newMove(thisPiece, newPos));
+                moves.addMove(this.newMove(thisPiece, newPos), boardState);
             }
         }
 
@@ -140,7 +139,7 @@ export class RookPiece extends ChessPiece {
                     }
                     break;
                 } else if (existingPiece.player !== thisPiece.player) {
-                    moves.addMove(this.newMove(thisPiece, newPos));
+                    moves.addMove(this.newMove(thisPiece, newPos), boardState);
                     // ensure next position is marked as blocked
                     const blockedPosition = ChessPosition.get(posCol, i + 1);
                     moves.addBlockedPosition(blockedPosition);
@@ -155,7 +154,7 @@ export class RookPiece extends ChessPiece {
                     this.newShadowMove(thisPiece, newPos, blockingPiece!)
                 );
             } else {
-                moves.addMove(this.newMove(thisPiece, newPos));
+                moves.addMove(this.newMove(thisPiece, newPos), boardState);
             }
         }
 
@@ -179,7 +178,7 @@ export class RookPiece extends ChessPiece {
                     }
                     break;
                 } else if (existingPiece.player !== thisPiece.player) {
-                    moves.addMove(this.newMove(thisPiece, newPos));
+                    moves.addMove(this.newMove(thisPiece, newPos), boardState);
                     // ensure next position is marked as blocked
                     const blockedPosition = ChessPosition.get(posCol, i - 1);
                     moves.addBlockedPosition(blockedPosition);
@@ -194,7 +193,7 @@ export class RookPiece extends ChessPiece {
                     this.newShadowMove(thisPiece, newPos, blockingPiece!)
                 );
             } else {
-                moves.addMove(this.newMove(thisPiece, newPos));
+                moves.addMove(this.newMove(thisPiece, newPos), boardState);
             }
         }
     }
@@ -202,7 +201,7 @@ export class RookPiece extends ChessPiece {
     protected getPossibleMovementsWhite(
         boardState: ChessBoardState
     ): ChessPieceAvailableMoveSet {
-        const moves = new ChessPieceAvailableMoveSet(this.player, boardState);
+        const moves = new ChessPieceAvailableMoveSet(this.player);
 
         RookPiece.addPossibleMovesToSet(this, boardState, moves);
 

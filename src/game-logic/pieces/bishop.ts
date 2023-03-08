@@ -35,9 +35,9 @@ export class BishopPiece extends ChessPiece {
         moves: ChessPieceAvailableMoveSet
     ): void {
         // add for higher columns
-        const [posCol, posRow] = ChessPosition.cellToColRow(
-            thisPiece.getPosition()
-        );
+        const posCol = ChessPosition.getCellCol(thisPiece.getPosition());
+        const posRow = ChessPosition.getCellRow(thisPiece.getPosition());
+
         let isShadow: boolean;
         let blockingPiece: ChessPiece | null;
 
@@ -66,7 +66,10 @@ export class BishopPiece extends ChessPiece {
                     }
                     break;
                 } else if (existingPiece.player !== thisPiece.player) {
-                    moves.addMove(this.newMove(thisPiece, toPosition));
+                    moves.addMove(
+                        this.newMove(thisPiece, toPosition),
+                        boardState
+                    );
                     // block the next position
                     const blockedPosition = ChessPosition.get(
                         col,
@@ -84,7 +87,7 @@ export class BishopPiece extends ChessPiece {
                     this.newShadowMove(thisPiece, toPosition, blockingPiece!)
                 );
             } else {
-                moves.addMove(this.newMove(thisPiece, toPosition));
+                moves.addMove(this.newMove(thisPiece, toPosition), boardState);
             }
         }
 
@@ -113,7 +116,10 @@ export class BishopPiece extends ChessPiece {
                         break;
                     }
                 } else if (existingPiece.player !== thisPiece.player) {
-                    moves.addMove(this.newMove(thisPiece, toPosition));
+                    moves.addMove(
+                        this.newMove(thisPiece, toPosition),
+                        boardState
+                    );
                     // block the next position
                     const blockedPosition = ChessPosition.get(
                         col,
@@ -131,7 +137,7 @@ export class BishopPiece extends ChessPiece {
                     this.newShadowMove(thisPiece, toPosition, blockingPiece!)
                 );
             } else {
-                moves.addMove(this.newMove(thisPiece, toPosition));
+                moves.addMove(this.newMove(thisPiece, toPosition), boardState);
             }
         }
 
@@ -160,7 +166,10 @@ export class BishopPiece extends ChessPiece {
                     }
                     break;
                 } else if (existingPiece.player !== thisPiece.player) {
-                    moves.addMove(this.newMove(thisPiece, toPosition));
+                    moves.addMove(
+                        this.newMove(thisPiece, toPosition),
+                        boardState
+                    );
                     // block the next position
                     const blockedPosition = ChessPosition.get(
                         col,
@@ -178,7 +187,7 @@ export class BishopPiece extends ChessPiece {
                     this.newShadowMove(thisPiece, toPosition, blockingPiece!)
                 );
             } else {
-                moves.addMove(this.newMove(thisPiece, toPosition));
+                moves.addMove(this.newMove(thisPiece, toPosition), boardState);
             }
         }
 
@@ -206,7 +215,10 @@ export class BishopPiece extends ChessPiece {
                     }
                     break;
                 } else if (existingPiece.player !== thisPiece.player) {
-                    moves.addMove(this.newMove(thisPiece, toPosition));
+                    moves.addMove(
+                        this.newMove(thisPiece, toPosition),
+                        boardState
+                    );
                     // block the next position
                     const blockedPosition = ChessPosition.get(
                         col,
@@ -224,7 +236,7 @@ export class BishopPiece extends ChessPiece {
                     this.newShadowMove(thisPiece, toPosition, blockingPiece!)
                 );
             } else {
-                moves.addMove(this.newMove(thisPiece, toPosition));
+                moves.addMove(this.newMove(thisPiece, toPosition), boardState);
             }
         }
     }
@@ -232,7 +244,7 @@ export class BishopPiece extends ChessPiece {
     protected getPossibleMovementsWhite(
         boardState: ChessBoardState
     ): ChessPieceAvailableMoveSet {
-        const moves = new ChessPieceAvailableMoveSet(this.player, boardState);
+        const moves = new ChessPieceAvailableMoveSet(this.player);
         BishopPiece.addPossibleMovesToSet(this, boardState, moves);
         return moves;
     }

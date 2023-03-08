@@ -8,10 +8,15 @@ import { PawnPiece } from "./pawn";
 import { QueenPiece } from "./queen";
 import { RookPiece } from "./rook";
 
-export type ChessPieceStatic = typeof PawnPiece | typeof RookPiece | typeof KnightPiece | typeof BishopPiece | typeof QueenPiece | typeof KingPiece;
+export type ChessPieceStatic =
+    | typeof PawnPiece
+    | typeof RookPiece
+    | typeof KnightPiece
+    | typeof BishopPiece
+    | typeof QueenPiece
+    | typeof KingPiece;
 
 export class ChessPieceFactory {
-
     public static createPiece(
         pieceLetter: string,
         player: ChessPlayer,
@@ -43,7 +48,7 @@ export class ChessPieceFactory {
             case PawnPiece.letter:
                 return PawnPiece;
             case RookPiece.letter:
-                return RookPiece
+                return RookPiece;
             case KnightPiece.letter:
                 return KnightPiece;
             case BishopPiece.letter:

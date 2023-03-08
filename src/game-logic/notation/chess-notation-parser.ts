@@ -115,23 +115,38 @@ export class ChessNotation {
                 // determine if first letter is column or piece letter
                 const fc = notation.substring(0, 1).toLowerCase().charCodeAt(0);
                 // if column, this is a pawn
-                if ("a".charCodeAt(0) >= fc && "h".charCodeAt(0) <= fc) {
+                if (
+                    97 /* "a".charCodeAt(0) */ <= fc &&
+                    104 /* "h".charCodeAt(0) */ >= fc
+                ) {
                     pieceLetter = PawnPiece.letter;
                     posFrom = notation.substring(0, 2);
                     posTo = notation.substring(2);
                 } else {
-                    // if not a column, this is a move like "Nfg3" or "N1g3"
+                    // if not a column, this is a move like "Nfg3" or "N1g3" or "d4e5"
                     pieceLetter = notation.substring(0, 1);
                     posTo = notation.substring(2);
                     const fromColRow = notation.substring(1, 2);
                     // if it's a column, find row
-                    if ("a".charCodeAt(0) >= fromColRow.charCodeAt(0) && "h".charCodeAt(0) <= fromColRow.charCodeAt(0)) {
+                    if (
+                        97 /* "a".charCodeAt(0) */ <=
+                            fromColRow.charCodeAt(0) &&
+                        104 /* "h".charCodeAt(0) */ >= fromColRow.charCodeAt(0)
+                    ) {
                         for (const piece of boardState.getAllPieces()) {
-                            if (piece.letter === pieceLetter.toUpperCase() && piece.player === movePlayer) {
-                                const [col, row] = ChessPosition.cellToColRow(piece.getPosition());
+                            if (
+                                piece.letter === pieceLetter.toUpperCase() &&
+                                piece.player === movePlayer
+                            ) {
+                                const row = ChessPosition.getCellRow(
+                                    piece.getPosition()
+                                );
+
                                 //@ts-ignore
                                 if (row == fromColRow) {
-                                    posFrom = ChessPosition.toString(piece.getPosition());
+                                    posFrom = ChessPosition.toString(
+                                        piece.getPosition()
+                                    );
                                     break;
                                 }
                             }
@@ -139,18 +154,27 @@ export class ChessNotation {
                     } else {
                         // if it's a row, find column
                         for (const piece of boardState.getAllPieces()) {
-                            if (piece.letter === pieceLetter.toUpperCase() && piece.player === movePlayer) {
-                                const [col, row] = ChessPosition.cellToColRow(piece.getPosition());
-                                const colLetter = String.fromCharCode(col + "a".charCodeAt(0) - 1);
+                            if (
+                                piece.letter === pieceLetter.toUpperCase() &&
+                                piece.player === movePlayer
+                            ) {
+                                const col = ChessPosition.getCellCol(
+                                    piece.getPosition()
+                                );
+                                const colLetter = String.fromCharCode(
+                                    col + 97 /* "a".charCodeAt(0) */ - 1
+                                );
                                 if (colLetter === fromColRow) {
-                                    posFrom = ChessPosition.toString(piece.getPosition());
+                                    posFrom = ChessPosition.toString(
+                                        piece.getPosition()
+                                    );
                                     break;
                                 }
                             }
                         }
                     }
                 }
-            } else /*if (notation.length === 5)*/ {
+            } else {
                 // this will be of the form "Nf3g5"
                 pieceLetter = notation.substring(0, 1);
                 posFrom = notation.substring(1, 3);
@@ -172,21 +196,23 @@ export class ChessNotation {
                     fromPos,
                 }
             );
-        } else if (piece.letter.toLocaleLowerCase() !== pieceLetter.toLocaleLowerCase()) {
+        } else if (
+            piece.letter.toLocaleLowerCase() !== pieceLetter.toLocaleLowerCase()
+        ) {
             return new ChessNotationParseStatus(
                 false,
                 null,
                 ChessNotationParseFailure.pieceDesignationIncorrect,
                 {
                     fromPos,
-                    piece: piece.toString()
+                    piece: piece.toString(),
                 }
             );
         }
 
         const toPiece = boardState.getPieceAtPosition(toPos);
-        const [fromPosCol, fromPosRow] = ChessPosition.cellToColRow(fromPos);
-        const [toPosCol, toPosRow] = ChessPosition.cellToColRow(toPos);
+        const fromPosCol = ChessPosition.getCellCol(fromPos);
+        const toPosCol = ChessPosition.getCellCol(toPos);
 
         // special case: en passant
         let enPassant = false;
@@ -322,7 +348,9 @@ export class ChessNotation {
         }
 
         // check which pawn is making this move
-        const [posCol, posRow] = ChessPosition.cellToColRow(pos);
+        const posCol = ChessPosition.getCellCol(pos);
+        const posRow = ChessPosition.getCellRow(pos);
+
         const prevPos = ChessPosition.get(posCol, posRow - inc);
         const prevPosPiece = boardState.getPieceAtPosition(prevPos);
 
@@ -416,7 +444,7 @@ export class ChessNotation {
         move: ChessBoardSingleMove
     ): string {
         const movePiece = move.pieceMoved;
-        const [col, row] = ChessPosition.cellToColRow(move.toPosition);
+        const col = ChessPosition.getCellCol(move.toPosition);
 
         // special case, castle
         if (move.isCastle) {
@@ -470,7 +498,7 @@ export class ChessNotation {
                 break;
             }
         }
-        if (secondFound) {
+        if (secondFound || movePiece.letter === PawnPiece.letter) {
             notationParts.fromPosition = ChessPosition.toString(
                 move.fromPosition
             );

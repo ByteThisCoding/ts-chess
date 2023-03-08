@@ -111,7 +111,11 @@ export class ChromosomePopulation {
         const newChromosomes: Chromosome[] = [];
         for (let left = 0; left < newGeneration.length / 2; left++) {
             const right = newGeneration.length - left - 1;
-            if (newGeneration[left] && newGeneration[right] && newGeneration[left] !== newGeneration[right]) {
+            if (
+                newGeneration[left] &&
+                newGeneration[right] &&
+                newGeneration[left] !== newGeneration[right]
+            ) {
                 const newChromosome = Chromosome.makeOffspring(
                     newGeneration[left],
                     newGeneration[right]

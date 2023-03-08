@@ -15,10 +15,14 @@ export class ChessPieceAvailableMoveSet {
 
     private numMoves = 0;
 
-    constructor(
-        private player: ChessPlayer,
-        private boardState: ChessBoardState
-    ) {}
+    constructor(private player: ChessPlayer) {}
+
+    clear(): void {
+        this.numMoves = 0;
+        this.availableMoves.clear();
+        this.shadowMoves.clear();
+        this.blockedPositions.clear();
+    }
 
     getNumMoves(): number {
         return this.numMoves;
@@ -33,7 +37,10 @@ export class ChessPieceAvailableMoveSet {
     /**
      * Add a potential move, wrapping move if it's a chess position
      */
-    addMove(move: ChessBoardSingleMove | null): void {
+    addMove(
+        move: ChessBoardSingleMove | null,
+        boardState: ChessBoardState
+    ): void {
         // if trying to add an empty move (probably item out of bounds), return
         if (!move) {
             return;
@@ -41,9 +48,7 @@ export class ChessPieceAvailableMoveSet {
 
         // if not castle, don't add if piece of same color is there
         if (!move.isCastle) {
-            const existing = this.boardState.getPieceAtPosition(
-                move.toPosition
-            );
+            const existing = boardState.getPieceAtPosition(move.toPosition);
             if (existing?.player === this.player) {
                 return;
             }
@@ -100,12 +105,14 @@ export class ChessPieceAvailableMoveSet {
 
     /**
      * Combine the moves of another instance of this class into this
-     * This does not add shadow moves
      */
-    merge(movesSet: ChessPieceAvailableMoveSet): void {
+    merge(
+        movesSet: ChessPieceAvailableMoveSet,
+        boardState: ChessBoardState
+    ): void {
         for (const [pos, moves] of movesSet.availableMoves) {
             for (const move of moves) {
-                this.addMove(move);
+                this.addMove(move, boardState);
             }
         }
 

@@ -9,7 +9,10 @@ import { QueenPiece } from "../pieces/queen";
 import { RookPiece } from "../pieces/rook";
 import { ChessBoardSingleMove } from "../moves/chess-board-move";
 import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set";
-import { ChessPieceFactory, ChessPieceStatic } from "../pieces/chess-piece-factory";
+import {
+    ChessPieceFactory,
+    ChessPieceStatic,
+} from "../pieces/chess-piece-factory";
 import { ChessMoveValidator } from "../moves/chess-move-validator";
 
 interface BoardMoveStats {
@@ -51,7 +54,7 @@ export class ChessBoardState {
         prevStats: null,
         moveNumber: 0,
         blackPieceTypeCounts: new Map(),
-        whitePieceTypeCounts: new Map()
+        whitePieceTypeCounts: new Map(),
     };
 
     // internal, used to prevent infinite recursion when evaluating checkmate
@@ -71,23 +74,34 @@ export class ChessBoardState {
         .fill(null)
         .map(() => new Set());
 
+    private posStrings: string[] = [];
+
     // store information about the last move
     private constructor(private positions: (ChessPiece | null)[]) {
         // set piece counts
         for (const position of positions) {
+            // update string pos
+            this.posStrings.push(this.getPieceStringLetter(position));
+
             switch (position?.player) {
                 case ChessPlayer.white:
-                    const whitePiece = ChessPieceFactory.getPieceClass(position?.letter);
+                    const whitePiece = ChessPieceFactory.getPieceClass(
+                        position?.letter
+                    );
                     this.boardStats.whitePieceTypeCounts.set(
                         whitePiece,
-                        (this.boardStats.whitePieceTypeCounts.get(whitePiece) || 0) + 1
+                        (this.boardStats.whitePieceTypeCounts.get(whitePiece) ||
+                            0) + 1
                     );
                     break;
                 case ChessPlayer.black:
-                    const blackPiece = ChessPieceFactory.getPieceClass(position?.letter);
+                    const blackPiece = ChessPieceFactory.getPieceClass(
+                        position?.letter
+                    );
                     this.boardStats.blackPieceTypeCounts.set(
                         blackPiece,
-                        (this.boardStats.blackPieceTypeCounts.get(blackPiece) || 0) + 1
+                        (this.boardStats.blackPieceTypeCounts.get(blackPiece) ||
+                            0) + 1
                     );
                     break;
             }
@@ -209,8 +223,12 @@ export class ChessBoardState {
         this._useAvailableMovesCache = false;
 
         this.boardStats.prevStats = { ...this.boardStats };
-        this.boardStats.prevStats.blackPieceTypeCounts = new Map(this.boardStats.prevStats.blackPieceTypeCounts);
-        this.boardStats.prevStats.whitePieceTypeCounts = new Map(this.boardStats.prevStats.whitePieceTypeCounts);
+        this.boardStats.prevStats.blackPieceTypeCounts = new Map(
+            this.boardStats.prevStats.blackPieceTypeCounts
+        );
+        this.boardStats.prevStats.whitePieceTypeCounts = new Map(
+            this.boardStats.prevStats.whitePieceTypeCounts
+        );
 
         this.boardStats.lastNotation = notation;
         this.boardStats.moveNumber++;
@@ -237,7 +255,9 @@ export class ChessBoardState {
             );
             // ensure the proper piece is deleted
             // piece to delete is toPosition.col, toPosition.row+inc
-            let [col, row] = ChessPosition.cellToColRow(move.toPosition);
+            let col = ChessPosition.getCellCol(move.toPosition);
+            let row = ChessPosition.getCellRow(move.toPosition);
+
             row += move.player === ChessPlayer.white ? -1 : 1;
             this.updateSinglePiece(
                 ChessPosition.get(col, row),
@@ -249,8 +269,7 @@ export class ChessBoardState {
             // the to-position indicates the rook to castle with
             const rook = this.getPieceAtPosition(move.toPosition)!;
             // also clear rook's position
-            //this.updateSinglePiece(move.toPosition, null, this.boardStats.moveNumber);
-            const [col, row] = ChessPosition.cellToColRow(rook.getPosition());
+            const col = ChessPosition.getCellCol(rook.getPosition());
 
             if (col === 1) {
                 // queenside
@@ -295,14 +314,6 @@ export class ChessBoardState {
 
         this._availableMovesCache.clear();
         this._useAvailableMovesCache = true;
-
-        /*for (let i=0; i<64; i++) {
-            let str = "";
-            for (const mv of this.cellMovesPieces[i]) {
-                str += mv.toString();
-            }
-            console.log(ChessPosition.toString(i)+": "+str);
-        }*/
     }
 
     /**
@@ -313,14 +324,14 @@ export class ChessBoardState {
             !this._useAvailableMovesCache ||
             !this._availableMovesCache.has(player)
         ) {
-            const allPlayerMoves = new ChessPieceAvailableMoveSet(player, this);
+            const allPlayerMoves = new ChessPieceAvailableMoveSet(player);
 
             for (const piece of this.positions) {
                 if (piece && piece.player === player) {
                     const possibleMoves =
                         this.getPossibleMovementsForPiece(piece);
 
-                    allPlayerMoves.merge(possibleMoves);
+                    allPlayerMoves.merge(possibleMoves, this);
                 }
             }
 
@@ -468,7 +479,9 @@ export class ChessBoardState {
         // if there is an existing piece, add entry in reverse map to replace it
         const existingPiece = this.positions[pos];
         if (existingPiece) {
-            const existingPieceType = ChessPieceFactory.getPieceClass(existingPiece.letter);
+            const existingPieceType = ChessPieceFactory.getPieceClass(
+                existingPiece.letter
+            );
             // move number has incremented already, so need to decrement
             this.boardStats.lastMoveReverseUpdates.set(pos, {
                 piece: existingPiece,
@@ -483,13 +496,17 @@ export class ChessBoardState {
                 this.boardStats.whitePiecesValue -= existingPiece.pointsValue;
                 this.boardStats.whitePieceTypeCounts.set(
                     existingPieceType,
-                    (this.boardStats.whitePieceTypeCounts.get(existingPieceType) || 0) - 1
+                    (this.boardStats.whitePieceTypeCounts.get(
+                        existingPieceType
+                    ) || 0) - 1
                 );
             } else {
                 this.boardStats.blackPiecesValue -= existingPiece.pointsValue;
                 this.boardStats.blackPieceTypeCounts.set(
                     existingPieceType,
-                    (this.boardStats.blackPieceTypeCounts.get(existingPieceType) || 0) - 1
+                    (this.boardStats.blackPieceTypeCounts.get(
+                        existingPieceType
+                    ) || 0) - 1
                 );
             }
         } else {
@@ -503,15 +520,18 @@ export class ChessBoardState {
         if (!piece) {
             // if there was a piece before, it was already put in reverse map above
             this.positions[pos] = null;
+            this.posStrings[pos] = this.getPieceStringLetter(null);
         } else if (promotionPiece) {
             // special case, we're promoting a piece
             // we need to add that piece, then reverse map to put the pawn piece back
 
             // clear old position
             this.positions[prevPosition!] = null;
+            this.posStrings[prevPosition!] = this.getPieceStringLetter(null);
 
             // set new position
             this.positions[pos] = promotionPiece;
+            this.posStrings[pos] = this.getPieceStringLetter(promotionPiece);
 
             // update relative score
             if (piece.player === ChessPlayer.white) {
@@ -520,13 +540,17 @@ export class ChessBoardState {
 
                 this.boardStats.whitePieceTypeCounts.set(
                     PawnPiece,
-                    (this.boardStats.whitePieceTypeCounts.get(PawnPiece) || 0) - 1
+                    (this.boardStats.whitePieceTypeCounts.get(PawnPiece) || 0) -
+                        1
                 );
 
-                const newPieceType = ChessPieceFactory.getPieceClass(promotionPiece.letter);
+                const newPieceType = ChessPieceFactory.getPieceClass(
+                    promotionPiece.letter
+                );
                 this.boardStats.whitePieceTypeCounts.set(
                     newPieceType,
-                    (this.boardStats.whitePieceTypeCounts.get(newPieceType) || 0) + 1
+                    (this.boardStats.whitePieceTypeCounts.get(newPieceType) ||
+                        0) + 1
                 );
             } else {
                 this.boardStats.blackPiecesValue +=
@@ -534,13 +558,17 @@ export class ChessBoardState {
 
                 this.boardStats.blackPieceTypeCounts.set(
                     PawnPiece,
-                    (this.boardStats.blackPieceTypeCounts.get(PawnPiece) || 0) - 1
+                    (this.boardStats.blackPieceTypeCounts.get(PawnPiece) || 0) -
+                        1
                 );
 
-                const newPieceType = ChessPieceFactory.getPieceClass(promotionPiece.letter);
+                const newPieceType = ChessPieceFactory.getPieceClass(
+                    promotionPiece.letter
+                );
                 this.boardStats.blackPieceTypeCounts.set(
                     newPieceType,
-                    (this.boardStats.blackPieceTypeCounts.get(newPieceType) || 0) + 1
+                    (this.boardStats.blackPieceTypeCounts.get(newPieceType) ||
+                        0) + 1
                 );
             }
 
@@ -552,9 +580,11 @@ export class ChessBoardState {
         } else {
             // clear old position
             this.positions[prevPosition!] = null;
+            this.posStrings[prevPosition!] = this.getPieceStringLetter(null);
 
             // set new position
             this.positions[pos] = piece;
+            this.posStrings[pos] = this.getPieceStringLetter(piece);
             piece.setPosition(pos, moveNumber);
 
             // add entry to reverse-map to put it back to its original spot
@@ -611,6 +641,7 @@ export class ChessBoardState {
             // place a piece at pos
             if (piece) {
                 this.positions[pos] = piece;
+                this.posStrings[pos] = this.getPieceStringLetter(piece);
                 piece.setPosition(pos, turnNumber);
                 removePieces.add(piece);
             } else {
@@ -625,6 +656,7 @@ export class ChessBoardState {
                     removePieces.add(piece);
                 }
                 this.positions[pos] = null;
+                this.posStrings[pos] = this.getPieceStringLetter(null);
             }
 
             for (const ePiece of this.cellMovesPieces[pos]) {
@@ -670,9 +702,14 @@ export class ChessBoardState {
         state.whiteKingPiece = cloneWhiteKing as KingPiece;
         state.blackKingPiece = cloneBlackKing as KingPiece;
         state.boardStats = { ...this.boardStats };
+        state.posStrings = [...this.posStrings];
 
-        state.boardStats.blackPieceTypeCounts = new Map(state.boardStats.blackPieceTypeCounts);
-        state.boardStats.whitePieceTypeCounts = new Map(state.boardStats.whitePieceTypeCounts);
+        state.boardStats.blackPieceTypeCounts = new Map(
+            state.boardStats.blackPieceTypeCounts
+        );
+        state.boardStats.whitePieceTypeCounts = new Map(
+            state.boardStats.whitePieceTypeCounts
+        );
 
         return state;
     }
@@ -681,20 +718,7 @@ export class ChessBoardState {
      * Get a user-unfriendly string of board positions
      */
     toString(): string {
-        let str = "";
-        for (let i = 0; i < 64; i++) {
-            const piece = this.positions[i];
-            if (piece) {
-                str +=
-                    piece.player === ChessPlayer.white
-                        ? piece.letter.toUpperCase()
-                        : piece.letter.toLowerCase();
-            } else {
-                str += "-";
-            }
-        }
-
-        return str;
+        return this.posStrings.join("");
     }
 
     /**
@@ -718,16 +742,20 @@ export class ChessBoardState {
 
         board += "\n\n";
         board += `Last move: ${this.boardStats.lastNotation}\n`;
-        board += `White in check: ${this.boardStats.isWhiteInCheck
-            } | White in checkmate: ${this.boardStats.isWhiteInCheckmate
-            } | White King: ${ChessPosition.toString(
-                this.whiteKingPiece.getPosition()
-            )}\n`;
-        board += `Black in check: ${this.boardStats.isBlackInCheck
-            } | Black in checkmate: ${this.boardStats.isBlackInCheckmate
-            } | Black King: ${ChessPosition.toString(
-                this.blackKingPiece.getPosition()
-            )}\n`;
+        board += `White in check: ${
+            this.boardStats.isWhiteInCheck
+        } | White in checkmate: ${
+            this.boardStats.isWhiteInCheckmate
+        } | White King: ${ChessPosition.toString(
+            this.whiteKingPiece.getPosition()
+        )}\n`;
+        board += `Black in check: ${
+            this.boardStats.isBlackInCheck
+        } | Black in checkmate: ${
+            this.boardStats.isBlackInCheckmate
+        } | Black King: ${ChessPosition.toString(
+            this.blackKingPiece.getPosition()
+        )}\n`;
         board += `Stalemate: ${this.boardStats.isStalemate}\n`;
         board += `Move Number: ${this.getMoveNumber()}\n`;
         board += `Board Value: ${this.getScore()}\n`;
@@ -813,5 +841,14 @@ export class ChessBoardState {
         state.boardStats.blackPiecesValue = piecesValue;
 
         return state;
+    }
+
+    private getPieceStringLetter(position: ChessPiece | null): string {
+        if (!position) {
+            return "-";
+        }
+        return position.player === ChessPlayer.white
+            ? position.letter
+            : position.letter.toLowerCase();
     }
 }

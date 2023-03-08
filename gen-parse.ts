@@ -9,7 +9,7 @@ async function parse() {
 
     const contents = await fs.promises.readFile(IN_FILE, "utf-8");
     for (let line of contents.split("\n")) {
-        line = line.trim().replace(/\0/g, '');
+        line = line.trim().replace(/\0/g, "");
         if (line[0] !== "{") {
             continue;
         }

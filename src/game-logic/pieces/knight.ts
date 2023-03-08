@@ -30,8 +30,9 @@ export class KnightPiece extends ChessPiece {
     protected getPossibleMovementsWhite(
         boardState: ChessBoardState
     ): ChessPieceAvailableMoveSet {
-        const moves = new ChessPieceAvailableMoveSet(this.player, boardState);
-        const [posCol, posRow] = ChessPosition.cellToColRow(this.getPosition());
+        const moves = new ChessPieceAvailableMoveSet(this.player);
+        const posCol = ChessPosition.getCellCol(this.getPosition());
+        const posRow = ChessPosition.getCellRow(this.getPosition());
 
         // <->
         //  ^
@@ -42,7 +43,7 @@ export class KnightPiece extends ChessPiece {
             if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
                 moves.addBlockedPosition(toPos);
             } else {
-                moves.addMove(ChessPiece.newMove(this, toPos));
+                moves.addMove(ChessPiece.newMove(this, toPos), boardState);
             }
         }
 
@@ -51,7 +52,7 @@ export class KnightPiece extends ChessPiece {
             if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
                 moves.addBlockedPosition(toPos);
             } else {
-                moves.addMove(ChessPiece.newMove(this, toPos));
+                moves.addMove(ChessPiece.newMove(this, toPos), boardState);
             }
         }
 
@@ -60,7 +61,7 @@ export class KnightPiece extends ChessPiece {
             if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
                 moves.addBlockedPosition(toPos);
             } else {
-                moves.addMove(ChessPiece.newMove(this, toPos));
+                moves.addMove(ChessPiece.newMove(this, toPos), boardState);
             }
         }
 
@@ -69,7 +70,7 @@ export class KnightPiece extends ChessPiece {
             if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
                 moves.addBlockedPosition(toPos);
             } else {
-                moves.addMove(ChessPiece.newMove(this, toPos));
+                moves.addMove(ChessPiece.newMove(this, toPos), boardState);
             }
         }
 
@@ -81,7 +82,7 @@ export class KnightPiece extends ChessPiece {
             if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
                 moves.addBlockedPosition(toPos);
             } else {
-                moves.addMove(ChessPiece.newMove(this, toPos));
+                moves.addMove(ChessPiece.newMove(this, toPos), boardState);
             }
         }
 
@@ -90,7 +91,7 @@ export class KnightPiece extends ChessPiece {
             if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
                 moves.addBlockedPosition(toPos);
             } else {
-                moves.addMove(ChessPiece.newMove(this, toPos));
+                moves.addMove(ChessPiece.newMove(this, toPos), boardState);
             }
         }
 
@@ -99,7 +100,7 @@ export class KnightPiece extends ChessPiece {
             if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
                 moves.addBlockedPosition(toPos);
             } else {
-                moves.addMove(ChessPiece.newMove(this, toPos));
+                moves.addMove(ChessPiece.newMove(this, toPos), boardState);
             }
         }
 
@@ -108,7 +109,7 @@ export class KnightPiece extends ChessPiece {
             if (boardState.getPieceAtPosition(toPos)?.player === this.player) {
                 moves.addBlockedPosition(toPos);
             } else {
-                moves.addMove(ChessPiece.newMove(this, toPos));
+                moves.addMove(ChessPiece.newMove(this, toPos), boardState);
             }
         }
 

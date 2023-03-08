@@ -31,7 +31,7 @@ export class QueenPiece extends ChessPiece {
     protected getPossibleMovementsWhite(
         boardState: ChessBoardState
     ): ChessPieceAvailableMoveSet {
-        const moves = new ChessPieceAvailableMoveSet(this.player, boardState);
+        const moves = new ChessPieceAvailableMoveSet(this.player);
 
         BishopPiece.addPossibleMovesToSet(this, boardState, moves);
         RookPiece.addPossibleMovesToSet(this, boardState, moves);
