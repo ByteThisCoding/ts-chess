@@ -34,11 +34,11 @@ export enum ChessAiDifficultyMode {
 export class ChessNegamaxAiPlayer implements iChessAiPlayer {
 
     private settings = {
-        transpositionEnabled: false,
+        transpositionEnabled: true,
         nullPruneEnabled: false,
         iterativeDeepeningEnabled: true,
         preemptiveDepthReductionEnabled: false,
-        alphaBetaPruneEnabled: false,
+        alphaBetaPruneEnabled: true,
         moveSortingEnabled: true
     };
 
@@ -50,7 +50,7 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
     constructor(
         private heuristic: iChessAiHeuristic,
         private sortHeuristic: iChessAiHeuristic,
-        difficultyMode: ChessAiDifficultyMode = ChessAiDifficultyMode.medium
+        difficultyMode: ChessAiDifficultyMode = ChessAiDifficultyMode.ultra
     ) {
         switch (difficultyMode) {
             case ChessAiDifficultyMode.easy:
@@ -66,7 +66,7 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
                 this.maxSearchTimeMs = 16_000;
                 break;
             case ChessAiDifficultyMode.ultra:
-                this.maxDepth = 50;
+                this.maxDepth = 100;
                 this.maxSearchTimeMs = 25_000;
                 break;
         }
@@ -77,7 +77,7 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
     ): Promise<ChessBoardSingleMove | null> {
         const start = +new Date();
         const player = boardState.getLastMove()?.player === ChessPlayer.white ? ChessPlayer.black : ChessPlayer.white;
-        console.log("Available moves", [...boardState.getPossibleMovesForPlayer(player).getMoves()].map(m => m.toString()))
+        //console.log("Available moves", [...boardState.getPossibleMovesForPlayer(player).getMoves()].map(m => m.toString()))
 
         const negateMult = player === ChessPlayer.white ? 1 : -1;
 
@@ -100,13 +100,13 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
             )
 
         // Log the move evaluations after the search is complete
-        console.log("Move Evaluations:", this.moveEvaluations.map(ev => ({
+        /*console.log("Move Evaluations:", this.moveEvaluations.map(ev => ({
             move: ev.move.toString(),
             evaluation: ev.evaluation.score
-        })));
+        })));*/
 
         // Log the final best path
-        console.log("Best Path:", movePath.map(m => m?.toString()).join(" -> "), hScore);
+        console.log("Best Path:", movePath.map(m => m?.toString()).join(" -> "));
 
         console.log(
             "AI move determined in " +
@@ -131,7 +131,7 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
 
         const cutoffTimeMs = +new Date() + this.maxSearchTimeMs;
 
-        for (let depth = 2; depth <= this.maxDepth; depth+=2) {
+        for (let depth = 1; depth <= this.maxDepth; depth++) {
             console.log("Starting iterative deepening search of depth: " + depth);
 
             const thisResponse = this.negamax(
@@ -145,16 +145,16 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
                 []
             );
 
-            //if (!response.move || thisResponse.hScore.score > response.hScore.score) {
+            if (!response.move || !thisResponse.timeLimitReached) {
                 console.log("Updating best move at depth", depth, ": ", thisResponse.move?.toString());
-                console.log("Current Path:", thisResponse.movePath.map(m => m?.toString()).join(" -> "), thisResponse.hScore.score);
+                console.log("Current Path:", thisResponse.movePath.map(m => m?.toString()).join(" -> "), thisResponse.hScore);
 
                 // make the move and get opponent player moves
                 //boardState.setPiecesFromMove(thisResponse.move, "");
                 //console.log("All opponent player moves", [...boardState.getPossibleMovesForPlayer(player === ChessPlayer.white ? ChessPlayer.black : ChessPlayer.white).getMoves()].map(m => m.toString()))
                 //boardState.undoLastMove();
                 response = thisResponse;
-            //}
+            }
 
             if (+new Date() >= cutoffTimeMs) {
                 break;
@@ -287,13 +287,14 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
                 bestMoveH = { ...thisMoveH.hScore, score: currentScore };
                 bestMove = move;
                 bestMovePath = [...thisMoveH.movePath];
-            }
-    
-            if (this.settings.alphaBetaPruneEnabled) {
-                alphaPrune = Math.max(alphaPrune, currentScore);
-    
-                if (alphaPrune >= betaPrune) {
-                    break; // Beta cutoff
+
+                if (this.settings.alphaBetaPruneEnabled) {
+                    //alphaPrune = Math.max(alphaPrune, currentScore);
+                    alphaPrune = Math.max(alphaPrune, bestMoveH.score);
+        
+                    if (alphaPrune >= betaPrune) {
+                        break; // Beta cutoff
+                    }
                 }
             }
     
@@ -317,6 +318,7 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
             this.transpositionTable.set(transpositionTableKey, {
                 type,
                 depthRemaining,
+                // TODO: should this be negated?
                 hScore: { ...bestMoveH, score: bestMoveH.score * negateMult },
                 move: bestMove!,
                 movePath: bestMovePath

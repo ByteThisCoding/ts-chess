@@ -23,8 +23,8 @@ RunGame();
 async function RunGame() {
     const game = new ChessGame();
     //await loopNoAi(game);
-    //await loopOneAi(game);
-    await loopTwoAis(game);
+    await loopOneAi(game);
+    //await loopTwoAis(game);
 
     console.log(printGameCheckmatePieces(game.getCurrentBoardState()));
 

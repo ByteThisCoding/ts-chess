@@ -212,7 +212,8 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
         }
 
         // calculate relative pieces score
-        this.dataPoints.relativePiecesScore.value = (whitePoints - blackPoints) / (whitePoints + blackPoints) * 100;
+        //this.dataPoints.relativePiecesScore.value = 100 * (whitePoints - blackPoints) / (whitePoints + blackPoints);
+        this.dataPoints.relativePiecesScore.value = 100 * (whitePoints - blackPoints);
 
         // check doubled / stacked pawns, enemy having them helps us
         this.scoreStackedPawns(boardState);
@@ -228,7 +229,8 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
         // general mobility score, how many moves can we make?
         this.dataPoints.mobilityScore.value =
             (this.whitePossibleMovements.getNumMoves() -
-            this.blackPossibleMovements.getNumMoves()) * 100;
+            this.blackPossibleMovements.getNumMoves()) / (this.whitePossibleMovements.getNumMoves() +
+            this.blackPossibleMovements.getNumMoves());
 
         let totalScore = 0;
         let data: any = {};
@@ -283,6 +285,9 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
 
     /**
      * Adjust the score for the control of the center from a move
+     * 
+     * TODO: consider pieces that occupy the center
+     * TODO: consider pieces that control more than one square
      */
     private adjustControlOfCenterScoreFromMove(
         boardState: ChessBoardState,
