@@ -4,16 +4,19 @@ import { ChessPlayer } from "../enums";
 import { ChessBoardSingleMove } from "../moves/chess-board-move";
 import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set";
 import { ChessBoardSingleMoveShadow } from "../moves/chess-board-shadow-move";
+import { ProfileAllMethods } from "../../util/profile-all-methods";
 
 /**
  * Abstraction for common chess piece logic + external reference
  */
+@ProfileAllMethods
 export abstract class ChessPiece {
     abstract name: string;
     abstract letter: string;
     abstract player: ChessPlayer;
     abstract pointsValue: number;
     abstract doCacheMoves: boolean;
+    abstract type: number;
 
     // TODO: is bug with isActivated when looking ahead, doesn't unset
     private isActivated = false;
@@ -28,6 +31,12 @@ export abstract class ChessPiece {
         private maxNumPossibleMoves: number
     ) {
         this.startPosition = position;
+    }
+
+    getType(): number {
+        return this.player === ChessPlayer.black
+            ? this.type + 6
+            : this.type;
     }
 
     areMovesCached(): boolean {
@@ -69,7 +78,7 @@ export abstract class ChessPiece {
     getPossibleMovements(
         boardState: ChessBoardState
     ): ChessPieceAvailableMoveSet {
-        if (this.doCacheMoves) {
+        /*if (this.doCacheMoves) {
             if (this.movesCache === null) {
                 this.movesCache =
                     this.player === ChessPlayer.white
@@ -77,14 +86,14 @@ export abstract class ChessPiece {
                         : this.getPossibleMovementsBlack(boardState);
             }
             return this.movesCache;
-        } else {
+        } else {*/
             const moves =
                 this.player === ChessPlayer.white
                     ? this.getPossibleMovementsWhite(boardState)
                     : this.getPossibleMovementsBlack(boardState);
 
             return moves;
-        }
+        //}
     }
 
     clone(): ChessPiece {

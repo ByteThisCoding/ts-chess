@@ -13,6 +13,7 @@ export class RookPiece extends ChessPiece {
     letter: string = RookPiece.letter;
 
     name: string = "Rook";
+    type = 3;
 
     static pointsValue = 5;
     pointsValue: number = RookPiece.pointsValue;

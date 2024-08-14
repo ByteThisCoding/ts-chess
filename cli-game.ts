@@ -8,6 +8,7 @@ import { ChessPlayer } from "./src/game-logic/enums";
 import { ChessBoardSingleMove } from "./src/game-logic/moves/chess-board-move";
 import { ChessNotation } from "./src/game-logic/notation/chess-notation-parser";
 import { ChessPosition } from "./src/game-logic/position/chess-position";
+import { logProfileMap } from "./src/util/method-profiler";
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -51,13 +52,18 @@ async function loopNoAi(game: ChessGame) {
             const move = await requestChessMove(
                 game.getBoardStateHistory().getBoardState()
             );
+
+            if (!move) {
+                break;
+            }
+
             game.makeMove(move);
             console.log(
                 game.getBoardStateHistory().getBoardState().toStringDetailed()
             );
             console.log(
                 "________________________",
-                heuristic.getScore(game.getBoardStateHistory().getBoardState())
+                heuristic.getScore(game.getBoardStateHistory().getBoardState(), -Infinity, true)
             );
         } catch (err) {
             console.log(`There was a problem with that move.`, err);
@@ -98,12 +104,13 @@ async function loopOneAi(game: ChessGame) {
     //const heuristic = new ChessAiHeuristic();
     const aiPlayer = new ChessNegamaxAiPlayer(
         heuristic,
-        new ChessAiSortHeuristic()
+        //new ChessAiSortHeuristic()
+        heuristic
     );
 
     // if player is not first, have AI move first
     if (playerColor === ChessPlayer.black) {
-        const aiMove = aiPlayer.determineNextMove(
+        const aiMove = await aiPlayer.determineNextMove(
             game.getBoardStateHistory().getBoardState()
         );
 
@@ -128,6 +135,11 @@ async function loopOneAi(game: ChessGame) {
             const move = await requestChessMove(
                 game.getBoardStateHistory().getBoardState()
             );
+
+            if (!move) {
+                break;
+            }
+            
             game.makeMove(move);
             console.log(
                 game.getBoardStateHistory().getBoardState().toStringDetailed()
@@ -139,7 +151,7 @@ async function loopOneAi(game: ChessGame) {
 
             // get the AI's move
             if (!game.isGameOver()) {
-                const aiMove = aiPlayer.determineNextMove(
+                const aiMove = await aiPlayer.determineNextMove(
                     game.getBoardStateHistory().getBoardState()
                 );
                 if (!aiMove) {
@@ -148,6 +160,7 @@ async function loopOneAi(game: ChessGame) {
                 }
 
                 game.makeMove(aiMove);
+                console.log(logProfileMap());
                 console.log(
                     game
                         .getBoardStateHistory()
@@ -173,20 +186,25 @@ async function loopTwoAis(game: ChessGame) {
     const start = +new Date();
     console.log("Two AI players game has started");
 
+    const heuristic = new ChessAiHeuristic();
     const aiPlayerWhite = new ChessNegamaxAiPlayer(
-        new ChessAiHeuristic(),
-        new ChessAiSortHeuristic()
+        /*new ChessAiHeuristic(),
+        new ChessAiSortHeuristic()*/
+        heuristic,
+        heuristic
     );
     const aiPlayerBlack = new ChessNegamaxAiPlayer(
-        new ChessAiHeuristic(),
-        new ChessAiSortHeuristic()
+        /*new ChessAiHeuristic(),
+        new ChessAiSortHeuristic()*/
+        heuristic,
+        heuristic
     );
 
     const repetitionMap = new Map<string, number>();
 
     while (!game.isGameOver()) {
         try {
-            const aiMove = aiPlayerWhite.determineNextMove(
+            const aiMove = await aiPlayerWhite.determineNextMove(
                 game.getBoardStateHistory().getBoardState()
             );
             if (!aiMove) {
@@ -213,7 +231,7 @@ async function loopTwoAis(game: ChessGame) {
 
             // get the AI's move
             if (!game.isGameOver()) {
-                const aiMove = aiPlayerBlack.determineNextMove(
+                const aiMove = await aiPlayerBlack.determineNextMove(
                     game.getBoardStateHistory().getBoardState()
                 );
                 if (!aiMove) {
@@ -261,7 +279,7 @@ async function loopTwoAis(game: ChessGame) {
  */
 async function requestChessMove(
     boardState: ChessBoardState
-): Promise<ChessBoardSingleMove> {
+): Promise<ChessBoardSingleMove | null> {
     while (true) {
         const currentPlayer =
             boardState.getLastMove()?.player === ChessPlayer.white
@@ -270,6 +288,11 @@ async function requestChessMove(
         const notation = await requestInput(
             `Please enter the move you'd like to make for ${currentPlayer} in chess notation:`
         );
+
+        if (notation === "quit") {
+            return null;
+        }
+
         const parseStatus = ChessNotation.moveFromNotation(
             boardState,
             notation

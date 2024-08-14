@@ -13,6 +13,7 @@ import {
     ChessCell,
     ChessPosition,
 } from "../../game-logic/position/chess-position";
+import { ProfileAllMethods } from "../../util/profile-all-methods";
 import {
     iChessAiHeuristic,
     iChessAiHeuristicEvaluation,
@@ -58,6 +59,7 @@ const GOOD_HEURISTICS: iChessAiHeuristicDataPoints<number>[] = [
     },
 ];
 
+@ProfileAllMethods
 export class ChessAiHeuristic implements iChessAiHeuristic {
     private maxPiecePoints =
         PawnPiece.pointsValue * 8 +
@@ -89,45 +91,41 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
             // the relative value of each piece score
             relativePiecesScore: new HeuristicDataPoint(
                 weights.relativePiecesScore,
-                this.maxPiecePoints
+                100 // Scale to 0-100 range
             ),
             // score based on if player is threatening with a skewer (TODO: max value of 2)
-            pinSkewerScore: new HeuristicDataPoint(weights.pinSkewerScore, 2),
+            pinSkewerScore: new HeuristicDataPoint(weights.pinSkewerScore, 100),
             // score based on what each player is threatening
             threateningScore: new HeuristicDataPoint(
                 weights.threateningScore,
-                this.maxPiecePoints
+                100 // Scale to 0-100 range
             ),
             // passed pawn score
-            passedPawnScore: new HeuristicDataPoint(weights.passedPawnScore, 8),
+            passedPawnScore: new HeuristicDataPoint(weights.passedPawnScore, 100),
             // activation score
             activatedScore: new HeuristicDataPoint(
                 weights.activatedScore,
-                // 1.25 for bishop, 1.15 for knight, 1 for pawn
-                1.25 * 2 + 1.15 * 2 + 1 * 2
+                100 // Scale to 0-100 range
             ),
             // control of center
             centerControlScore: new HeuristicDataPoint(
                 weights.centerControlScore,
-                16
+                100 // Scale to 0-100 range
             ),
             // mobility
             mobilityScore: new HeuristicDataPoint(
                 weights.mobilityScore,
-                40 //TODO: find better value
+                100 // Scale to 0-100 range
             ),
             // doubled pawns, tripled, etc
             stackedPawnScore: new HeuristicDataPoint(
                 weights.stackedPawnScore,
-                4
+                100 // Scale to 0-100 range
             ),
         };
     }
 
-    /**
-     * Calculate the score for all of the metrics
-     */
-    getScore(boardState: ChessBoardState): iChessAiHeuristicEvaluation {
+    getScore(boardState: ChessBoardState, bestScore: number, isMaximizingPlayer: boolean): iChessAiHeuristicEvaluation {
         if (boardState.isGameInCheckmate()) {
             return {
                 score: boardState.isPlayerInCheckmate(ChessPlayer.white)
@@ -137,17 +135,16 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
             };
         }
 
-        // rest state
-        this.whitePossibleMovements.clear();
-        this.blackPossibleMovements.clear();
-
-        // commenting out to check if this hurts performance too
-        /*if (boardState.isGameInStalemate()) {
+        if (boardState.isGameInStalemate()) {
             return {
                 score: 0,
                 data: {},
             };
-        }*/
+        }
+
+        // rest state
+        this.whitePossibleMovements.clear();
+        this.blackPossibleMovements.clear();
 
         // reset data point values
         for (const key in this.dataPoints) {
@@ -160,21 +157,23 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
         const centerControlBlack = new Set<ChessCell>();
 
         // iterate over all pieces and assemble data points
+        let whitePoints = 0;
+        let blackPoints = 0;
         for (const piece of boardState.getAllPieces()) {
             let inc = 0;
-            const possibleMoves =
-                boardState.getPossibleMovementsForPiece(piece);
+            const possibleMoves = boardState.getPossibleMovementsForPiece(piece);
             if (piece.player === ChessPlayer.white) {
                 inc = 1;
+                if (piece.letter !== KingPiece.letter) {
+                    whitePoints += piece.pointsValue;
+                }
                 this.whitePossibleMovements.merge(possibleMoves, boardState);
             } else {
                 inc = -1;
+                if (piece.letter !== KingPiece.letter) {
+                    blackPoints += piece.pointsValue;
+                }
                 this.blackPossibleMovements.merge(possibleMoves, boardState);
-            }
-
-            if (piece.letter !== KingPiece.letter) {
-                this.dataPoints.relativePiecesScore.value +=
-                    inc * piece.pointsValue;
             }
 
             // adjust score to represent activated pieces, we favor bishops > knights > pawns
@@ -195,15 +194,6 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
             // if it's a pawn, check if it's passed
             this.adjustPassedPawnScore(boardState, piece, inc);
 
-            // adjust control of center based on position
-            // commenting out to check if it is better to leave out
-            /*this.adjustControlOfCenterScoreFromPiece(
-                boardState,
-                piece,
-                centerControlWhite,
-                centerControlBlack
-            );*/
-
             // check threats
             for (const move of possibleMoves.getMoves()) {
                 this.adjustThreatScoreFromMove(boardState, piece, move, inc);
@@ -221,12 +211,15 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
             this.adjustSkewersPinsScore(boardState, possibleMoves, inc);
         }
 
+        // calculate relative pieces score
+        this.dataPoints.relativePiecesScore.value = (whitePoints - blackPoints) / (whitePoints + blackPoints) * 100;
+
         // check doubled / stacked pawns, enemy having them helps us
         this.scoreStackedPawns(boardState);
 
         // add up
         this.dataPoints.centerControlScore.value =
-            centerControlWhite.size - centerControlBlack.size;
+            (centerControlWhite.size - centerControlBlack.size) * 100;
 
         // the longer a piece isn't activated, the worse off the player is, so adjust
         this.dataPoints.activatedScore.value *=
@@ -234,21 +227,20 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
 
         // general mobility score, how many moves can we make?
         this.dataPoints.mobilityScore.value =
-            this.whitePossibleMovements.getNumMoves() -
-            this.blackPossibleMovements.getNumMoves();
+            (this.whitePossibleMovements.getNumMoves() -
+            this.blackPossibleMovements.getNumMoves()) * 100;
 
         let totalScore = 0;
         let data: any = {};
         for (const key in this.dataPoints) {
-            const datapoint = (this.dataPoints as any)[
-                key
-            ] as HeuristicDataPoint;
+            const datapoint = (this.dataPoints as any)[key] as HeuristicDataPoint;
             data[key] = {
                 value: datapoint.value,
-                norm: datapoint.getNorm(),
+                norm: datapoint.getNorm() * 100, // Scale the normalized value to 0-100
                 weight: datapoint.weight,
+                maxValueAbs: datapoint.maxValueAbs
             };
-            totalScore += datapoint.getNorm() * datapoint.weight;
+            totalScore += datapoint.getNorm() * datapoint.weight * 100; // Apply the scaling here as well
         }
         return {
             score: totalScore,
@@ -258,7 +250,6 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
 
     /**
      * Adjust the score for passed pawns
-     * This is called during an iteration of all pieces
      */
     private adjustPassedPawnScore(
         boardState: ChessBoardState,
@@ -284,15 +275,14 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
                 }
             }
 
-            if (!isPassed) {
-                this.dataPoints.passedPawnScore.value += inc;
+            if (isPassed) {
+                this.dataPoints.passedPawnScore.value += inc * 100;
             }
         }
     }
 
     /**
-     * Adjust the score for the control of the center
-     * This is called during an iteration of all pieces
+     * Adjust the score for the control of the center from a move
      */
     private adjustControlOfCenterScoreFromMove(
         boardState: ChessBoardState,
@@ -301,10 +291,10 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
         centerControlBlack: Set<ChessCell>
     ): void {
         switch (move.toPosition) {
-            case 27: //case ChessPosition.get(4, 4):
-            case 35: //case ChessPosition.get(4, 5):
-            case 28: //case ChessPosition.get(5, 4):
-            case 36: //case ChessPosition.get(5, 5):
+            case 27:
+            case 35:
+            case 28:
+            case 36:
                 if (move.player === ChessPlayer.white) {
                     centerControlWhite.add(move.toPosition);
                 } else {
@@ -315,34 +305,7 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
     }
 
     /**
-     * Adjust the score for the control of the center
-     * This is called during an iteration of all pieces
-     *
-     * TODO: if a move can actually remove this piece, we need to account for that!!
-     */
-    private adjustControlOfCenterScoreFromPiece(
-        boardState: ChessBoardState,
-        piece: ChessPiece,
-        centerControlWhite: Set<ChessCell>,
-        centerControlBlack: Set<ChessCell>
-    ): void {
-        switch (piece.getPosition()) {
-            case 27: //case ChessPosition.get(4, 4):
-            case 35: //case ChessPosition.get(4, 5):
-            case 28: //case ChessPosition.get(5, 4):
-            case 36: //case ChessPosition.get(5, 5):
-                if (piece.player === ChessPlayer.white) {
-                    centerControlWhite.add(piece.getPosition());
-                } else {
-                    centerControlBlack.add(piece.getPosition());
-                }
-                break;
-        }
-    }
-
-    /**
      * Adjust the score for threats
-     * This is called during an iteration of all pieces
      */
     private adjustThreatScoreFromMove(
         boardState: ChessBoardState,
@@ -351,16 +314,34 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
         inc: number
     ): void {
         const pieceAtPos = boardState.getPieceAtPosition(move.toPosition);
-        // add some score for threatening
         if (pieceAtPos && pieceAtPos.player !== piece.player) {
-            // this shouldn't be considered a threat of the piece under attack can capture this one
             const pieceAtPosPossibleMoves =
                 boardState.getPossibleMovementsForPiece(pieceAtPos);
             if (!pieceAtPosPossibleMoves.hasMoveToPosition(move.toPosition)) {
-                this.dataPoints.threateningScore.value +=
-                    inc * pieceAtPos.pointsValue;
+                // Calculate threat score based on relative piece values
+                const threatScore = this.calculateThreatScore(piece, pieceAtPos);
+                this.dataPoints.threateningScore.value += inc * threatScore * 100;
             }
         }
+    }
+
+    private calculateThreatScore(threateningPiece: ChessPiece, threatenedPiece: ChessPiece): number {
+        // Base threat score is the value of the threatened piece
+        let threatScore = threatenedPiece.pointsValue;
+
+        // Adjust score based on the relative values of the pieces
+        const valueDifference = threatenedPiece.pointsValue - threateningPiece.pointsValue;
+
+        if (valueDifference > 0) {
+            // Threatening a more valuable piece is good
+            threatScore += valueDifference * 0.5;
+        } else if (valueDifference < 0) {
+            // Threatening with a more valuable piece is less desirable
+            threatScore += valueDifference * 0.25;
+        }
+
+        // Ensure the threat score is always positive
+        return Math.max(threatScore, 0);
     }
 
     /**
@@ -386,7 +367,7 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
                         .hasMoveToPosition(move.pieceMoved.getPosition())
                 ) {
                     // we should only increment if the threatened piece doesn't have the power to take original piece
-                    this.dataPoints.pinSkewerScore.value += inc;
+                    this.dataPoints.pinSkewerScore.value += inc * 100;
                 }
             }
         }
@@ -407,12 +388,12 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
                 if (piece?.letter === PawnPiece.letter) {
                     if (piece.player === ChessPlayer.white) {
                         if (whitePawnInCol) {
-                            this.dataPoints.stackedPawnScore.value += 1;
+                            this.dataPoints.stackedPawnScore.value += 100;
                         }
                         whitePawnInCol = true;
                     } else {
                         if (blackPawnInCol) {
-                            this.dataPoints.stackedPawnScore.value -= 1;
+                            this.dataPoints.stackedPawnScore.value -= 100;
                         }
                         blackPawnInCol = true;
                     }

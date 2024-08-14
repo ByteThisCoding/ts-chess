@@ -1,12 +1,12 @@
 {
     "name": "@byte-this/ts-chess",
     "version": "1.0.65",
-    "type:": "module",
+    "type": "module",
     "main": "public-api.js",
     "types": "public-api.d.ts",
     "scripts": {
         "format": "npx prettier --write .",
-        "run": "ts-node cli-game.ts",
+        "start": "node --loader ts-node/esm --experimental-specifier-resolution=node cli-game.ts",
         "build": "node build-cli.js build",
         "publish:npm": "node build-cli.js publish"
     },
@@ -14,7 +14,8 @@
         "@types/collections": "^5.1.2",
         "@types/node": "^18.11.18",
         "prettier": "^2.8.1",
-        "ts-node-dev": "^2.0.0",
+        "ts-node": "^10.9.1",
+        "typescript": "^4.9.5",
         "tsconfig-paths": "^4.1.2"
     }
 }

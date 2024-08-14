@@ -15,6 +15,7 @@ export class PawnPiece extends ChessPiece {
     letter: string = PawnPiece.letter;
 
     name: string = "Pawn";
+    type = 0;
 
     static pointsValue = 1;
     pointsValue: number = PawnPiece.pointsValue;

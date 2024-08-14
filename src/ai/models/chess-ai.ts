@@ -5,5 +5,5 @@ export interface iChessAiPlayer {
     /**
      * Assumes this player is the opposite of the player that just went
      */
-    determineNextMove(boardState: ChessBoardState): ChessBoardSingleMove | null;
+    determineNextMove(boardState: ChessBoardState): Promise<ChessBoardSingleMove | null>;
 }

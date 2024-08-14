@@ -1,3 +1,5 @@
+import { MethodProfiler } from "../../util/method-profiler";
+
 /**
  * Position is represented by a number
  *
@@ -16,14 +18,20 @@ export class ChessPosition {
     /**
      * Get a particular position on the board
      */
+    //@ts-ignore
+    @MethodProfiler
     public static get(col: number, row: number): ChessCell {
         return (row - 1) * 8 + col - 1;
     }
 
+    //@ts-ignore
+    @MethodProfiler
     public static getCellCol(cell: ChessCell): number {
         return (cell % 8) + 1;
     }
 
+    //@ts-ignore
+    @MethodProfiler
     public static getCellRow(cell: ChessCell): number {
         return Math.floor(cell / 8) + 1;
     }
@@ -31,6 +39,8 @@ export class ChessPosition {
     /**
      * Convert a string such as "a8" to a position
      */
+    //@ts-ignore
+    @MethodProfiler
     public static fromString(str: string): ChessCell {
         const colLetter = str.substring(0, 1).toLowerCase();
         const col = colLetter.charCodeAt(0) - 97 /* "a".charCodeAt(0) */ + 1;
@@ -50,6 +60,8 @@ export class ChessPosition {
     /**
      * Return a readable string, such as "a6"
      */
+    //@ts-ignore
+    @MethodProfiler
     static toString(pos: ChessCell): string {
         const colNum = this.getCellCol(pos);
         const rowNum = this.getCellRow(pos);

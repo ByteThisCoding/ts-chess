@@ -14,6 +14,7 @@ export class KingPiece extends ChessPiece {
 
     static letter = "K";
     letter: string = KingPiece.letter;
+    type = 5;
 
     static pointsValue = 50;
     pointsValue: number = KingPiece.pointsValue;
@@ -62,9 +63,9 @@ export class KingPiece extends ChessPiece {
         }
 
         // can't if player is in check
-        if (boardState.isGameInCheck()) {
+        /*if (boardState.isGameInCheck()) {
             return;
-        }
+        }*/
 
         // invalid if king is in wrong position (sanity check, other conditions not sufficient at time of writing)
         const col = ChessPosition.getCellCol(this.getPosition());

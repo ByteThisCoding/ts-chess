@@ -4,10 +4,12 @@ import { ChessPlayer } from "../enums";
 import { ChessPiece } from "../pieces/chess-piece";
 import { ChessBoardSingleMove } from "./chess-board-move";
 import { ChessBoardSingleMoveShadow } from "./chess-board-shadow-move";
+import { ProfileAllMethods } from "../../util/profile-all-methods";
 
 /**
  * Encapsulation of a set of possible moves
  */
+@ProfileAllMethods
 export class ChessPieceAvailableMoveSet {
     private availableMoves = new Map<ChessCell, ChessBoardSingleMove[]>();
     private shadowMoves = new Map<ChessCell, ChessBoardSingleMoveShadow[]>();
@@ -29,9 +31,9 @@ export class ChessPieceAvailableMoveSet {
     }
 
     addBlockedPosition(pos: ChessCell): void {
-        if (pos > -1 && pos < 64) {
+        //if (pos > -1 && pos < 64) {
             this.blockedPositions.add(pos);
-        }
+        //}
     }
 
     /**

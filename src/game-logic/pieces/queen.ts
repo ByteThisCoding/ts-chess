@@ -14,6 +14,7 @@ export class QueenPiece extends ChessPiece {
     letter: string = QueenPiece.letter;
 
     name: string = "Queen";
+    type = 4;
 
     static pointsValue = 9;
     pointsValue: number = QueenPiece.pointsValue;

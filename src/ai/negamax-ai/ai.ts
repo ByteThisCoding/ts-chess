@@ -2,15 +2,14 @@ import { ChessBoardState } from "../../game-logic/board-state/chess-board-state"
 import { ChessPlayer } from "../../game-logic/enums";
 import { ChessBoardSingleMove } from "../../game-logic/moves/chess-board-move";
 import { ChessMoveValidator } from "../../game-logic/moves/chess-move-validator";
+import { ProfileAllMethods } from "../../util/profile-all-methods";
 import { iChessAiPlayer } from "../models/chess-ai";
-import {
-    iChessAiHeuristic,
-    iChessAiHeuristicEvaluation,
-} from "../models/heuristic";
+import { iChessAiHeuristic, iChessAiHeuristicEvaluation } from "../models/heuristic";
 
 interface iLookaheadResponse {
     hScore: iChessAiHeuristicEvaluation;
-    move: ChessBoardSingleMove;
+    move: ChessBoardSingleMove | null;
+    movePath: (ChessBoardSingleMove | null)[];
 }
 
 enum TranspositionTableType {
@@ -31,337 +30,318 @@ export enum ChessAiDifficultyMode {
     ultra = "Difficult",
 }
 
-/**
- * Negamax with alpha beta pruning
- */
+@ProfileAllMethods
 export class ChessNegamaxAiPlayer implements iChessAiPlayer {
+
+    private settings = {
+        transpositionEnabled: false,
+        nullPruneEnabled: false,
+        iterativeDeepeningEnabled: true,
+        preemptiveDepthReductionEnabled: false,
+        alphaBetaPruneEnabled: false,
+        moveSortingEnabled: true
+    };
+
     private maxDepth: number;
     private maxSearchTimeMs: number;
-
-    // TODO: need to properly store top level move!!!
-    private transpositionTable = new Map<string, iTranspositionTableEntry>();
+    private transpositionTable = new Map<number, iTranspositionTableEntry>();
+    private moveEvaluations: { move: ChessBoardSingleMove; evaluation: iChessAiHeuristicEvaluation }[] = [];
 
     constructor(
-        // the main heuristic to evaluate leaf nodes in the negamax traversal
         private heuristic: iChessAiHeuristic,
-        // a less-expensive heuristic to order moves to potentially save time
         private sortHeuristic: iChessAiHeuristic,
-        difficultyMode: ChessAiDifficultyMode = ChessAiDifficultyMode.hard
+        difficultyMode: ChessAiDifficultyMode = ChessAiDifficultyMode.medium
     ) {
         switch (difficultyMode) {
             case ChessAiDifficultyMode.easy:
-                this.maxDepth = 1;
+                this.maxDepth = 2;
                 this.maxSearchTimeMs = Infinity;
                 break;
             case ChessAiDifficultyMode.medium:
-                this.maxDepth = 4;
+                this.maxDepth = 8;
                 this.maxSearchTimeMs = 8_000;
                 break;
             case ChessAiDifficultyMode.hard:
-                this.maxDepth = 6;
+                this.maxDepth = 12;
                 this.maxSearchTimeMs = 16_000;
                 break;
             case ChessAiDifficultyMode.ultra:
-                this.maxDepth = 20;
-                this.maxSearchTimeMs = 22_000;
+                this.maxDepth = 50;
+                this.maxSearchTimeMs = 25_000;
+                break;
         }
     }
 
-    /**
-     * Assumes this player is the opposite of the player that just went
-     */
-    determineNextMove(
+    async determineNextMove(
         boardState: ChessBoardState
-    ): ChessBoardSingleMove | null {
+    ): Promise<ChessBoardSingleMove | null> {
         const start = +new Date();
-        const player =
-            boardState.getLastMove()?.player === ChessPlayer.white
-                ? ChessPlayer.black
-                : ChessPlayer.white;
+        const player = boardState.getLastMove()?.player === ChessPlayer.white ? ChessPlayer.black : ChessPlayer.white;
+        console.log("Available moves", [...boardState.getPossibleMovesForPlayer(player).getMoves()].map(m => m.toString()))
 
-        const enemy =
-            player === ChessPlayer.white
-                ? ChessPlayer.black
-                : ChessPlayer.white;
-
-        // clone once for mutation safety of the original board
-        //const cloneBoard = boardState.clone();
         const negateMult = player === ChessPlayer.white ? 1 : -1;
 
-        //const depth = this.MAX_DEPTH;
-        console.log("AI starting search of depth " + this.maxDepth);
+        this.moveEvaluations = []; // Reset move evaluations before starting
 
-        // TODO: update transposition table so we don't have to clear each time
-        this.transpositionTable.clear();
-        const { move, hScore } = this.iterativeDeepeningNegamax(
-            boardState,
-            player,
-            enemy,
-            negateMult,
-            this.transpositionTable
-        );
-
-        // find the uncloned version of the move, we need object referential equality
-        let bestMoveOriginal!: ChessBoardSingleMove;
-        if (move) {
-            bestMoveOriginal = move;
-        } else {
-            // if the AI didn't determine a move, just grab whatever first move and proceed, this means checkmate can't be avoided
-            for (const firstMove of boardState
-                .getPossibleMovesForPlayer(player)
-                .getMoves()) {
-                if (this.tryMakeMove(boardState, firstMove)) {
-                    bestMoveOriginal = firstMove;
-                    boardState.undoLastMove();
-                    break;
-                }
-            }
-        }
-
-        console.log(
-            "AI move determined in " +
-                (+new Date() - start) / 1000 +
-                " seconds and depth of " +
-                this.maxDepth +
-                " (" +
-                hScore?.score +
-                ") " +
-                bestMoveOriginal?.toString() || ":resign:"
-        );
-        return bestMoveOriginal || null;
-    }
-
-    /**
-     * Depth first search: negamax with a/b pruning
-     */
-    private iterativeDeepeningNegamax(
-        boardState: ChessBoardState,
-        player: ChessPlayer,
-        enemy: ChessPlayer,
-        negateMult: number,
-        //pathMoves: ChessBoardSingleMove[],
-        transpositionTable: Map<string, iTranspositionTableEntry>
-    ): iLookaheadResponse {
-        let response!: iLookaheadResponse;
-
-        const cutoffTimeMs = +new Date() + this.maxSearchTimeMs;
-
-        for (let i = 0; i < this.maxDepth; i++) {
-            console.log(
-                "Starting iterative deepening search of depth: " + (i + 1)
-            );
-
-            const thisResponse: iLookaheadResponse & {
-                timeLimitReached: boolean;
-            } = this.negamax(
-                //cloneBoard,
+        const { move, hScore, movePath } = this.settings.iterativeDeepeningEnabled
+            ? this.iterativeDeepeningNegamax(
+                    boardState,
+                    player,
+                    negateMult
+            ) : this.negamax(
                 boardState,
                 player,
-                enemy,
-                i + 1,
+                this.maxDepth,
                 -Infinity,
                 Infinity,
                 negateMult,
-                //[],
-                transpositionTable,
-                //possibleMoves,
-                cutoffTimeMs
+                +new Date() + this.maxSearchTimeMs,
+                []
+            )
+
+        // Log the move evaluations after the search is complete
+        console.log("Move Evaluations:", this.moveEvaluations.map(ev => ({
+            move: ev.move.toString(),
+            evaluation: ev.evaluation.score
+        })));
+
+        // Log the final best path
+        console.log("Best Path:", movePath.map(m => m?.toString()).join(" -> "), hScore);
+
+        console.log(
+            "AI move determined in " +
+            (+new Date() - start) / 1000 +
+            " seconds and depth of " +
+            this.maxDepth +
+            " (" +
+            hScore?.score +
+            ") " +
+            move?.toString() || ":resign:"
+        );
+
+        return move || null;
+    }
+
+    private iterativeDeepeningNegamax(
+        boardState: ChessBoardState,
+        player: ChessPlayer,
+        negateMult: number
+    ): iLookaheadResponse {
+        let response: iLookaheadResponse = { hScore: { score: -Infinity, data: {} }, move: null, movePath: [] };
+
+        const cutoffTimeMs = +new Date() + this.maxSearchTimeMs;
+
+        for (let depth = 2; depth <= this.maxDepth; depth+=2) {
+            console.log("Starting iterative deepening search of depth: " + depth);
+
+            const thisResponse = this.negamax(
+                boardState,
+                player,
+                depth,
+                -Infinity,
+                Infinity,
+                negateMult,
+                cutoffTimeMs,
+                []
             );
 
-            if (
-                !response ||
-                !thisResponse.timeLimitReached ||
-                (negateMult * thisResponse.hScore.score >=
-                    negateMult * response.hScore.score)
-            ) {
-                console.log("Updating response:", { response, thisResponse });
+            //if (!response.move || thisResponse.hScore.score > response.hScore.score) {
+                console.log("Updating best move at depth", depth, ": ", thisResponse.move?.toString());
+                console.log("Current Path:", thisResponse.movePath.map(m => m?.toString()).join(" -> "), thisResponse.hScore.score);
+
+                // make the move and get opponent player moves
+                //boardState.setPiecesFromMove(thisResponse.move, "");
+                //console.log("All opponent player moves", [...boardState.getPossibleMovesForPlayer(player === ChessPlayer.white ? ChessPlayer.black : ChessPlayer.white).getMoves()].map(m => m.toString()))
+                //boardState.undoLastMove();
                 response = thisResponse;
-            }
+            //}
 
             if (+new Date() >= cutoffTimeMs) {
                 break;
             }
         }
 
-        // TEMP FIX: in case move ref is invalid, use toString to find equal move
-        if (response && response.move) {
-            for (const move of boardState
-                .getPossibleMovesForPlayer(player)
-                .getMoves()) {
-                if (move.toString() === response.move.toString()) {
-                    response.move = move;
-                    break;
-                }
-            }
-        }
-
         return response;
     }
 
-    /**
-     * Depth first search: negamax with a/b pruning
-     */
     private negamax(
         boardState: ChessBoardState,
         player: ChessPlayer,
-        enemy: ChessPlayer,
         depthRemaining: number,
         alphaPrune: number,
         betaPrune: number,
         negateMult: number,
-        //pathMoves: ChessBoardSingleMove[],
-        transpositionTable: Map<string, iTranspositionTableEntry>,
-        //possibleMoves: { move: ChessBoardSingleMove; score: number }[],
-        cutoffTimeMs: number
+        cutoffTimeMs: number,
+        movePath: (ChessBoardSingleMove | null)[]
     ): iLookaheadResponse & { timeLimitReached: boolean } {
-        let alphaOriginal = alphaPrune;
         let timeLimitReached = false;
-
-        let bestMoveH: iChessAiHeuristicEvaluation = {
-            score: -Infinity,
-            data: {},
-        };
-        //let bestMovePath = pathMoves;
-        let bestMove!: ChessBoardSingleMove;
-
-        const transpositionTableKey = boardState.toString();
-
-        if (transpositionTable.has(transpositionTableKey)) {
-            const tableResult = transpositionTable.get(transpositionTableKey)!;
+    
+        let bestMoveH: iChessAiHeuristicEvaluation = { score: -Infinity, data: {} };
+        let bestMove: ChessBoardSingleMove | null = null;
+        let bestMovePath: (ChessBoardSingleMove | null)[] = [...movePath];
+    
+        const transpositionTableKey = boardState.toHash();
+    
+        if (this.settings.transpositionEnabled && this.transpositionTable.has(transpositionTableKey)) {
+            const tableResult = this.transpositionTable.get(transpositionTableKey)!;
+            
             if (tableResult.depthRemaining >= depthRemaining) {
-                switch (tableResult.type) {
-                    case TranspositionTableType.exact:
-                        bestMove = tableResult.move;
-                        bestMoveH = tableResult.hScore;
-                        bestMoveH.score *= negateMult;
-                        break;
-                    case TranspositionTableType.lowerbound:
-                        alphaPrune = Math.max(
-                            alphaPrune,
-                            tableResult.hScore.score * negateMult
-                        );
-                        break;
-                    case TranspositionTableType.upperbound:
-                        betaPrune = Math.min(
-                            betaPrune,
-                            tableResult.hScore.score * negateMult
-                        );
-                        break;
-                }
-
-                if (alphaPrune >= betaPrune) {
-                    bestMove = tableResult.move;
-                    bestMoveH = tableResult.hScore;
-                    bestMoveH.score *= negateMult;
-                }
+                return {
+                    hScore: { ...tableResult.hScore, score: tableResult.hScore.score * negateMult },
+                    move: tableResult.move,
+                    movePath: [...movePath, tableResult.move],
+                    timeLimitReached: false
+                };
             }
         }
-
-        if (!bestMove && depthRemaining === 0) {
-            // base case, depth is 0
-            bestMoveH = this.heuristic.getScore(boardState);
-            bestMoveH.score *= negateMult;
-        } else if (!bestMove) {
-            const possibleMoves: {
-                move: ChessBoardSingleMove;
-                score: number;
-            }[] = [];
-            // sort based on initial board state analysis
-            for (const move of boardState
-                .getPossibleMovesForPlayer(player)
-                .getMoves()) {
-                const moveIsGood = this.tryMakeMove(boardState, move);
-                if (moveIsGood) {
-                    const score =
-                        this.sortHeuristic.getScore(boardState).score *
-                        negateMult;
-
-                    possibleMoves.push({
-                        move,
-                        score,
-                    });
-                    boardState.undoLastMove();
-                }
-            }
-
-            // sort the moves based on initial heuristic estimate
-            possibleMoves.sort((a, b) => b.score - a.score);
-
-            // check each move recursively
-            for (const { move } of possibleMoves) {
-                boardState.setPiecesFromMove(move, "");
-                const thisMoveH = this.negamax(
+    
+        // Null Move Pruning
+        if (this.settings.nullPruneEnabled) {
+            const R = 2; // Reduction factor for null move pruning
+            if (depthRemaining > R && !boardState.isPlayerInCheck(player)) {
+                boardState.setPiecesFromMove(null, ""); // Perform a null move
+                const nullMoveH = this.negamax(
                     boardState,
-                    enemy,
-                    player,
-                    depthRemaining - 1,
+                    player === ChessPlayer.white ? ChessPlayer.black : ChessPlayer.white,
+                    depthRemaining - 1 - R,
                     -betaPrune,
                     -alphaPrune,
                     -negateMult,
-                    transpositionTable,
-                    //possibleMoves,
                     cutoffTimeMs,
+                    movePath
                 );
                 boardState.undoLastMove();
-
-                // if black, flip score to negative
-                thisMoveH.hScore.score *= -1;
-                thisMoveH.move = move;
-
-                // compare scores
-                if (thisMoveH.hScore.score >= bestMoveH.score) {
-                    bestMoveH = thisMoveH.hScore;
-                    bestMove = thisMoveH.move;
+    
+                if (-nullMoveH.hScore.score >= betaPrune) {
+                    return {
+                        hScore: { score: betaPrune, data: {} },
+                        move: null!,
+                        movePath: [...movePath],
+                        timeLimitReached: false
+                    };
                 }
-
-                if (bestMoveH.score > alphaPrune) {
-                    alphaPrune = bestMoveH.score;
-                }
-
-                if (alphaPrune >= betaPrune) {
-                    break;
-                }
-
-                if (+new Date() >= cutoffTimeMs) {
-                    timeLimitReached = true;
-                    break;
-                }
-            }
-
-            if (!timeLimitReached) {
-                // add to transposition table
-                let type: TranspositionTableType;
-                if (bestMoveH.score <= alphaOriginal) {
-                    type = TranspositionTableType.upperbound;
-                } else if (bestMoveH.score >= betaPrune) {
-                    type = TranspositionTableType.lowerbound;
-                } else {
-                    type = TranspositionTableType.exact;
-                }
-
-                // multiply it by negateMulti to ensure it stays in absolute value
-                const tableScore = { ...bestMoveH };
-                tableScore.score *= negateMult;
-                //tableScore.score *= negateMult;
-                transpositionTable.set(transpositionTableKey, {
-                    type,
-                    depthRemaining,
-                    hScore: tableScore,
-                    move: bestMove,
-                });
             }
         }
+    
+        // Base case: if depth is 0, evaluate the board
+        if (depthRemaining <= 0) {
+            bestMoveH = this.heuristic.getScore(boardState, bestMoveH.score, player === ChessPlayer.white);
+            bestMoveH.score *= negateMult; // Flip the score for negamax
+            //console.log(negateMult, "Low depth:", movePath.map(mv => mv?.toString()), bestMoveH.score);
+            return { hScore: bestMoveH, move: null!, movePath: [...movePath], timeLimitReached: false };
+        }
+    
+        // Generate and evaluate moves
+        const possibleMoves: { move: ChessBoardSingleMove; score: number }[] = [];
+        for (const move of boardState.getPossibleMovesForPlayer(player).getMoves()) {
+            const moveIsGood = this.tryMakeMove(boardState, move);
+            if (moveIsGood) {
+                const score = this.sortHeuristic.getScore(boardState, bestMoveH.score, player === ChessPlayer.white);
+                score.score *= negateMult;
+                possibleMoves.push({ move, score: score.score });
+                boardState.undoLastMove();
+            }
+        }
+    
+        // Sort moves based on heuristic score
+        if (this.settings.moveSortingEnabled) {
+            possibleMoves.sort((a, b) => b.score - a.score);
+        }
+    
+        // Evaluate each move
+        for (const { move } of possibleMoves) {
+            const isCapture = boardState.setPiecesFromMove(move, "");
+    
+            // Apply Late Move Reductions (LMR) with heuristic filtering and depth adjustments
+            let depthAdjustment = 0;
+            const adjustmentFactor = 0.3; // A more conservative adjustment
+    
+            const moveScorePreemptive = this.heuristic.getScore(boardState);
 
-        return { hScore: bestMoveH, move: bestMove, timeLimitReached };
+            if (
+                this.settings.preemptiveDepthReductionEnabled && 
+                !isCapture &&
+                ((move.player == ChessPlayer.white && moveScorePreemptive.score < alphaPrune + adjustmentFactor) ||
+                    (move.player == ChessPlayer.black && moveScorePreemptive.score > alphaPrune - adjustmentFactor))
+            ) {
+                depthAdjustment = -1; // Conservative depth reduction
+            }
+    
+            const newDepth = depthRemaining - 1 + depthAdjustment;
+            const thisMoveH = this.negamax(
+                boardState,
+                player === ChessPlayer.white ? ChessPlayer.black : ChessPlayer.white,
+                newDepth,
+                -betaPrune,
+                -alphaPrune,
+                -negateMult,
+                cutoffTimeMs,
+                [...movePath, move]
+            );
+            boardState.undoLastMove();
+    
+            // Flip the score for negamax calculation
+            const currentScore = -1 * thisMoveH.hScore.score;
+    
+            if (currentScore > bestMoveH.score) {
+                bestMoveH = { ...thisMoveH.hScore, score: currentScore };
+                bestMove = move;
+                bestMovePath = [...thisMoveH.movePath];
+            }
+    
+            if (this.settings.alphaBetaPruneEnabled) {
+                alphaPrune = Math.max(alphaPrune, currentScore);
+    
+                if (alphaPrune >= betaPrune) {
+                    break; // Beta cutoff
+                }
+            }
+    
+            if (+new Date() >= cutoffTimeMs) {
+                timeLimitReached = true;
+                break;
+            }
+        }
+    
+        // Store in Transposition Table
+        if (!timeLimitReached && this.settings.transpositionEnabled) {
+            let type: TranspositionTableType;
+            if (this.settings.alphaBetaPruneEnabled && bestMoveH.score <= alphaPrune) {
+                type = TranspositionTableType.upperbound;
+            } else if (this.settings.alphaBetaPruneEnabled && bestMoveH.score >= betaPrune) {
+                type = TranspositionTableType.lowerbound;
+            } else {
+                type = TranspositionTableType.exact;
+            }
+    
+            this.transpositionTable.set(transpositionTableKey, {
+                type,
+                depthRemaining,
+                hScore: { ...bestMoveH, score: bestMoveH.score * negateMult },
+                move: bestMove!,
+                movePath: bestMovePath
+            });
+        }
+    
+        // Log the best move found at this depth
+        if (bestMove) {
+            this.moveEvaluations.push({ move: bestMove, evaluation: bestMoveH });
+        }
+    
+        return { hScore: bestMoveH, move: bestMove, movePath: bestMovePath, timeLimitReached };
     }
+    
 
-    /**
-     * Try to make a move, return false if invalid
-     */
     private tryMakeMove(
         boardState: ChessBoardState,
         move: ChessBoardSingleMove
     ): boolean {
+        /*boardState.setPiecesFromMove(move, "");
+        if (boardState.isPlayerInCheck(move.player)) {
+            boardState.undoLastMove();
+            return false;
+        }
+        return true;*/
         const response = ChessMoveValidator.isMoveValid(boardState, move);
         if (response.success) {
             boardState.setPiecesFromMove(move, "");

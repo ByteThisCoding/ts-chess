@@ -5,29 +5,31 @@ import {
 } from "./chess-board-move-validation-status";
 import { ChessBoardState } from "../board-state/chess-board-state";
 import { ChessPosition } from "../position/chess-position";
+import { ProfileAllMethods } from "../../util/profile-all-methods";
+import { MethodProfiler } from "../../util/method-profiler";
 
 /**
  * Utility responsible for checking if a move is valid
  */
 export class ChessMoveValidator {
+
+    @MethodProfiler
     public static isMoveValid(
         boardState: ChessBoardState,
         move: ChessBoardSingleMove
     ): ChessBoardMoveValidationStatus {
         const piece = move.pieceMoved;
-
-        // validate player owns piece
-        if (move.player !== move.pieceMoved.player) {
+    
+        // Validate player owns piece
+        if (move.player !== piece.player) {
             return new ChessBoardMoveValidationStatus(
                 false,
                 ChessBoardMoveValidationFailure.playerDoesNotOwn,
-                {
-                    piece: piece.toString(),
-                }
+                { piece: piece.toString() }
             );
         }
-
-        // validate from position is correct
+    
+        // Validate from position is correct
         const fromPos = move.fromPosition;
         const fromPiece = boardState.getPieceAtPosition(fromPos);
         if (!fromPiece?.equals(piece)) {
@@ -38,15 +40,14 @@ export class ChessMoveValidator {
                     fromPos: ChessPosition.toString(fromPos),
                     piece: piece.toString(),
                     fromPiece: fromPiece?.toString(),
-                    board: boardState.toString(),
+                    // Removed unnecessary board state string conversion for performance
                     move: move.toString(),
                 }
             );
         }
-
-        // validate piece can move to this position
+    
+        // Validate piece can move to this position
         const toPos = move.toPosition;
-
         const validMoves = boardState.getPossibleMovementsForPiece(piece);
         if (!validMoves.hasMoveToPosition(toPos)) {
             return new ChessBoardMoveValidationStatus(
@@ -54,16 +55,15 @@ export class ChessMoveValidator {
                 ChessBoardMoveValidationFailure.pieceCannotAccessPosition,
                 {
                     move: move.toString(),
-                    availableMoves: [...validMoves.getMoves()].map((mv) =>
+                    /*availableMoves: [...validMoves.getMoves()].map((mv) =>
                         ChessPosition.toString(mv.toPosition)
-                    ),
+                    ),*/
                 }
             );
         }
-
-        // tentatively make move to detect if player would be in invalid check
-        const { inCheck, piece: checkPiece } =
-            boardState.doesMovePutPlayerInIllegalCheck(move);
+    
+        // Tentatively make move to detect if player would be in invalid check
+        const { inCheck, piece: checkPiece } = boardState.doesMovePutPlayerInIllegalCheck(move);
         if (inCheck) {
             return new ChessBoardMoveValidationStatus(
                 false,
@@ -74,7 +74,7 @@ export class ChessMoveValidator {
                 }
             );
         }
-
+    
         return new ChessBoardMoveValidationStatus(true, null);
     }
 }

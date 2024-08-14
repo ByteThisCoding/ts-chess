@@ -5,6 +5,7 @@ import { KnightPiece } from "../../game-logic/pieces/knight";
 import { PawnPiece } from "../../game-logic/pieces/pawn";
 import { QueenPiece } from "../../game-logic/pieces/queen";
 import { RookPiece } from "../../game-logic/pieces/rook";
+import { ProfileAllMethods } from "../../util/profile-all-methods";
 import {
     iChessAiHeuristic,
     iChessAiHeuristicEvaluation,
@@ -13,6 +14,7 @@ import {
 /**
  * This is a simpler heuristic used to order moves for the AI before using the real one
  */
+@ProfileAllMethods
 export class ChessAiSortHeuristic implements iChessAiHeuristic {
     private maxPiecePoints =
         PawnPiece.pointsValue * 8 +
@@ -39,7 +41,7 @@ export class ChessAiSortHeuristic implements iChessAiHeuristic {
         }
 
         return {
-            score: boardState.getScore() / this.maxPiecePoints,
+            score: boardState.getScore(),
             data: {},
         };
     }

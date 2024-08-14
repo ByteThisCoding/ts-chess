@@ -14,6 +14,7 @@ export class BishopPiece extends ChessPiece {
     doCacheMoves = true;
 
     name: string = "Bishop";
+    type = 2;
 
     static pointsValue = 3;
     pointsValue: number = BishopPiece.pointsValue;
