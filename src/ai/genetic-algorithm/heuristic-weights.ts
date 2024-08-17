@@ -2,7 +2,7 @@ import { ChessGame } from "../../game-logic/chess-game";
 import {
     iChessAiHeuristicDataPoint,
     iChessAiHeuristicDataPoints,
-} from "../models/heuristic-data-point";
+} from "../models/heuristic-data-point.model";
 import { Chromosome } from "./chromosome";
 import { ChromosomePopulation } from "./population";
 

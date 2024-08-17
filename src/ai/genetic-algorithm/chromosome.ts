@@ -1,8 +1,8 @@
 import { ChessAiHeuristic } from "../heuristic/heuristic";
 import { ChessAiSortHeuristic } from "../heuristic/sort-heuristic";
-import { iChessAiPlayer } from "../models/chess-ai";
-import { iChessAiHeuristicDataPoints } from "../models/heuristic-data-point";
-import { ChessNegamaxAiPlayer } from "../negamax-ai/ai";
+import { iChessAiPlayer } from "../models/chess-ai.model";
+import { iChessAiHeuristicDataPoints } from "../models/heuristic-data-point.model";
+import { ChessNegamaxAiPlayer } from "../negamax-ai/ai-algorithm";
 
 /**
  * A chromosome is an encapsulation of different weights which form an AI's heuristic

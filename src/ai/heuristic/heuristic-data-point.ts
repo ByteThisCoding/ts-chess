@@ -1,4 +1,4 @@
-import { iChessAiHeuristicDataPoint } from "../models/heuristic-data-point";
+import { iChessAiHeuristicDataPoint } from "../models/heuristic-data-point.model";
 
 /**
  * Encapsulate a single data point
@@ -18,6 +18,6 @@ export class HeuristicDataPoint implements iChessAiHeuristicDataPoint {
         } else if (value < -1) {
             value = -1;
         }
-        return value;
+        return value * this.maxValueAbs;
     }
 }

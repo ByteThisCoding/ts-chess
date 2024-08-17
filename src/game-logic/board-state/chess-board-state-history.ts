@@ -1,8 +1,6 @@
-import { ChessBoardSingleMove } from "../moves/chess-board-move";
-import { ChessBoardState } from "./chess-board-state";
-import { ChessPosition } from "../position/chess-position";
-import { ChessPlayer } from "../enums";
+import { ChessBoardSingleMove } from "../moves/chess-board-move.model";
 import { ChessNotation } from "../notation/chess-notation-parser";
+import { ChessBoardStateImpl } from "./chess-board-state-impl";
 
 /**
  * This will encapsulate a chess board's current state
@@ -13,13 +11,13 @@ import { ChessNotation } from "../notation/chess-notation-parser";
  */
 export class ChessBoardStateHistory {
     // initialize with the start board
-    private latestBoardState = ChessBoardState.getStartBoard();
+    private latestBoardState = ChessBoardStateImpl.getStartBoard();
 
     private movesHistory: ChessBoardSingleMove[] = [];
 
     // TODO: can we make more efficient by chaining instead of cloning?
     // we'd need to handle how to store captured pieces
-    private boardHistory: ChessBoardState[] = [];
+    private boardHistory: ChessBoardStateImpl[] = [];
 
     getListOfMovesNotation(): string[] {
         const moves = this.boardHistory
@@ -56,7 +54,7 @@ export class ChessBoardStateHistory {
         return lastMove;
     }
 
-    getBoardState(): ChessBoardState {
+    getBoardState(): ChessBoardStateImpl {
         return this.latestBoardState;
     }
 }

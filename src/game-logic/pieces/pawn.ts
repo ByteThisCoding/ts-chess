@@ -1,16 +1,17 @@
-import { ChessBoardState } from "../board-state/chess-board-state";
-import { ChessPiece } from "./chess-piece";
 import { ChessCell, ChessPosition } from "../position/chess-position";
 import { ChessPlayer } from "../enums";
-import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set";
 import { KnightPiece } from "./knight";
 import { QueenPiece } from "./queen";
+import { ChessBoardState } from "../board-state/chess-board-state.model";
+import { AbstractChessPiece } from "./abstract-chess-piece";
+import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set.model";
+import { ChessPieceAvailableMoveSetImpl } from "../moves/chess-piece-available-move-set-impl";
 
 /**
  * Encapsulation of a pawn
  * This piece doesn't use shadow moves because it can only move to specific squares in a capturing manner (i.e. not in a line)
  */
-export class PawnPiece extends ChessPiece {
+export class PawnPiece extends AbstractChessPiece {
     static letter = "P";
     letter: string = PawnPiece.letter;
 
@@ -52,7 +53,7 @@ export class PawnPiece extends ChessPiece {
         boardState: ChessBoardState,
         inc: 1 | -1
     ): ChessPieceAvailableMoveSet {
-        const moves = new ChessPieceAvailableMoveSet(this.player);
+        const moves = new ChessPieceAvailableMoveSetImpl(this.player);
         const posCol = ChessPosition.getCellCol(this.getPosition());
         const posRow = ChessPosition.getCellRow(this.getPosition());
 
@@ -69,7 +70,7 @@ export class PawnPiece extends ChessPiece {
                 ) {
                     this.promotionLetters.forEach((letter) => {
                         moves.addMove(
-                            ChessPiece.newMove(
+                            AbstractChessPiece.newMove(
                                 this,
                                 nextPos,
                                 false,
@@ -83,7 +84,7 @@ export class PawnPiece extends ChessPiece {
                 } else {
                     // otherwise, add normal move
                     moves.addMove(
-                        ChessPiece.newMove(this, nextPos),
+                        AbstractChessPiece.newMove(this, nextPos),
                         boardState
                     );
                 }
@@ -106,7 +107,7 @@ export class PawnPiece extends ChessPiece {
                     ) {
                         this.promotionLetters.forEach((letter) => {
                             moves.addMove(
-                                ChessPiece.newMove(
+                                AbstractChessPiece.newMove(
                                     this,
                                     takeLeftPos,
                                     false,
@@ -119,7 +120,7 @@ export class PawnPiece extends ChessPiece {
                         });
                     } else {
                         moves.addMove(
-                            ChessPiece.newMove(this, takeLeftPos),
+                            AbstractChessPiece.newMove(this, takeLeftPos),
                             boardState
                         );
                     }
@@ -145,7 +146,7 @@ export class PawnPiece extends ChessPiece {
                     ) {
                         this.promotionLetters.forEach((letter) => {
                             moves.addMove(
-                                ChessPiece.newMove(
+                                AbstractChessPiece.newMove(
                                     this,
                                     takeRightPos,
                                     false,
@@ -158,7 +159,7 @@ export class PawnPiece extends ChessPiece {
                         });
                     } else {
                         moves.addMove(
-                            ChessPiece.newMove(this, takeRightPos),
+                            AbstractChessPiece.newMove(this, takeRightPos),
                             boardState
                         );
                     }
@@ -177,7 +178,7 @@ export class PawnPiece extends ChessPiece {
 
                 if (!boardState.hasPieceAtPosition(nextPos)) {
                     moves.addMove(
-                        ChessPiece.newMove(this, nextPos),
+                        AbstractChessPiece.newMove(this, nextPos),
                         boardState
                     );
                 } else {
@@ -207,7 +208,7 @@ export class PawnPiece extends ChessPiece {
                         boardState.getMoveNumber()
                 ) {
                     moves.addMove(
-                        ChessPiece.newMove(this, leftPawnMove, false, true),
+                        AbstractChessPiece.newMove(this, leftPawnMove, false, true),
                         boardState
                     );
                 } else {
@@ -231,7 +232,7 @@ export class PawnPiece extends ChessPiece {
                         boardState.getMoveNumber()
                 ) {
                     moves.addMove(
-                        ChessPiece.newMove(this, rightPawnMove, false, true),
+                        AbstractChessPiece.newMove(this, rightPawnMove, false, true),
                         boardState
                     );
                 } else {

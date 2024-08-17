@@ -1,8 +1,8 @@
-import { ChessBoardSingleMove } from "./moves/chess-board-move";
 import { ChessBoardStateHistory } from "./board-state/chess-board-state-history";
 import { ChessMoveValidator } from "./moves/chess-move-validator";
 import { ChessPlayer } from "./enums";
-import { ChessBoardState } from "./board-state/chess-board-state";
+import { ChessBoardState } from "./board-state/chess-board-state.model";
+import { ChessBoardSingleMove } from "./moves/chess-board-move.model";
 
 export class ChessGame {
     private boardStateHistory = new ChessBoardStateHistory();

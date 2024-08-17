@@ -1,4 +1,4 @@
-import { ChessBoardSingleMove } from "../moves/chess-board-move";
+import { ChessBoardSingleMove } from "../moves/chess-board-move.model";
 
 export enum ChessNotationParseFailure {
     invalidNotationFormat = "The notation you've entered is not in valid format.",

@@ -1,4 +1,4 @@
-import { ChessBoardState } from "../../game-logic/board-state/chess-board-state";
+import { ChessBoardState } from "../../game-logic/board-state/chess-board-state.model";
 
 export interface iChessAiHeuristicEvaluation {
     score: number;

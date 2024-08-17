@@ -1,4 +1,3 @@
-import { ChessPiece } from "../pieces/chess-piece";
 import { ChessCell, ChessPosition } from "../position/chess-position";
 import { ChessPlayer } from "../enums";
 import { BishopPiece } from "../pieces/bishop";
@@ -7,14 +6,18 @@ import { KnightPiece } from "../pieces/knight";
 import { PawnPiece } from "../pieces/pawn";
 import { QueenPiece } from "../pieces/queen";
 import { RookPiece } from "../pieces/rook";
-import { ChessBoardSingleMove } from "../moves/chess-board-move";
-import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set";
 import {
     ChessPieceFactory,
     ChessPieceStatic,
 } from "../pieces/chess-piece-factory";
-import { ChessMoveValidator } from "../moves/chess-move-validator";
 import { ProfileAllMethods } from "../../util/profile-all-methods";
+import { ChessBoardState } from "./chess-board-state.model";
+import { ChessBoardSingleMove } from "../moves/chess-board-move.model";
+import { ChessBoardSingleMoveImpl } from "../moves/chess-board-move-impl";
+import { ChessPiece } from "../pieces/chess-piece.model";
+import { AbstractChessPiece } from "../pieces/abstract-chess-piece";
+import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set.model";
+import { ChessPieceAvailableMoveSetImpl } from "../moves/chess-piece-available-move-set-impl";
 
 interface BoardMoveStats {
     isBlackInCheck: boolean;
@@ -41,7 +44,7 @@ interface BoardMoveStats {
  * Mutable Representation of a chess board with pieces
  */
 @ProfileAllMethods
-export class ChessBoardState {
+export class ChessBoardStateImpl implements ChessBoardState {
     private boardStats: BoardMoveStats = {
         isBlackInCheck: false,
         isBlackInCheckmate: false,
@@ -340,7 +343,7 @@ export class ChessBoardState {
 
         return this._availableMovesCache.get(player)!;*/
 
-        const allPlayerMoves = new ChessPieceAvailableMoveSet(player);
+        const allPlayerMoves = new ChessPieceAvailableMoveSetImpl(player);
 
         for (const piece of this.positions) {
             if (piece && piece.player === player) {
@@ -699,7 +702,7 @@ export class ChessBoardState {
     /**
      * Deep clone the state of this board and its pieces
      */
-    clone(): ChessBoardState {
+    clone(): ChessBoardStateImpl {
         let cloneWhiteKing!: ChessPiece;
         let cloneBlackKing!: ChessPiece;
         const clonedPositions: (ChessPiece | null)[] = new Array(64);
@@ -717,7 +720,7 @@ export class ChessBoardState {
                 }
             }
         }
-        const state = new ChessBoardState(clonedPositions);
+        const state = new ChessBoardStateImpl(clonedPositions);
         // TODO: deep recursive copy of board stats
         state.boardStats.lastMove = this.boardStats.lastMove?.clone() || null;
         state.whiteKingPiece = cloneWhiteKing as KingPiece;
@@ -784,7 +787,7 @@ export class ChessBoardState {
     /**
      * Get a board state object of the beginning of a game
      */
-    public static getStartBoard(): ChessBoardState {
+    public static getStartBoard(): ChessBoardStateImpl {
         const positions: (ChessPiece | null)[] = new Array(64).fill(null);
 
         // temp variable to store positions for insertion
@@ -845,7 +848,7 @@ export class ChessBoardState {
         const blackKingPiece = new KingPiece(ChessPlayer.black, pos);
         positions[pos] = blackKingPiece;
 
-        const state = new ChessBoardState(positions);
+        const state = new ChessBoardStateImpl(positions);
         state.whiteKingPiece = whiteKingPiece;
         state.blackKingPiece = blackKingPiece;
 
@@ -919,4 +922,63 @@ export class ChessBoardState {
             this.zobristHash ^= this.zobristTable[capturedPieceIndex][toPos];
         }
     }
+
+    /**
+     * Serializes the entire state of the ChessBoardState, including all properties.
+     */
+    serialize(): string {
+        const serializedState: any = {};
+
+        // Serialize all properties of the class instance
+        for (const key of Object.keys(this)) {
+            const value = (this as any)[key];
+
+            if (value instanceof Map) {
+                serializedState[key] = Array.from(value.entries());
+            } else if (value instanceof Set) {
+                serializedState[key] = Array.from(value);
+            } else if (value instanceof AbstractChessPiece) {
+                serializedState[key] = value.serialize();
+            } else if (value && typeof value === 'object' && typeof value.serialize === 'function') {
+                serializedState[key] = value.serialize();
+            } else {
+                serializedState[key] = value;
+            }
+        }
+
+        return JSON.stringify(serializedState);
+    }
+
+    /**
+     * Deserializes a JSON string into a ChessBoardState object.
+     */
+    static deserialize(jsonString: string): ChessBoardStateImpl {
+        const parsedState = JSON.parse(jsonString);
+        const state = new ChessBoardStateImpl(parsedState.positions);
+
+        // Reflectively deserialize all properties
+        for (const key of Object.keys(parsedState)) {
+            let value = parsedState[key];
+
+            if (Array.isArray(value) && value.every(item => Array.isArray(item))) {
+                // Handle Maps
+                (state as any)[key] = new Map(value as any);
+            } else if (Array.isArray(value)) {
+                // Handle Sets
+                (state as any)[key] = new Set(value);
+            } else if (value && typeof value === 'object' && value.letter && value.player) {
+                // Handle ChessPiece
+                (state as any)[key] = ChessPieceFactory.createPieceFromSerialized(value);
+            } else if (value && typeof value === 'object' && value.zobristHash) {
+                // Handle complex nested objects that are not ChessPieces
+                (state as any)[key] = ChessBoardSingleMoveImpl.deserialize(value);
+            } else {
+                // Handle simple types
+                (state as any)[key] = value;
+            }
+        }
+
+        return state;
+    }
+
 }

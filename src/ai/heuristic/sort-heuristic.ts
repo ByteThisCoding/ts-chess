@@ -1,4 +1,4 @@
-import { ChessBoardState } from "../../game-logic/board-state/chess-board-state";
+import { ChessBoardState } from "../../game-logic/board-state/chess-board-state.model";
 import { ChessPlayer } from "../../game-logic/enums";
 import { BishopPiece } from "../../game-logic/pieces/bishop";
 import { KnightPiece } from "../../game-logic/pieces/knight";
@@ -9,7 +9,7 @@ import { ProfileAllMethods } from "../../util/profile-all-methods";
 import {
     iChessAiHeuristic,
     iChessAiHeuristicEvaluation,
-} from "../models/heuristic";
+} from "../models/heuristic.model";
 
 /**
  * This is a simpler heuristic used to order moves for the AI before using the real one

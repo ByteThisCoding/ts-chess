@@ -1,8 +1,5 @@
-import { ChessBoardState } from "../board-state/chess-board-state";
 import { ChessCell, ChessPosition } from "../position/chess-position";
 import { ChessPlayer } from "../enums";
-import { ChessBoardSingleMove } from "../moves/chess-board-move";
-import { ChessPiece } from "../pieces/chess-piece";
 import { KingPiece } from "../pieces/king";
 import { KnightPiece } from "../pieces/knight";
 import { PawnPiece } from "../pieces/pawn";
@@ -11,6 +8,10 @@ import {
     ChessNotationParseFailure,
     ChessNotationParseStatus,
 } from "./chess-notation-parse-status";
+import { ChessBoardState } from "../board-state/chess-board-state.model";
+import { ChessBoardSingleMove } from "../moves/chess-board-move.model";
+import { ChessBoardSingleMoveImpl } from "../moves/chess-board-move-impl";
+import { ChessPiece } from "../pieces/chess-piece.model";
 
 /**
  * Utility for converting a move to notation and a notation to a move object
@@ -227,7 +228,7 @@ export class ChessNotation {
 
         return new ChessNotationParseStatus(
             true,
-            new ChessBoardSingleMove(
+            new ChessBoardSingleMoveImpl(
                 movePlayer,
                 piece,
                 fromPos,
@@ -275,7 +276,7 @@ export class ChessNotation {
 
             return new ChessNotationParseStatus(
                 true,
-                new ChessBoardSingleMove(
+                new ChessBoardSingleMoveImpl(
                     movePlayer,
                     king,
                     kingPos,
@@ -309,7 +310,7 @@ export class ChessNotation {
 
             return new ChessNotationParseStatus(
                 true,
-                new ChessBoardSingleMove(
+                new ChessBoardSingleMoveImpl(
                     movePlayer,
                     king,
                     kingPos,
@@ -369,7 +370,7 @@ export class ChessNotation {
                 // this is a valid move
                 return new ChessNotationParseStatus(
                     true,
-                    new ChessBoardSingleMove(
+                    new ChessBoardSingleMoveImpl(
                         movePlayer,
                         prevPosPiece,
                         prevPos,
@@ -402,7 +403,7 @@ export class ChessNotation {
                     // this is a valid move
                     return new ChessNotationParseStatus(
                         true,
-                        new ChessBoardSingleMove(
+                        new ChessBoardSingleMoveImpl(
                             movePlayer,
                             midPosPiece,
                             midPos,

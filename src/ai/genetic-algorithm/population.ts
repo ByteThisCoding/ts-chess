@@ -1,8 +1,8 @@
 import { ChessGame } from "../../game-logic/chess-game";
 import { ChessPlayer } from "../../game-logic/enums";
-import { iChessAiPlayer } from "../models/chess-ai";
-import { iChessAiHeuristicDataPoints } from "../models/heuristic-data-point";
-import { ChessNegamaxAiPlayer } from "../negamax-ai/ai";
+import { iChessAiPlayer } from "../models/chess-ai.model";
+import { iChessAiHeuristicDataPoints } from "../models/heuristic-data-point.model";
+import { ChessNegamaxAiPlayer } from "../negamax-ai/ai-algorithm";
 import { Chromosome } from "./chromosome";
 
 /**

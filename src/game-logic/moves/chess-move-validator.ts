@@ -1,12 +1,11 @@
-import { ChessBoardSingleMove } from "./chess-board-move";
 import {
     ChessBoardMoveValidationFailure,
     ChessBoardMoveValidationStatus,
 } from "./chess-board-move-validation-status";
-import { ChessBoardState } from "../board-state/chess-board-state";
 import { ChessPosition } from "../position/chess-position";
-import { ProfileAllMethods } from "../../util/profile-all-methods";
 import { MethodProfiler } from "../../util/method-profiler";
+import { ChessBoardState } from "../board-state/chess-board-state.model";
+import { ChessBoardSingleMove } from "./chess-board-move.model";
 
 /**
  * Utility responsible for checking if a move is valid

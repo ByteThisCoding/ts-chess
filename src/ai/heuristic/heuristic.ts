@@ -1,9 +1,5 @@
-import { ChessBoardSingleMove } from "../../../public-api";
-import { ChessBoardState } from "../../game-logic/board-state/chess-board-state";
 import { ChessPlayer } from "../../game-logic/enums";
-import { ChessPieceAvailableMoveSet } from "../../game-logic/moves/chess-piece-available-move-set";
 import { BishopPiece } from "../../game-logic/pieces/bishop";
-import { ChessPiece } from "../../game-logic/pieces/chess-piece";
 import { KingPiece } from "../../game-logic/pieces/king";
 import { KnightPiece } from "../../game-logic/pieces/knight";
 import { PawnPiece } from "../../game-logic/pieces/pawn";
@@ -17,12 +13,17 @@ import { ProfileAllMethods } from "../../util/profile-all-methods";
 import {
     iChessAiHeuristic,
     iChessAiHeuristicEvaluation,
-} from "../models/heuristic";
+} from "../models/heuristic.model";
 import {
     iChessAiHeuristicDataPoint,
     iChessAiHeuristicDataPoints,
-} from "../models/heuristic-data-point";
+} from "../models/heuristic-data-point.model";
 import { HeuristicDataPoint } from "./heuristic-data-point";
+import { ChessBoardState } from "../../game-logic/board-state/chess-board-state.model";
+import { ChessBoardSingleMove } from "../../game-logic/moves/chess-board-move.model";
+import { ChessPiece } from "../../game-logic/pieces/chess-piece.model";
+import { ChessPieceAvailableMoveSetImpl } from "../../game-logic/moves/chess-piece-available-move-set-impl";
+import { ChessPieceAvailableMoveSet } from "../../game-logic/moves/chess-piece-available-move-set.model";
 
 const GOOD_HEURISTICS: iChessAiHeuristicDataPoints<number>[] = [
     // hand-picked
@@ -71,10 +72,10 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
     // TODO: genetic algorithm or manually adjust values
     private dataPoints: iChessAiHeuristicDataPoints<iChessAiHeuristicDataPoint>;
 
-    private whitePossibleMovements = new ChessPieceAvailableMoveSet(
+    private whitePossibleMovements = new ChessPieceAvailableMoveSetImpl(
         ChessPlayer.white
     );
-    private blackPossibleMovements = new ChessPieceAvailableMoveSet(
+    private blackPossibleMovements = new ChessPieceAvailableMoveSetImpl(
         ChessPlayer.black
     );
 
@@ -238,12 +239,15 @@ export class ChessAiHeuristic implements iChessAiHeuristic {
             const datapoint = (this.dataPoints as any)[key] as HeuristicDataPoint;
             data[key] = {
                 value: datapoint.value,
-                norm: datapoint.getNorm() * 100, // Scale the normalized value to 0-100
+                norm: datapoint.getNorm(),
                 weight: datapoint.weight,
                 maxValueAbs: datapoint.maxValueAbs
             };
-            totalScore += datapoint.getNorm() * datapoint.weight * 100; // Apply the scaling here as well
+            totalScore += datapoint.getNorm() * datapoint.weight; 
         }
+
+        totalScore = Math.round(totalScore);
+
         return {
             score: totalScore,
             data,

@@ -1,16 +1,18 @@
-import { ChessBoardState } from "../board-state/chess-board-state";
 import { ChessCell, ChessPosition } from "../position/chess-position";
 import { ChessPlayer } from "../enums";
-import { ChessBoardSingleMove } from "../moves/chess-board-move";
-import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set";
-import { ChessBoardSingleMoveShadow } from "../moves/chess-board-shadow-move";
 import { ProfileAllMethods } from "../../util/profile-all-methods";
+import { ChessBoardState } from "../board-state/chess-board-state.model";
+import { ChessBoardSingleMoveImpl } from "../moves/chess-board-move-impl";
+import { ChessPiece } from "./chess-piece.model";
+import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set.model";
+import { ChessBoardSingleMoveShadow } from "../moves/chess-board-shadow-move";
+import { ChessBoardSingleMove } from "../moves/chess-board-move.model";
 
 /**
  * Abstraction for common chess piece logic + external reference
  */
 @ProfileAllMethods
-export abstract class ChessPiece {
+export abstract class AbstractChessPiece implements ChessPiece {
     abstract name: string;
     abstract letter: string;
     abstract player: ChessPlayer;
@@ -19,15 +21,15 @@ export abstract class ChessPiece {
     abstract type: number;
 
     // TODO: is bug with isActivated when looking ahead, doesn't unset
-    private isActivated = false;
-    private lastPositionChangeTurn: number = 0;
-    private startPosition: ChessCell;
-    private prevPosition: ChessCell | null = null;
+    isActivated = false;
+    lastPositionChangeTurn: number = 0;
+    startPosition: ChessCell;
+    prevPosition: ChessCell | null = null;
 
     private movesCache: ChessPieceAvailableMoveSet | null = null;
 
     constructor(
-        private position: ChessCell,
+        public position: ChessCell,
         private maxNumPossibleMoves: number
     ) {
         this.startPosition = position;
@@ -123,6 +125,22 @@ export abstract class ChessPiece {
         )})`;
     }
 
+    serialize(): any {
+        return {
+            name: this.name,
+            letter: this.letter,
+            player: this.player,
+            pointsValue: this.pointsValue,
+            doCacheMoves: this.doCacheMoves,
+            type: this.type,
+            isActivated: this.isActivated,
+            lastPositionChangeTurn: this.lastPositionChangeTurn,
+            startPosition: this.startPosition,
+            prevPosition: this.prevPosition,
+            position: this.position,
+        };
+    }
+
     /**
      * Helper method to simplify creating new move objects for subclasses
      */
@@ -133,8 +151,8 @@ export abstract class ChessPiece {
         isEnPassant: boolean = false,
         isPromotion: boolean = false,
         promotionLetter: string = ""
-    ): ChessBoardSingleMove | null {
-        return new ChessBoardSingleMove(
+    ): ChessBoardSingleMoveImpl | null {
+        return new ChessBoardSingleMoveImpl(
             thisPiece.player,
             thisPiece,
             thisPiece.position,
@@ -150,7 +168,7 @@ export abstract class ChessPiece {
         thisPiece: ChessPiece,
         toPosition: ChessCell,
         blockingPiece: ChessPiece
-    ): ChessBoardSingleMoveShadow | null {
+    ): ChessBoardSingleMove | null {
         return new ChessBoardSingleMoveShadow(
             thisPiece.player,
             thisPiece,
@@ -165,6 +183,7 @@ export abstract class ChessPiece {
     protected abstract getPossibleMovementsWhite(
         boardState: ChessBoardState
     ): ChessPieceAvailableMoveSet;
+    
     protected abstract getPossibleMovementsBlack(
         boardState: ChessBoardState
     ): ChessPieceAvailableMoveSet;

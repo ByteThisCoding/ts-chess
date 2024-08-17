@@ -1,12 +1,12 @@
-import { ChessCell, ChessPosition } from "../position/chess-position";
+import { ChessCell } from "../position/chess-position";
 import { ChessPlayer } from "../enums";
 import { BishopPiece } from "./bishop";
-import { ChessPiece } from "./chess-piece";
 import { KingPiece } from "./king";
 import { KnightPiece } from "./knight";
 import { PawnPiece } from "./pawn";
 import { QueenPiece } from "./queen";
 import { RookPiece } from "./rook";
+import { ChessPiece } from "./chess-piece.model";
 
 export type ChessPieceStatic =
     | typeof PawnPiece
@@ -60,5 +60,25 @@ export class ChessPieceFactory {
         }
 
         throw new Error(`Invalid piece code: ${pieceLetter}`);
+    }
+
+    /**
+     * Reconstruct a ChessPiece from its serialized data.
+     */
+    public static createPieceFromSerialized(data: any): ChessPiece {
+        const { letter, player, position } = data;
+        const PieceClass = this.getPieceClass(letter);
+
+        // Create an instance of the piece
+        const piece = new PieceClass(player, position) as any;
+
+        // Set additional properties
+        piece.isActivated = data.isActivated;
+        piece.lastPositionChangeTurn = data.lastPositionChangeTurn;
+        piece.startPosition = data.startPosition;
+        piece.prevPosition = data.prevPosition;
+        piece.position = data.position;
+
+        return piece;
     }
 }

@@ -8,14 +8,16 @@
         "format": "npx prettier --write .",
         "start": "node --loader ts-node/esm --experimental-specifier-resolution=node cli-game.ts",
         "build": "node build-cli.js build",
-        "publish:npm": "node build-cli.js publish"
+        "publish:npm": "node build-cli.js publish",
+        "find-circular": "npx madge --circular --extensions ts,tsx --exclude=\".*\\.model\\..*\" ./src"
     },
     "devDependencies": {
         "@types/collections": "^5.1.2",
         "@types/node": "^18.11.18",
+        "madge": "^8.0.0",
         "prettier": "^2.8.1",
         "ts-node": "^10.9.1",
-        "typescript": "^4.9.5",
-        "tsconfig-paths": "^4.1.2"
+        "tsconfig-paths": "^4.1.2",
+        "typescript": "^4.9.5"
     }
 }

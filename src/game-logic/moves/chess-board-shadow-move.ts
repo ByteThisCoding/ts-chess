@@ -1,12 +1,12 @@
 import { ChessPlayer } from "../enums";
-import { ChessPiece } from "../pieces/chess-piece";
+import { ChessPiece } from "../pieces/chess-piece.model";
 import { ChessCell, ChessPosition } from "../position/chess-position";
-import { ChessBoardSingleMove } from "./chess-board-move";
+import { ChessBoardSingleMoveImpl } from "./chess-board-move-impl";
 
 /**
  * Attaches another property "blockingPiece"
  */
-export class ChessBoardSingleMoveShadow extends ChessBoardSingleMove {
+export class ChessBoardSingleMoveShadow extends ChessBoardSingleMoveImpl {
     constructor(
         player: ChessPlayer,
         pieceMoved: ChessPiece,

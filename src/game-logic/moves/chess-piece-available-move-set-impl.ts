@@ -1,19 +1,20 @@
-import { ChessBoardState } from "../board-state/chess-board-state";
-import { ChessCell, ChessPosition } from "../position/chess-position";
+import { ChessCell } from "../position/chess-position";
 import { ChessPlayer } from "../enums";
-import { ChessPiece } from "../pieces/chess-piece";
-import { ChessBoardSingleMove } from "./chess-board-move";
-import { ChessBoardSingleMoveShadow } from "./chess-board-shadow-move";
 import { ProfileAllMethods } from "../../util/profile-all-methods";
+import { ChessBoardState } from "../board-state/chess-board-state.model";
+import { ChessBoardSingleMove } from "./chess-board-move.model";
+import { ChessPiece } from "../pieces/chess-piece.model";
+import { ChessPieceAvailableMoveSet } from "./chess-piece-available-move-set.model";
 
 /**
  * Encapsulation of a set of possible moves
  */
 @ProfileAllMethods
-export class ChessPieceAvailableMoveSet {
-    private availableMoves = new Map<ChessCell, ChessBoardSingleMove[]>();
-    private shadowMoves = new Map<ChessCell, ChessBoardSingleMoveShadow[]>();
-    private blockedPositions = new Set<ChessCell>();
+export class ChessPieceAvailableMoveSetImpl implements ChessPieceAvailableMoveSet {
+    // TODO: shouldn't be public
+    public availableMoves = new Map<ChessCell, ChessBoardSingleMove[]>();
+    public shadowMoves = new Map<ChessCell, ChessBoardSingleMove[]>();
+    public blockedPositions = new Set<ChessCell>();
 
     private numMoves = 0;
 
@@ -67,7 +68,7 @@ export class ChessPieceAvailableMoveSet {
     /**
      * A shadow move is a move which is blocked by a single piece which is owned by the enemy
      */
-    addShadowMove(move: ChessBoardSingleMoveShadow | null): void {
+    addShadowMove(move: ChessBoardSingleMove | null): void {
         // if trying to add an empty move (probably item out of bounds), return
         if (!move) {
             return;
@@ -137,7 +138,7 @@ export class ChessPieceAvailableMoveSet {
         }
     }
 
-    *getShadowMoves(): Iterable<ChessBoardSingleMoveShadow> {
+    *getShadowMoves(): Iterable<ChessBoardSingleMove> {
         for (const [pos, moves] of this.shadowMoves) {
             for (const move of moves) {
                 yield move;
@@ -190,7 +191,7 @@ export class ChessPieceAvailableMoveSet {
         return moves || [];
     }
 
-    getShadowMovesToPosition(pos: ChessCell): ChessBoardSingleMoveShadow[] {
+    getShadowMovesToPosition(pos: ChessCell): ChessBoardSingleMove[] {
         const moves = this.shadowMoves.get(pos);
         return moves || [];
     }
