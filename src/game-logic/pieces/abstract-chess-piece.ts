@@ -5,8 +5,8 @@ import { ChessBoardState } from "../board-state/chess-board-state.model";
 import { ChessBoardSingleMoveImpl } from "../moves/chess-board-move-impl";
 import { ChessPiece } from "./chess-piece.model";
 import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set.model";
-import { ChessBoardSingleMoveShadow } from "../moves/chess-board-shadow-move";
-import { ChessBoardSingleMove } from "../moves/chess-board-move.model";
+import { ChessBoardSingleMoveShadowImpl } from "../moves/chess-board-shadow-move";
+import { ChessBoardSingleMoveShadow } from "../moves/chess-board-shadow-move.model";
 
 /**
  * Abstraction for common chess piece logic + external reference
@@ -168,8 +168,8 @@ export abstract class AbstractChessPiece implements ChessPiece {
         thisPiece: ChessPiece,
         toPosition: ChessCell,
         blockingPiece: ChessPiece
-    ): ChessBoardSingleMove | null {
-        return new ChessBoardSingleMoveShadow(
+    ): ChessBoardSingleMoveShadow | null {
+        return new ChessBoardSingleMoveShadowImpl(
             thisPiece.player,
             thisPiece,
             thisPiece.position,

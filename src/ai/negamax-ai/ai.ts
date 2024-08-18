@@ -4,7 +4,7 @@ import { iChessAiPlayer } from "../models/chess-ai.model";
 import { AI_WORKER_MESSAGES } from "./ai-worker-messages";
 import { ChessBoardState } from "../../game-logic/board-state/chess-board-state.model";
 import { ChessBoardSingleMove } from "../../game-logic/moves/chess-board-move.model";
-import { ChessBoardSingleMoveImpl } from "../../../public-api";
+import { ChessBoardMoveDeserializer } from "../../game-logic/moves/chess-board-move-deserializer";
 
 export class ChessNegamaxAiPlayer implements iChessAiPlayer {
 
@@ -39,7 +39,7 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
 
                     workerDone = true;
                     resolve({
-                        move: ChessBoardSingleMoveImpl.deserialize(data.move),
+                        move: ChessBoardMoveDeserializer.deserialize(data.move),
                         score: data.score
                     });
                 });

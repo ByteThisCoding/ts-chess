@@ -13,11 +13,11 @@ import {
 import { ProfileAllMethods } from "../../util/profile-all-methods";
 import { ChessBoardState } from "./chess-board-state.model";
 import { ChessBoardSingleMove } from "../moves/chess-board-move.model";
-import { ChessBoardSingleMoveImpl } from "../moves/chess-board-move-impl";
 import { ChessPiece } from "../pieces/chess-piece.model";
 import { AbstractChessPiece } from "../pieces/abstract-chess-piece";
 import { ChessPieceAvailableMoveSet } from "../moves/chess-piece-available-move-set.model";
 import { ChessPieceAvailableMoveSetImpl } from "../moves/chess-piece-available-move-set-impl";
+import { ChessBoardMoveDeserializer } from "../moves/chess-board-move-deserializer";
 
 interface BoardMoveStats {
     isBlackInCheck: boolean;
@@ -971,7 +971,7 @@ export class ChessBoardStateImpl implements ChessBoardState {
                 (state as any)[key] = ChessPieceFactory.createPieceFromSerialized(value);
             } else if (value && typeof value === 'object' && value.zobristHash) {
                 // Handle complex nested objects that are not ChessPieces
-                (state as any)[key] = ChessBoardSingleMoveImpl.deserialize(value);
+                (state as any)[key] = ChessBoardMoveDeserializer.deserialize(value);
             } else {
                 // Handle simple types
                 (state as any)[key] = value;

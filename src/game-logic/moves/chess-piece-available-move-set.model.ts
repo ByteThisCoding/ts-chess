@@ -2,12 +2,13 @@ import { ChessBoardState } from "../board-state/chess-board-state.model";
 import { ChessPiece } from "../pieces/chess-piece.model";
 import { ChessCell } from "../position/chess-position";
 import { ChessBoardSingleMove } from "./chess-board-move.model";
+import { ChessBoardSingleMoveShadow } from "./chess-board-shadow-move.model";
 
 export interface ChessPieceAvailableMoveSet {
 
     // TODO: shouldn't be public
     availableMoves: Map<ChessCell, ChessBoardSingleMove[]>;
-    shadowMoves: Map<ChessCell, ChessBoardSingleMove[]>;
+    shadowMoves: Map<ChessCell, ChessBoardSingleMoveShadow[]>;
     blockedPositions: Set<ChessCell>;
 
     clear(): void;
@@ -27,7 +28,7 @@ export interface ChessPieceAvailableMoveSet {
     /**
      * A shadow move is a move which is blocked by a single piece which is owned by the enemy
      */
-    addShadowMove(move: ChessBoardSingleMove | null): void;
+    addShadowMove(move: ChessBoardSingleMoveShadow | null): void;
 
     /**
      * Remove a move from this set
@@ -46,7 +47,7 @@ export interface ChessPieceAvailableMoveSet {
 
     getMoves(): Iterable<ChessBoardSingleMove>;
 
-    getShadowMoves(): Iterable<ChessBoardSingleMove>;
+    getShadowMoves(): Iterable<ChessBoardSingleMoveShadow>;
 
     getBlockedPositions(): Iterable<ChessCell>;
 
@@ -70,5 +71,5 @@ export interface ChessPieceAvailableMoveSet {
      */
     getMovesToPosition(pos: ChessCell): ChessBoardSingleMove[];
 
-    getShadowMovesToPosition(pos: ChessCell): ChessBoardSingleMove[];
+    getShadowMovesToPosition(pos: ChessCell): ChessBoardSingleMoveShadow[];
 }

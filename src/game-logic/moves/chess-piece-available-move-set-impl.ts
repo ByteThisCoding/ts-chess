@@ -5,6 +5,7 @@ import { ChessBoardState } from "../board-state/chess-board-state.model";
 import { ChessBoardSingleMove } from "./chess-board-move.model";
 import { ChessPiece } from "../pieces/chess-piece.model";
 import { ChessPieceAvailableMoveSet } from "./chess-piece-available-move-set.model";
+import { ChessBoardSingleMoveShadow } from "./chess-board-shadow-move.model";
 
 /**
  * Encapsulation of a set of possible moves
@@ -13,7 +14,7 @@ import { ChessPieceAvailableMoveSet } from "./chess-piece-available-move-set.mod
 export class ChessPieceAvailableMoveSetImpl implements ChessPieceAvailableMoveSet {
     // TODO: shouldn't be public
     public availableMoves = new Map<ChessCell, ChessBoardSingleMove[]>();
-    public shadowMoves = new Map<ChessCell, ChessBoardSingleMove[]>();
+    public shadowMoves = new Map<ChessCell, ChessBoardSingleMoveShadow[]>();
     public blockedPositions = new Set<ChessCell>();
 
     private numMoves = 0;
@@ -68,7 +69,7 @@ export class ChessPieceAvailableMoveSetImpl implements ChessPieceAvailableMoveSe
     /**
      * A shadow move is a move which is blocked by a single piece which is owned by the enemy
      */
-    addShadowMove(move: ChessBoardSingleMove | null): void {
+    addShadowMove(move: ChessBoardSingleMoveShadow | null): void {
         // if trying to add an empty move (probably item out of bounds), return
         if (!move) {
             return;
@@ -138,7 +139,7 @@ export class ChessPieceAvailableMoveSetImpl implements ChessPieceAvailableMoveSe
         }
     }
 
-    *getShadowMoves(): Iterable<ChessBoardSingleMove> {
+    *getShadowMoves(): Iterable<ChessBoardSingleMoveShadow> {
         for (const [pos, moves] of this.shadowMoves) {
             for (const move of moves) {
                 yield move;
@@ -191,7 +192,7 @@ export class ChessPieceAvailableMoveSetImpl implements ChessPieceAvailableMoveSe
         return moves || [];
     }
 
-    getShadowMovesToPosition(pos: ChessCell): ChessBoardSingleMove[] {
+    getShadowMovesToPosition(pos: ChessCell): ChessBoardSingleMoveShadow[] {
         const moves = this.shadowMoves.get(pos);
         return moves || [];
     }
