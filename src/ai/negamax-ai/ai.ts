@@ -14,7 +14,7 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
     constructor() {
         for (let i = 0; i < this.NUM_WORKERS; i++) {
             this.workers[i] = WorkerFactory.getWorker(
-                '/src/ai/negamax-ai/ai-worker.js'
+                './src/ai/negamax-ai/ai-worker.js'
             );
         }
     }
@@ -44,6 +44,7 @@ export class ChessNegamaxAiPlayer implements iChessAiPlayer {
                     });
                 });
 
+                console.log(`[Ai] sending request to ai worker ${i+1} of ${this.workers.length}`);
                 worker.postMessage(AI_WORKER_MESSAGES.startSearch, {
                     board: boardState.serialize(),
                     nth: i,

@@ -3,6 +3,8 @@ import { parentPort } from "worker_threads";
 
 /**
  * The worker itself will use this
+ * 
+ * TODO: need to add double-blind initialization callbacks
  */
 export class WorkerBootstrapper implements WorkerFacade {
 
@@ -10,7 +12,8 @@ export class WorkerBootstrapper implements WorkerFacade {
     private sendMessage: Function;
 
     constructor() {
-        if (self?.onmessage) {
+        if (typeof self !== 'undefined' && self?.onmessage) {
+            console.log("[WorkerBootstrapper] using webworker callbacks.");
             this.listenMessage = (message: string,  callback: (data: any) => any) => {
                 self.addEventListener(message, (event: any) => {
                     callback(event.data);
@@ -24,6 +27,7 @@ export class WorkerBootstrapper implements WorkerFacade {
                 });
             }
         } else {
+            console.log("[WorkerBootstrapper] using Node callbacks.");
             this.listenMessage = (message: string,  callback: (data: any) => any) => {
                 parentPort?.on(message, (event: any) => {
                     callback(event.data);

@@ -30,8 +30,11 @@ workerListener.onMessage(AI_WORKER_MESSAGES.startSearch, async (data: {board: st
         data.numWorkers
     );
 
+    console.log(`[AiWorker] starting search on worker ${data.nth + 1} of ${data.numWorkers}`);
     const board = ChessBoardStateImpl.deserialize(data.board);
     const move = await ai.determineNextMove(board);
+    console.log(`[AiWorker] completed search on worker ${data.nth + 1} of ${data.numWorkers}`, move.toString());
 
+    // TODO: return move depth, not just move
     workerListener.postMessage(AI_WORKER_MESSAGES.completeSearch, move);
 });
