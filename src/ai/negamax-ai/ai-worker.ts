@@ -7,8 +7,8 @@ import { AI_WORKER_MESSAGES } from "./ai-worker-messages";
 /**
  * This is a worker thread for the AI
  */
+console.log("[AiWorker] script started");
 const workerListener = new WorkerBootstrapper();
-
 workerListener.onMessage(AI_WORKER_MESSAGES.startSearch, async (data: {board: string; nth: number; numWorkers: number}) => {
     const heuristic = new ChessAiHeuristic({
         relativePiecesScore: 0.7,
@@ -31,10 +31,12 @@ workerListener.onMessage(AI_WORKER_MESSAGES.startSearch, async (data: {board: st
     );
 
     console.log(`[AiWorker] starting search on worker ${data.nth + 1} of ${data.numWorkers}`);
-    const board = ChessBoardStateImpl.deserialize(data.board);
+    console.log("..", data.board);
+    /*const board = ChessBoardStateImpl.deserialize(data.board);
+
     const move = await ai.determineNextMove(board);
     console.log(`[AiWorker] completed search on worker ${data.nth + 1} of ${data.numWorkers}`, move.toString());
 
     // TODO: return move depth, not just move
-    workerListener.postMessage(AI_WORKER_MESSAGES.completeSearch, move);
+    workerListener.postMessage(AI_WORKER_MESSAGES.completeSearch, move);*/
 });

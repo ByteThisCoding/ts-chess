@@ -6,9 +6,11 @@ export class WorkerFactory {
 
     static getWorker(scriptPath: string): WorkerFacade {
         if (typeof window !== 'undefined') {
+            console.log("[WorkerFactory] creating web worker");
             return new BrowserWorker(scriptPath);
         }
 
+        console.log("[WorkerFactory] creating node worker");
         return new NodeWorker(scriptPath);
     }
 

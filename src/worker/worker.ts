@@ -5,3 +5,7 @@ export interface WorkerFacade {
     onMessage(message: string, callback: (data: any) => any): void;
 
 }
+
+export enum WorkerCoreEnums {
+    workerReady = "worker-ready"
+};

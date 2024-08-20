@@ -1,10 +1,8 @@
-import { WorkerFacade } from "./worker";
+import { WorkerCoreEnums, WorkerFacade } from "./worker";
 import { parentPort } from "worker_threads";
 
 /**
  * The worker itself will use this
- * 
- * TODO: need to add double-blind initialization callbacks
  */
 export class WorkerBootstrapper implements WorkerFacade {
 
@@ -15,32 +13,40 @@ export class WorkerBootstrapper implements WorkerFacade {
         if (typeof self !== 'undefined' && self?.onmessage) {
             console.log("[WorkerBootstrapper] using webworker callbacks.");
             this.listenMessage = (message: string,  callback: (data: any) => any) => {
-                self.addEventListener(message, (event: any) => {
-                    callback(event.data);
-                })
+                self.addEventListener('message', (event: any) => {
+                    console.log("[WorkerBootstrapper] message received", event?.detail?.message);
+                    if (event.detail.message === message) {
+                        callback(event.detail.payload);
+                    }
+                });
             };
 
-            this.sendMessage = (message: string, data: any) => {
+            this.sendMessage = (message: string, payload: any) => {
                 self.postMessage({
                     message,
-                    data
+                    payload
                 });
             }
         } else {
             console.log("[WorkerBootstrapper] using Node callbacks.");
             this.listenMessage = (message: string,  callback: (data: any) => any) => {
-                parentPort?.on(message, (event: any) => {
-                    callback(event.data);
-                })
+                parentPort?.on('message', (event: any) => {
+                    console.log("[WorkerBootstrapper] message received", event?.message);
+                    if (event.message === message) {
+                        callback(event.payload);
+                    }
+                });
             };
 
-            this.sendMessage = (message: string, data: any) => {
+            this.sendMessage = (message: string, payload: any) => {
                 parentPort?.postMessage({
                     message,
-                    data
+                    payload
                 })
             };
         }
+
+        this.postMessage(WorkerCoreEnums.workerReady, {});
     }
 
     postMessage(message: string, data: any): void {
